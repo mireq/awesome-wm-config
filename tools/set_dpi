@@ -1,0 +1,28 @@
+#!/bin/bash
+if [[ "$#" -ne 1 ]]; then
+	echo "Expected single argument: dpi"
+fi
+
+RUNTIME_DIR=$XDG_RUNTIME_DIR
+AWESOME_DIR=$XDG_CONFIG_HOME/awesome
+
+dpi=$1
+dpi_dec=$(expr 1024 \* $dpi)
+cursor_size=$(expr $dpi / 96 \* 24)
+urxvt_font_size=$(echo "scale = 5; ($dpi*8*100/75)/96"|bc)
+echo -e "Xft.dpi: $dpi\nXcursor.size: $cursor_size\nXcursor.theme: Simple-Black\n"|xrdb -merge
+xrandr --dpi $dpi
+echo "Xft/DPI $dpi_dec" > $RUNTIME_DIR/xsettings
+killall -HUP xsettingsd
+$AWESOME_DIR/tools/set_cursor_theme Simple-Black $cursor_size
+#xsetroot -xcf /usr/share/cursors/xorg-x11/Simple-Black/cursors/left_ptr $cursor_size
+killall -q xdg-desktop-portal
+killall -q xdg-document-portal
+find /dev/pts -user mirec -exec bash -c "echo -ne \"\e]710;xft:DejaVu\ Sans\ Mono for Powerline:style=normal:pixelsize=${urxvt_font_size}\a\" > {}" \;
+#echo 'awesome.restart()' | awesome-client
+echo "local beautiful=require('beautiful'); beautiful.change_dpi($dpi)"|awesome-client
+if [ -f $RUNTIME_DIR/alacritty.dpi ]; then
+	start_dpi=`cat $RUNTIME_DIR/alacritty.dpi`
+	font_size=$(expr 8 \* $dpi / $start_dpi)
+	sed -i "s/size:.*$/size: $font_size.0/g" $RUNTIME_DIR/alacritty.yml
+fi
