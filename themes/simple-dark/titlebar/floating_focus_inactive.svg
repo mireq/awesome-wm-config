@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<svg width="18" height="18" version="1.1" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+ <rect id="use1121" x="6" y="8" width="2" height="2" fill="#dfdfdf" stroke-linecap="square" stroke-linejoin="bevel" stroke-width="10"/>
+ <use id="use1265" transform="translate(2,-2)" width="100%" height="100%" xlink:href="#use1121"/>
+ <use id="use1267" transform="translate(2,2)" width="100%" height="100%" xlink:href="#use1265"/>
+ <use transform="translate(-2,2)" width="100%" height="100%" xlink:href="#use1267"/>
+</svg>

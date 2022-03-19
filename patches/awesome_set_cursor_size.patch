@@ -1,0 +1,99 @@
+diff --git a/common/xcursor.c b/common/xcursor.c
+index c4c691df..87939cac 100644
+--- a/common/xcursor.c
++++ b/common/xcursor.c
+@@ -105,6 +105,9 @@ static char const * const xcursor_font[] =
+     [XC_xterm] = "xterm",
+ };
+ 
++static xcb_cursor_t xcursor[countof(xcursor_font)];
++
++
+ /** Get a cursor from a string.
+  * \param s The string.
+  */
+@@ -138,8 +141,6 @@ xcursor_font_tostr(uint16_t c)
+ xcb_cursor_t
+ xcursor_new(xcb_cursor_context_t *ctx, uint16_t cursor_font)
+ {
+-    static xcb_cursor_t xcursor[countof(xcursor_font)];
+-
+     if (!xcursor[cursor_font]) {
+         xcursor[cursor_font] = xcb_cursor_load_cursor(ctx, xcursor_font_tostr(cursor_font));
+     }
+@@ -148,4 +149,11 @@ xcursor_new(xcb_cursor_context_t *ctx, uint16_t cursor_font)
+ }
+ 
+ 
++void xcursor_clear_cache(void)
++{
++    for(int i = 0; i < countof(xcursor); i++)
++        xcursor[i] = 0;
++}
++
++
+ // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
+diff --git a/common/xcursor.h b/common/xcursor.h
+index ef56893b..e847f135 100644
+--- a/common/xcursor.h
++++ b/common/xcursor.h
+@@ -28,6 +28,7 @@
+ uint16_t xcursor_font_fromstr(const char *);
+ const char * xcursor_font_tostr(uint16_t);
+ xcb_cursor_t xcursor_new(xcb_cursor_context_t *, uint16_t);
++void xcursor_clear_cache(void);
+ 
+ #endif
+ // vim: filetype=c:expandtab:shiftwidth=4:tabstop=8:softtabstop=4:textwidth=80
+diff --git a/luaa.c b/luaa.c
+index 233174ef..8da94c6e 100644
+--- a/luaa.c
++++ b/luaa.c
+@@ -46,6 +46,7 @@
+ #include "awesome.h"
+ #include "common/backtrace.h"
+ #include "common/version.h"
++#include "common/xcursor.h"
+ #include "config.h"
+ #include "event.h"
+ #include "objects/client.h"
+@@ -346,6 +347,31 @@ luaA_load_image(lua_State *L)
+     return 1;
+ }
+ 
++
++static int
++luaA_set_cursor_size(lua_State *L)
++{
++    char size_env[17];
++    int size = luaL_checkinteger(L, 1);
++    if (size < 0) {
++        size = 1;
++    }
++    if (size > 999) {
++        size = 999;
++    }
++
++    sprintf(size_env, "XCURSOR_SIZE=%d", size);
++    putenv(size_env);
++
++    xcb_cursor_context_free(globalconf.cursor_ctx);
++    if (xcb_cursor_context_new(globalconf.connection, globalconf.screen, &globalconf.cursor_ctx) < 0)
++        fatal("Failed to initialize xcb-cursor");
++    xcursor_clear_cache();
++
++    lua_pushnil(L);
++    return 1;
++}
++
+ /** Set the preferred size for client icons.
+  *
+  * The closest equal or bigger size is picked if present, otherwise the closest
+@@ -1091,6 +1117,7 @@ luaA_init(xdgHandle* xdg, string_array_t *searchpath)
+         { "emit_signal", luaA_awesome_emit_signal },
+         { "systray", luaA_systray },
+         { "load_image", luaA_load_image },
++        { "set_cursor_size", luaA_set_cursor_size },
+         { "pixbuf_to_surface", luaA_pixbuf_to_surface },
+         { "set_preferred_icon_size", luaA_set_preferred_icon_size },
+         { "register_xproperty", luaA_register_xproperty },

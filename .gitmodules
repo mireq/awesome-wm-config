@@ -1,0 +1,9 @@
+[submodule "old/calendar"]
+	path = old/calendar
+	url = https://github.com/deficient/calendar.git
+[submodule "old/blingbling"]
+	path = old/blingbling
+	url = https://github.com/cedlemo/blingbling
+[submodule "vicious"]
+	path = vicious
+	url = https://github.com/vicious-widgets/vicious.git

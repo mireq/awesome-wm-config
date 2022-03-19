@@ -1,0 +1,110 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+import argparse
+import csv
+import os
+from collections import namedtuple
+from datetime import datetime
+from pathlib import Path
+
+import matplotlib.dates as mdates
+import matplotlib.pyplot as plt
+import numpy as np
+from dateutil.tz import tzlocal
+
+
+HistoryRecord = namedtuple('HistoryRecord', ['status', 'time', 'power', 'energy', 'voltage'])
+
+
+def reversed_lines(fp):
+	part = ''
+	for block in reversed_blocks(fp):
+		for c in reversed(block):
+			if c == '\n' and part:
+				yield part[::-1]
+				part = ''
+			part += c
+	if part: yield part[::-1]
+
+
+def reversed_blocks(fp, blocksize=4096):
+	fp.seek(0, os.SEEK_END)
+	here = fp.tell()
+	while 0 < here:
+		delta = min(blocksize, here)
+		here -= delta
+		fp.seek(here, os.SEEK_SET)
+		yield fp.read(delta)
+
+
+def read_history(selected_cycle):
+	tz = tzlocal()
+	cycle = 0
+	last_time = None
+	with open(Path.home() / '.battery_history', 'r') as fp:
+		for row in csv.reader(reversed_lines(fp), delimiter=';'):
+			if len(row) != 5:
+				continue
+			current_time = int(row[1])
+			record = HistoryRecord(*([row[0]] + [datetime.fromtimestamp(current_time)] + [int(val) for val in row[2:]]))
+			if last_time is None or (last_time - current_time) > 100:
+				cycle += 1
+			if cycle > selected_cycle:
+				break
+			last_time = current_time
+			if cycle == selected_cycle:
+				yield record
+
+
+def main():
+	parser = argparse.ArgumentParser(description="Show battery history")
+	parser.add_argument('--cycle', type=int, default=1, help="Charge / discharge cycle number")
+	args = parser.parse_args()
+
+	lines = list(read_history(args.cycle))
+
+	fig, (power_ax, energy_ax) = plt.subplots(2, 1)
+	fig.set_size_inches(18.5, 10.5)
+
+	time_values = [line.time for line in lines]
+	power_values = [line.power / 1000000 for line in lines]
+	energy_values = [line.energy / 1000000 for line in lines]
+	voltage_values = [line.voltage / 1000000 for line in lines]
+
+	time_low = min(time_values)
+	time_high = max(time_values)
+
+	power_low, power_high = np.percentile([power_values], [5, 95])
+	power_low = power_low * 0.8
+	power_high = power_high * 1.25
+
+	power_ax.title.set_text("Power")
+	power_ax.plot(time_values, power_values)
+	power_ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+	power_ax.set_xlim([time_low, time_high])
+	power_ax.set_ylim([power_low, power_high])
+	power_ax.get_xaxis().set_visible(False)
+	power_ax.set_ylabel("W")
+
+	color = 'tab:red'
+	energy_ax.title.set_text("Remaining energy")
+	energy_ax.plot(time_values, energy_values, color=color)
+	energy_ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+	energy_ax.set_xlim([time_low, time_high])
+	energy_ax.set_ylabel("Wh", color=color)
+	energy_ax.tick_params(axis='y', labelcolor=color)
+
+	color = 'tab:blue'
+	voltage_ax = energy_ax.twinx()
+	voltage_ax.plot(time_values, voltage_values, color=color)
+	voltage_ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+	voltage_ax.set_ylabel('V', color=color)
+	voltage_ax.tick_params(axis='y', labelcolor=color)
+
+	plt.tight_layout()
+	#fig.subplots_adjust(hspace=0.3)
+	plt.show()
+
+
+if __name__ == "__main__":
+	main()
