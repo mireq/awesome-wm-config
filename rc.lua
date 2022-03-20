@@ -504,6 +504,120 @@ screen.connect_signal("property::geometry", set_wallpaper)
 
 local mymainmenu = nil
 
+function set_screen_dpi(s)
+	local scaling = float_dpi(1, s)
+	local menu = s.main_menu;
+	menu.theme.width = theme.menu_width * scaling;
+	menu.theme.height = theme.menu_height * scaling;
+
+	for _, item in ipairs(menu.items) do
+		item.height = menu.theme.height
+		item.width = menu.theme.width
+		item.widget:get_first():get_children()[1]:set_left(item.height + dpi(2, s))
+	end
+	for _, child in pairs(menu.child) do
+		for _, item in ipairs(child.items) do
+			item.height = menu.theme.height
+			item.width = menu.theme.width
+			item.widget:get_first():get_children()[1]:set_left(item.height + dpi(2, s))
+		end
+	end
+
+	s.launcher:set_image(render_svg(theme.launch, scaling))
+
+	local textclock_width = calculate_text_width(s, '<span font="'..textclock_font..'">MM  00.10  00:00</span>')
+	local volume_width = calculate_text_width(s, '<span font="'..(theme.volume_font or theme.font)..'">100 %</span>')
+	s.battery_width = calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.font)..'">100 %</span>')
+	s.battery_width_ext = calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.font)..'">100 %</span> <span font="'..(theme.battery_current_font or theme.font)..'">99.9 W</span>')
+	local cpu_width = calculate_text_width(s, '<span font="'..(theme.cpu_percent_font or theme.font)..'">100 %</span>')
+	local memory_width = calculate_text_width(s, '<span font="'..(theme.mem_percent_font or theme.font)..'">99999 MB</span>')
+	local temp_width = calculate_text_width(s, '<span font="'..(theme.temp_font or theme.font)..'">100 %</span>')
+
+	s.textclock.forced_width = textclock_width
+	s.volume_widget.forced_width = volume_width
+	s.cpu_widget.forced_width = cpu_width
+	s.memory_widget.forced_width = memory_width
+	s.temp_widget.forced_width = temp_width
+
+	s.taglist_args.widget_template.forced_width = dpi(6, s)
+	s.taglist_args.widget_template.forced_height = dpi(6, s)
+
+	for _, c in ipairs(s.taglist:get_children()) do
+		c.widget.top = s.taglist_args.widget_template.forced_height
+		c:set_forced_width(s.taglist_args.widget_template.forced_height)
+		c:set_forced_height(s.taglist_args.widget_template.forced_width)
+	end
+end
+
+
+-- {{{ Menu
+local menu_accessories = {
+	{ "archives", "ark" },
+	{ "file manager", "konqueror" },
+	{ "editor", gui_editor },
+}
+local menu_internet = {
+	{ "browser", browser },
+}
+local menu_games = {
+	{ "PSX", "pcsxr" },
+	{ "Super NES", "zsnes" },
+}
+local menu_graphics = {
+	{ "gimp" , "gimp" },
+	{ "inkscape", "inkscape" },
+	{ "darktable" , "darktable" }
+}
+local menu_office = {
+	{ "writer" , "lowriter" },
+	{ "impress" , "loimpress" },
+}
+local menu_system = {
+	{ "htop" , terminal .. " -e htop " },
+	--{ "htop", 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=18" -depth 32 -background "rgba:0000/0000/0000/2000" -e htop'},
+	{ "hotkeys", function() return false, hotkeys_popup.show_help end},
+	{ "quit", function() awesome.quit() end},
+	{ "reboot", "loginctl reboot"},
+	{ "poweroff", "loginctl poweroff"},
+	{ "suspend", "loginctl suspend"}
+}
+local menu_tv = {
+	{ "Jednotka" , launch_tv .. "1:0:1:3B78:C8D:3:EB0000:0:0:0:" },
+	{ "Dvojka" , launch_tv .. "1:0:1:3B79:C8D:3:EB0000:0:0:0:" },
+	{ "RTVS SPORT HD" , launch_tv .. "1:0:1:3B7B:C8D:3:EB0000:0:0:0:" },
+	{ "CT 24" , launch_tv .. "1:0:1:1F43:CA1:3:EB0000:0:0:0:" },
+	{ "TA3" , launch_tv .. "1:0:1:1328:CA2:3:EB0000:0:0:0:" },
+	{ "HBO" , launch_tv .. "1:0:1:307:C94:3:EB0000:0:0:0:" },
+}
+local menu_demo = {
+	{ "Demo" , 'mpv /home/mirec/video.mkv' },
+	{ "Eletctic whiskey" , 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=16" -depth 32 -background "rgba:0000/0000/0000/8000" -e /home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/7lX3Rj-electric-whiskey.json --resolution 1200x800 --fps 60 --tile-size 600x400' },
+	{ "Ether" , 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=16" -depth 32 -background "rgba:0000/0000/0000/8000" -e /home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/MsjSW3-ether.json --resolution 840x520 --fps 60 --tile-size 420x260' },
+	{ "Rounded vornoi borders" , 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=16" -depth 32 -background "rgba:0000/0000/0000/8000" -e /home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/ll3GRM-rounded-vornoi-borders.json --resolution 960x400 --fps 60 --tile-size 480x200' },
+	{ "Seascape" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/Ms2SD1-seascape.json --resolution 640x360 --fps 30 --tile-size 320x180' },
+	{ "Voxel flythrough" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/MdGXWG-voxel-flythrough.json --resolution 720x400 --tile-size 180x200 --fps 30' },
+	{ "Hex voxel scene" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/4dsBz4-hex-voxel-scene.json --resolution 480x260 --tile-size 240x130 --fps 30' },
+	{ "Fractal land" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/XsBXWt-fractal-land/XsBXWt-fractal-land.json --resolution 640x360 --fps 30 --tile-size 320x180' }
+}
+local main_menu = awful.menu({
+	items = {
+		{ "accessories" , menu_accessories },
+		{ "graphics" , menu_graphics },
+		{ "internet" , menu_internet },
+		{ "games" , menu_games },
+		{ "office" , menu_office },
+		{ "system" , menu_system },
+		{ "tv" , menu_tv },
+		{ "demo" , menu_demo },
+	},
+	theme = {
+		height = theme.menu_height,
+		width = theme.menu_width,
+		submenu_icon = render_svg(theme.menu_submenu_icon, 1)
+	}
+})
+
+
 --awesome.set_cursor_size(48);
 local function setup_screen(s)
 	set_wallpaper(s)
@@ -512,85 +626,16 @@ local function setup_screen(s)
 
 	local scaling = float_dpi(1, s)
 	local spr = wibox.widget.textbox('   ')
-
-	-- {{{ Menu
-	local menu_accessories = {
-		{ "archives", "ark" },
-		{ "file manager", "konqueror" },
-		{ "editor", gui_editor },
-	}
-	local menu_internet = {
-		{ "browser", browser },
-	}
-	local menu_games = {
-		{ "PSX", "pcsxr" },
-		{ "Super NES", "zsnes" },
-	}
-	local menu_graphics = {
-		{ "gimp" , "gimp" },
-		{ "inkscape", "inkscape" },
-		{ "darktable" , "darktable" }
-	}
-	local menu_office = {
-		{ "writer" , "lowriter" },
-		{ "impress" , "loimpress" },
-	}
-	local menu_system = {
-		{ "htop" , terminal .. " -e htop " },
-		--{ "htop", 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=18" -depth 32 -background "rgba:0000/0000/0000/2000" -e htop'},
-		{ "hotkeys", function() return false, hotkeys_popup.show_help end},
-		{ "quit", function() awesome.quit() end},
-		{ "reboot", "loginctl reboot"},
-		{ "poweroff", "loginctl poweroff"},
-		{ "suspend", "loginctl suspend"}
-	}
-	local menu_tv = {
-		{ "Jednotka" , launch_tv .. "1:0:1:3B78:C8D:3:EB0000:0:0:0:" },
-		{ "Dvojka" , launch_tv .. "1:0:1:3B79:C8D:3:EB0000:0:0:0:" },
-		{ "RTVS SPORT HD" , launch_tv .. "1:0:1:3B7B:C8D:3:EB0000:0:0:0:" },
-		{ "CT 24" , launch_tv .. "1:0:1:1F43:CA1:3:EB0000:0:0:0:" },
-		{ "TA3" , launch_tv .. "1:0:1:1328:CA2:3:EB0000:0:0:0:" },
-		{ "HBO" , launch_tv .. "1:0:1:307:C94:3:EB0000:0:0:0:" },
-	}
-	local menu_demo = {
-		{ "Demo" , 'mpv /home/mirec/video.mkv' },
-		{ "Eletctic whiskey" , 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=16" -depth 32 -background "rgba:0000/0000/0000/8000" -e /home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/7lX3Rj-electric-whiskey.json --resolution 1200x800 --fps 60 --tile-size 600x400' },
-		{ "Ether" , 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=16" -depth 32 -background "rgba:0000/0000/0000/8000" -e /home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/MsjSW3-ether.json --resolution 840x520 --fps 60 --tile-size 420x260' },
-		{ "Rounded vornoi borders" , 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=16" -depth 32 -background "rgba:0000/0000/0000/8000" -e /home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/ll3GRM-rounded-vornoi-borders.json --resolution 960x400 --fps 60 --tile-size 480x200' },
-		{ "Seascape" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/Ms2SD1-seascape.json --resolution 640x360 --fps 30 --tile-size 320x180' },
-		{ "Voxel flythrough" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/MdGXWG-voxel-flythrough.json --resolution 720x400 --tile-size 180x200 --fps 30' },
-		{ "Hex voxel scene" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/4dsBz4-hex-voxel-scene.json --resolution 480x260 --tile-size 240x130 --fps 30' },
-		{ "Fractal land" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/XsBXWt-fractal-land/XsBXWt-fractal-land.json --resolution 640x360 --fps 30 --tile-size 320x180' }
-	}
-	local main_menu = awful.menu({
-		items = {
-			{ "accessories" , menu_accessories },
-			{ "graphics" , menu_graphics },
-			{ "internet" , menu_internet },
-			{ "games" , menu_games },
-			{ "office" , menu_office },
-			{ "system" , menu_system },
-			{ "tv" , menu_tv },
-			{ "demo" , menu_demo },
-		},
-		theme = {
-			height = theme.menu_height * scaling,
-			width = theme.menu_width * scaling,
-			submenu_icon = render_svg(theme.menu_submenu_icon, scaling)
-		}
-	})
 	mymainmenu = main_menu
+	s.main_menu = main_menu
 
 	local launcher = awful.widget.launcher({
 		image = beautiful.launch,
 		menu = main_menu,
 	})
+	s.launcher = launcher
 
-	if (scaling > 1) then
-		launcher:set_image(render_svg(theme.launch, scaling))
-	end
-
-	s.taglist = awful.widget.taglist{
+	s.taglist_args = {
 		screen = s,
 		filter = awful.widget.taglist.filter.all,
 		buttons = taglist_defaults.buttons,
@@ -624,6 +669,7 @@ local function setup_screen(s)
 			}
 		}
 	}
+	s.taglist = awful.widget.taglist(s.taglist_args)
 
 	s.tasklist = awful.widget.tasklist {
 		screen = s,
@@ -728,14 +774,6 @@ local function setup_screen(s)
 	}
 	s.layoutbox:buttons(layoutbox_defaults.buttons)
 
-	local textclock_width = calculate_text_width(s, '<span font="'..textclock_font..'">MM  00.10  00:00</span>')
-	local volume_width = calculate_text_width(s, '<span font="'..(theme.volume_font or theme.font)..'">100 %</span>')
-	s.battery_width = calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.font)..'">100 %</span>')
-	s.battery_width_ext = calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.font)..'">100 %</span> <span font="'..(theme.battery_current_font or theme.font)..'">99.9 W</span>')
-	local cpu_width = calculate_text_width(s, '<span font="'..(theme.cpu_percent_font or theme.font)..'">100 %</span>')
-	local memory_width = calculate_text_width(s, '<span font="'..(theme.mem_percent_font or theme.font)..'">99999 MB</span>')
-	local temp_width = calculate_text_width(s, '<span font="'..(theme.temp_font or theme.font)..'">100 %</span>')
-
 	local month_calendar = awful.widget.calendar_popup.month {
 		week_numbers = true,
 		style_month = {
@@ -792,29 +830,28 @@ local function setup_screen(s)
 		wireless_icon,
 		s.wireless_chart,
 		layout = wibox.layout.stack,
-		--forced_width = dpi(wireless_icon._private.default.width, s),
 	})
 	right_layout:add(spr)
 	right_layout:add(temp_icon)
-	right_layout:add(wibox.widget {
+	s.temp_widget = wibox.widget {
 		widget = temp_widget,
-		forced_width = temp_width,
 		align = "left"
-	})
+	}
+	right_layout:add(s.temp_widget)
 	right_layout:add(spr)
 	right_layout:add(mem_icon)
-	right_layout:add(wibox.widget {
+	s.memory_widget = wibox.widget {
 		widget = mem_widget,
-		forced_width = memory_width,
 		align = "left"
-	})
+	}
+	right_layout:add(s.memory_widget)
 	right_layout:add(spr)
 	right_layout:add(cpu_icon)
-	right_layout:add(wibox.widget {
+	s.cpu_widget = wibox.widget {
 		widget = cpu_widget,
-		forced_width = cpu_width,
 		align = "left"
-	})
+	}
+	right_layout:add(s.cpu_widget)
 	right_layout:add(spr)
 	s.battery_bar_fill = wibox.widget {
 		bg = '#cccdcf',
@@ -843,11 +880,11 @@ local function setup_screen(s)
 	right_layout:add(s.battery_text_container)
 	right_layout:add(spr)
 	right_layout:add(volume_icon)
-	right_layout:add(wibox.widget {
+	s.volume_widget = wibox.widget {
 		widget = volume_widget,
-		forced_width = volume_width,
 		align = "left"
-	})
+	}
+	right_layout:add(s.volume_widget)
 	right_layout:add(spr)
 	local systray_separator = wibox.widget {
 		spr,
@@ -876,13 +913,16 @@ local function setup_screen(s)
 		screen = "primary",
 		udisks.widget
 	})
-	right_layout:add(wibox.widget {
+	s.textclock = wibox.widget {
 		widget = textclock,
-		forced_width = textclock_width,
+		--forced_width = textclock_width,
 		align = "center"
-	})
+	}
+	right_layout:add(s.textclock)
 	right_layout:add(spr)
 	right_layout:add(s.layoutbox)
+
+	set_screen_dpi(s);
 
 	s.tool_bar = awful.wibar({
 		position = "top",
@@ -1135,20 +1175,22 @@ globalkeys = gears.table.join(
 	awful.key({ }, "XF86AudioRaiseVolume", function () volume("up", volumewidget) end),
 	awful.key({ }, "XF86AudioLowerVolume", function () volume("down", volumewidget) end),
 	awful.key({ }, "XF86AudioMute", function () volume("mute", volumewidget) end),
-	awful.key({ }, "XF86AudioMicMute", function () awful.util.spawn("amixer set Capture capture toggle", false ) end),
-	awful.key({ modkey, "Shift"   }, "d",
-		function ()
-			awesome.set_cursor_size(48);
-			capi.root.cursor("right_ptr");
-			for s in screen do
-				s.tool_bar.drawin.cursor = "right_ptr";
-			end
-		end,
-		{description = "test change dpi", group = "launcher"})
+	awful.key({ }, "XF86AudioMicMute", function () awful.util.spawn("amixer set Capture capture toggle", false ) end)
+	--awful.key({ modkey, "Shift"   }, "d",
+	--	function ()
+	--		awesome.set_cursor_size(48);
+	--		capi.root.cursor("right_ptr");
+	--		for s in screen do
+	--			s.tool_bar.drawin.cursor = "right_ptr";
+	--		end
+	--	end,
+	--	{description = "test change dpi", group = "launcher"})
 )
+
+
+
 beautiful.change_dpi = function(force_dpi)
 	local cursor_size = math.floor((force_dpi / 96)+0.5);
-	print("Cursor size " .. cursor_size)
 	if cursor_size < 1 then
 		cursor_size = 1
 	end
@@ -1158,9 +1200,11 @@ beautiful.change_dpi = function(force_dpi)
 	capi.root.cursor("left_ptr");
 
 	for s in screen do
+		local scaling = float_dpi(1, s)
 		s.dpi = force_dpi
-		s.tool_bar:remove()
-		setup_screen(s)
+		s.tool_bar.height = dpi(18, s);
+		s.tool_bar.drawin.cursor = "left_ptr";
+		set_screen_dpi(s)
 	end
 
 	beautiful.xresources.set_dpi(force_dpi)
