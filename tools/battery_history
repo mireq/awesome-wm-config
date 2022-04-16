@@ -41,17 +41,19 @@ def read_history(selected_cycle):
 	tz = tzlocal()
 	cycle = 0
 	last_time = None
+	last_status = None
 	with open(Path.home() / '.battery_history', 'r') as fp:
 		for row in csv.reader(reversed_lines(fp), delimiter=';'):
 			if len(row) != 5:
 				continue
 			current_time = int(row[1])
 			record = HistoryRecord(*([row[0]] + [datetime.fromtimestamp(current_time)] + [int(val) for val in row[2:]]))
-			if last_time is None or (last_time - current_time) > 100:
+			if last_time is None or last_status != record.status or (last_time - current_time) > 100:
 				cycle += 1
 			if cycle > selected_cycle:
 				break
 			last_time = current_time
+			last_status = record.status
 			if cycle == selected_cycle:
 				yield record
 
