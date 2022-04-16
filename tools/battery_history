@@ -87,6 +87,7 @@ def main():
 	power_ax.set_ylim([power_low, power_high])
 	power_ax.get_xaxis().set_visible(False)
 	power_ax.set_ylabel("W")
+	power_ax.grid(axis='y')
 
 	color = 'tab:red'
 	energy_ax.title.set_text("Remaining energy")
