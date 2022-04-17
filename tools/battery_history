@@ -3,14 +3,18 @@
 import argparse
 import csv
 import os
+import scipy.signal
 from collections import namedtuple
 from datetime import datetime
 from pathlib import Path
 
-import matplotlib.dates as mdates
-import matplotlib.pyplot as plt
-import numpy as np
 from dateutil.tz import tzlocal
+import matplotlib.dates as mdates
+import matplotlib.patches as patches
+import matplotlib.pyplot as plt
+import matplotlib.ticker
+import matplotlib.transforms
+import numpy as np
 
 
 HistoryRecord = namedtuple('HistoryRecord', ['status', 'time', 'power', 'energy', 'voltage'])
@@ -58,15 +62,55 @@ def read_history(selected_cycle):
 				yield record
 
 
+def polygon(ax, x1, y1, x2, y2, color):
+	polygon = plt.Polygon([(x1,y1), (x2,y2), (x2,0), (x1,0)], color=color)
+	ax.add_patch(polygon)
+
+
+def gradient_plot(ax, x_data, y_data, cmap, cmap_start=0.0, cmap_end=1.0, darken=False):
+	count = len(x_data)
+	x_data = [mdates.date2num(d) for d in x_data]
+	x_min = x_data[0]
+	x_max = x_data[-1]
+	cmap = plt.get_cmap(cmap)
+	for n, (x, y) in enumerate(zip(x_data, y_data)):
+		if n + 1 == count:
+			break
+		x_pos = (x - x_min) / (x_max - x_min)
+		color = cmap(x_pos * (cmap_end - cmap_start) + cmap_start)
+		if darken:
+			color = tuple([color[0] / 3, color[1] / 3, color[2] / 3, 1.0])
+		polygon(ax, x+0.000001, y, x_data[n+1], y_data[n+1], color=color)
+
+
 def main():
 	parser = argparse.ArgumentParser(description="Show battery history")
 	parser.add_argument('--cycle', type=int, default=1, help="Charge / discharge cycle number")
 	args = parser.parse_args()
 
-	lines = list(read_history(args.cycle))
+	lines = list(read_history(args.cycle))[::-1]
 
-	fig, (power_ax, energy_ax) = plt.subplots(2, 1)
-	fig.set_size_inches(18.5, 10.5)
+	plt.style.use({
+		'figure.facecolor': '#071326',
+		'figure.edgecolor': '#071326',
+		'savefig.facecolor': '#071326',
+		'savefig.edgecolor': '#071326',
+		'axes.facecolor': '#071326',
+		'lines.color': 'white',
+		'patch.edgecolor': 'white',
+		'text.color': 'white',
+		'axes.edgecolor': 'white',
+		'axes.labelcolor': 'white',
+		'xtick.color': 'white',
+		'ytick.color': 'white',
+		'grid.color': '#ffffff20',
+		'font.size': 14,
+	})
+	fig = plt.figure()
+	power_ax = fig.add_subplot(5, 1, (1, 3))
+	energy_ax = fig.add_subplot(5, 1, (4, 5))
+	#fig, (power_ax, energy_ax) = plt.subplots(2, 1)
+	fig.set_size_inches(16, 8)
 
 	time_values = [line.time for line in lines]
 	power_values = [line.power / 1000000 for line in lines]
@@ -76,36 +120,84 @@ def main():
 	time_low = min(time_values)
 	time_high = max(time_values)
 
-	power_low, power_high = np.percentile([power_values], [5, 95])
-	power_low = power_low * 0.8
-	power_high = power_high * 1.25
+	power_low, power_high = np.percentile([power_values], [4, 96])
+	power_low = power_low * 0.98
+	power_high = power_high * 1.0204
 
-	power_ax.title.set_text("Power")
-	power_ax.plot(time_values, power_values)
+	energy_low, energy_high = np.percentile([energy_values], [0.1, 99.9])
+
+	power_values = scipy.signal.savgol_filter(power_values, 7, 3)
+	voltage_values = scipy.signal.savgol_filter(voltage_values, 5, 3)
+
+	#power_ax.title.set_text("Power")
+	#power_ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(prune='both'))
+	gradient_plot(power_ax, time_values, power_values, "inferno", cmap_start=0.1)
+	power_ax.plot(time_values, power_values, color="#ffffff80", linewidth=0.5)
 	power_ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
 	power_ax.set_xlim([time_low, time_high])
 	power_ax.set_ylim([power_low, power_high])
 	power_ax.get_xaxis().set_visible(False)
-	power_ax.set_ylabel("W")
-	power_ax.grid(axis='y')
+	power_ax.get_yaxis().set_visible(True)
+	power_ax.spines['top'].set_visible(False)
+	power_ax.spines['right'].set_visible(False)
+	power_ax.spines['bottom'].set_visible(False)
+	power_ax.spines['left'].set_visible(False)
+	power_ax.tick_params(axis="y", width=0, direction="in", pad=-50)
+	formatter = matplotlib.ticker.EngFormatter(unit='W')
+	power_ax.yaxis.set_major_formatter(formatter)
+	yticks = power_ax.get_yticks()
+	for y0, y1 in zip(yticks[::2], yticks[1::2]):
+		power_ax.axhspan(y0, y1, color='white', alpha=0.05)
+	for y0, y1 in zip(yticks[1::2], yticks[2::2]):
+		power_ax.axhspan(y0, y1, color='black', alpha=0.05)
+	#plt.setp(power_ax.get_yticklabels()[0], visible=False)
+	#plt.setp(power_ax.get_yticklabels()[-1], visible=False)
 
-	color = 'tab:red'
-	energy_ax.title.set_text("Remaining energy")
-	energy_ax.plot(time_values, energy_values, color=color)
+	#energy_ax.yaxis.set_major_locator(matplotlib.ticker.AutoLocator(prune='both'))
+	#energy_ax.yaxis.get_major_locator().set_params(prune='both')
+	gradient_plot(energy_ax, time_values, energy_values, "viridis", cmap_start=0.1, cmap_end=1.0, darken=True)
+	energy_ax.plot(time_values, energy_values, color="#ffffff80", linewidth=0.5)
 	energy_ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
 	energy_ax.set_xlim([time_low, time_high])
-	energy_ax.set_ylabel("Wh", color=color)
-	energy_ax.tick_params(axis='y', labelcolor=color)
+	energy_ax.set_ylim([energy_low * 0.98, energy_high * 1.0204])
+	energy_ax.get_yaxis().set_visible(True)
+	energy_ax.spines['top'].set_visible(False)
+	energy_ax.spines['right'].set_visible(False)
+	energy_ax.spines['bottom'].set_visible(False)
+	energy_ax.spines['left'].set_visible(False)
+	energy_ax.tick_params(axis="y", width=0, direction="in", pad=-55)
+	energy_ax.tick_params(axis="x", width=0, direction="in", pad=-15)
+	formatter = matplotlib.ticker.EngFormatter(unit='Wh')
+	energy_ax.yaxis.set_major_formatter(formatter)
+	yticks = energy_ax.get_yticks()
+	for y0, y1 in zip(yticks[::2], yticks[1::2]):
+		energy_ax.axhspan(y0, y1, color='white', alpha=0.05)
+	for y0, y1 in zip(yticks[1::2], yticks[2::2]):
+		energy_ax.axhspan(y0, y1, color='black', alpha=0.05)
+	#plt.setp(energy_ax.get_yticklabels()[0], visible=False)
+	#plt.setp(energy_ax.get_yticklabels()[-1], visible=False)
 
-	color = 'tab:blue'
+	color = '#40a0ff'
 	voltage_ax = energy_ax.twinx()
-	voltage_ax.plot(time_values, voltage_values, color=color)
-	voltage_ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+	voltage_ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(prune='both'))
+	voltage_ax.spines['top'].set_visible(False)
+	voltage_ax.spines['right'].set_visible(False)
+	voltage_ax.spines['bottom'].set_visible(False)
+	voltage_ax.spines['left'].set_visible(False)
+	voltage_ax.tick_params(axis="y", width=0, direction="in", pad=-55)
+	formatter = matplotlib.ticker.EngFormatter(unit='V')
+	voltage_ax.yaxis.set_major_formatter(formatter)
+	voltage_ax.plot(time_values, voltage_values, color=color, linewidth=0.5)
 	voltage_ax.set_ylabel('V', color=color)
 	voltage_ax.tick_params(axis='y', labelcolor=color)
+	plt.setp(voltage_ax.get_yticklabels()[0], visible=False)
+	plt.setp(voltage_ax.get_yticklabels()[-1], visible=False)
+	for item in voltage_ax.get_yticklabels():
+		item.set_fontsize(10)
 
-	plt.tight_layout()
-	#fig.subplots_adjust(hspace=0.3)
+	plt.subplots_adjust(left=0, right=1, top=1, bottom=0, hspace=0)
+	#plt.tight_layout()
+	##fig.subplots_adjust(hspace=0.3)
 	plt.show()
 
 
