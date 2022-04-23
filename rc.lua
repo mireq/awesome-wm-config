@@ -299,6 +299,7 @@ if battery_history_file ~= nil then
 	battery_history_file:close()
 	battery_history_file = io.open(home .. '/.battery_history', 'a')
 end
+local proc_stat = io.open('/proc/stat', 'r')
 local battery_icon = wibox.widget.imagebox(beautiful.widget_battery)
 battery_icon.stylesheet = 'svg { fill: '..theme.fg_normal..'; }'
 local battery_widget = wibox.widget.textbox()
@@ -379,7 +380,23 @@ vicious.register(battery_widget, vicious_extra.bat,
 			text = text .. ' <span font="'..(theme.battery_current_font or theme.font)..'" alpha="50%">'..string.format("%.1f", args.power_now)..' W</span>'
 		end
 
-		if battery_history_file ~= nil then
+		if battery_history_file ~= nil and proc_stat ~= nil then
+			proc_stat:seek("set", 0)
+			local cpuline = '';
+			for line in proc_stat:lines() do
+				local _, _, cpu, user, nice, system, idle, iowait, irq, softirq = string.find(line, "^cpu([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+) ([0-9]+)")
+				if cpu ~= nil then
+					if cpu ~= '0' then
+						cpuline = cpuline .. ' '
+					end
+					cpuline = cpuline .. user .. ',' .. nice .. ',' .. system .. ',' .. idle .. ',' .. iowait .. ',' .. irq .. ',' .. softirq
+				end
+			end
+
+			if cpuline then
+				cpuline = ';' .. cpuline
+			end
+
 			local time = os.time()
 			local status = nil
 			if battery_current.status == "Charging" then
@@ -388,7 +405,7 @@ vicious.register(battery_widget, vicious_extra.bat,
 				status = 'd'
 			end
 			if status then
-				battery_history_file:write(status .. ";" .. time .. ";" .. math.floor(args.power_now * 1000000) .. ";" .. math.floor(args.energy_now * 1000000) .. ";" .. math.floor(args.voltage_now * 1000000) .. "\n")
+				battery_history_file:write(status .. ";" .. time .. ";" .. math.floor(args.power_now * 1000000) .. ";" .. math.floor(args.energy_now * 1000000) .. ";" .. math.floor(args.voltage_now * 1000000) .. cpuline .. "\n")
 				battery_history_file:flush()
 			end
 		end
@@ -553,6 +570,7 @@ end
 -- {{{ Menu
 local menu_accessories = {
 	{ "archives", "ark" },
+	{ "terminal emulator", terminal },
 	{ "file manager", "konqueror" },
 	{ "editor", gui_editor },
 }
@@ -966,7 +984,7 @@ local clientbuttons = gears.table.join(
 			c.width = c.screen.geometry.width
 			c.height = c.screen.geometry.height
 		end
-		return awful.mouse.client.move(c)
+		c:activate { context = "mouse_click", action = "mouse_move" }
 	end),
 	awful.button({ altkey }, 3, function(c)
 		if c.fullscreen or c.maximized then
@@ -975,7 +993,7 @@ local clientbuttons = gears.table.join(
 			c.width = c.screen.geometry.width
 			c.height = c.screen.geometry.height
 		end
-		return awful.mouse.client.resize(c)
+		c:activate { context = "mouse_click", action = "mouse_resize" }
 	end))
 	--awful.button({ altkey }, 3, awful.mouse.client.resize))
 
@@ -1539,19 +1557,19 @@ client.connect_signal("request::titlebars", function(c)
 			awful.button({ }, 1, function()
 				client.focus = c
 				c:raise()
-				awful.mouse.client.move(c)
+				c:activate { context = "titlebar", action = "mouse_move" }
 			end),
 			awful.button({ }, 3, function()
 				client.focus = c
 				c:raise()
-				awful.mouse.client.resize(c)
+				c:activate { context = "titlebar", action = "mouse_resize" }
 			end)
 		)
 	)
 
 	awful.titlebar(c, {position = titlebar_position, size = dpi(18, c.screen)}):set_widget(layout)
 
-	if c.class == 'URxvt' or c.class == 'Firefox' or c.class == 'Google-chrome' or c.class == "Wine" or c.class == "kruler" or c.class == "Alacritty" then
+	if c.class == 'URxvt' or c.class == 'Firefox' or c.class == 'firefox' or c.class == 'Google-chrome' or c.class == "Wine" or c.class == "kruler" or c.class == "Alacritty" then
 		awful.titlebar.hide(c, titlebar_position);
 	end
 end)

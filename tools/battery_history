@@ -17,7 +17,85 @@ import matplotlib.transforms
 import numpy as np
 
 
-HistoryRecord = namedtuple('HistoryRecord', ['status', 'time', 'power', 'energy', 'voltage'])
+class CpuRecord(object):
+	__slots__ = ['user', 'nice', 'system', 'idle', 'iowait', 'irq', 'softirq']
+
+	def __init__(self, user, nice, system, idle, iowait, irq, softirq):
+		self.user = user
+		self.nice = nice
+		self.system = system
+		self.idle = idle
+		self.iowait = iowait
+		self.irq = irq
+		self.softirq = softirq
+
+	def __repr__(self):
+		return f'{self.__class__.__name__}({self.user}, {self.nice}, {self.system}, {self.idle}, {self.iowait}, {self.irq}, {self.softirq})'
+
+	@property
+	def sum(self):
+		return self.user + self.nice + self.system + self.idle + self.iowait + self.irq + self.softirq
+
+	@property
+	def load(self):
+		count = self.sum
+		if count == 0:
+			return 0.0
+		return (self.user + self.nice + self.system + self.iowait + self.irq + self.softirq) / count
+
+	def __iter__(self):
+		yield self.user
+		yield self.nice
+		yield self.system
+		yield self.idle
+		yield self.iowait
+		yield self.irq
+		yield self.softirq
+
+
+
+class CpuList(object):
+	def __init__(self, cpuline):
+		if isinstance(cpuline, int):
+			self.cpus = [CpuRecord(*[0 for __ in range(7)]) for __ in range(cpuline)]
+		elif isinstance(cpuline, list):
+			self.cpus = cpuline
+		else:
+			self.cpus = [CpuRecord(*(int(val) for val in rec.split(','))) for rec in cpuline.split()]
+
+	def __repr__(self):
+		return f'{self.__class__.__name__}({self.cpus})'
+
+	def __sub__(self, other):
+		if not isinstance(other, CpuList):
+			raise ValueError("CpuList instance required")
+		new_cpus = []
+		for current, other in zip(self.cpus, other.cpus):
+			new_cpus.append(CpuRecord(*(a - b for a, b in zip(current, other))))
+		return CpuList(new_cpus)
+
+
+class HistoryRecord(object):
+	__slots__ = ['status', 'time', 'power', 'energy', 'voltage', 'cpuline', 'cpu']
+
+	def __init__(self, status, time, power, energy, voltage, cpuline=''):
+		self.status = status
+		self.time = time
+		self.power = power
+		self.energy = energy
+		self.voltage = voltage
+		self.cpuline = cpuline
+		if self.cpuline:
+			self.cpu = CpuList(self.cpuline)
+		else:
+			self.cpu = None
+
+	def __repr__(self):
+		return f'{self.__class__.__name__}({self.status}, {self.time}, {self.power}, {self.energy}, {self.voltage}, {self.cpuline})'
+
+	@property
+	def has_cpu(self):
+		return bool(self.cpuline)
 
 
 def reversed_lines(fp):
@@ -46,12 +124,18 @@ def read_history(selected_cycle):
 	cycle = 0
 	last_time = None
 	last_status = None
+	last_cpu = None
 	with open(Path.home() / '.battery_history', 'r') as fp:
 		for row in csv.reader(reversed_lines(fp), delimiter=';'):
-			if len(row) != 5:
+			if len(row) < 5:
 				continue
 			current_time = int(row[1])
-			record = HistoryRecord(*([row[0]] + [datetime.fromtimestamp(current_time)] + [int(val) for val in row[2:]]))
+			record = HistoryRecord(*([row[0]] + [datetime.fromtimestamp(current_time)] + [int(val) for val in row[2:5]] + row[5:]))
+			if record.has_cpu:
+				record_cpu = record.cpu
+				if last_cpu is not None:
+					record.cpu = last_cpu - record_cpu
+				last_cpu = record_cpu
 			if last_time is None or last_status != record.status or (last_time - current_time) > 100:
 				cycle += 1
 			if cycle > selected_cycle:
@@ -107,8 +191,15 @@ def main():
 		'font.size': 14,
 	})
 	fig = plt.figure()
-	power_ax = fig.add_subplot(5, 1, (1, 3))
-	energy_ax = fig.add_subplot(5, 1, (4, 5))
+	has_cpu = lines[0].has_cpu
+	if has_cpu:
+		power_ax = fig.add_subplot(11, 1, (1, 6))
+		energy_ax = fig.add_subplot(11, 1, (7, 10))
+		cpu_ax = fig.add_subplot(11, 1, (11, 11))
+	else:
+		power_ax = fig.add_subplot(5, 1, (1, 3))
+		energy_ax = fig.add_subplot(5, 1, (4, 5))
+		cpu_ax = None
 	#fig, (power_ax, energy_ax) = plt.subplots(2, 1)
 	fig.set_size_inches(16, 8)
 
@@ -120,9 +211,9 @@ def main():
 	time_low = min(time_values)
 	time_high = max(time_values)
 
-	power_low, power_high = np.percentile([power_values], [4, 96])
-	power_low = power_low * 0.98
-	power_high = power_high * 1.0204
+	power_low, power_high = np.percentile([power_values], [2, 98])
+	power_low = power_low * 0.96
+	power_high = power_high * 1.04167
 
 	energy_low, energy_high = np.percentile([energy_values], [0.1, 99.9])
 
@@ -153,6 +244,18 @@ def main():
 	#plt.setp(power_ax.get_yticklabels()[0], visible=False)
 	#plt.setp(power_ax.get_yticklabels()[-1], visible=False)
 
+	power_ax2 = power_ax.twiny()
+	power_ax2.set_xlim([time_low, time_high])
+	power_ax2.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
+	power_ax2.get_xaxis().set_visible(True)
+	power_ax2.tick_params(axis="x", width=0, direction="in", pad=-20)
+	power_ax2.spines['top'].set_visible(False)
+	power_ax2.spines['right'].set_visible(False)
+	power_ax2.spines['bottom'].set_visible(False)
+	power_ax2.spines['left'].set_visible(False)
+	plt.setp(power_ax2.get_xticklabels()[0], visible=False)
+
+
 	#energy_ax.yaxis.set_major_locator(matplotlib.ticker.AutoLocator(prune='both'))
 	#energy_ax.yaxis.get_major_locator().set_params(prune='both')
 	gradient_plot(energy_ax, time_values, energy_values, "viridis", cmap_start=0.1, cmap_end=1.0, darken=True)
@@ -160,6 +263,7 @@ def main():
 	energy_ax.xaxis.set_major_formatter(mdates.DateFormatter('%H:%M'))
 	energy_ax.set_xlim([time_low, time_high])
 	energy_ax.set_ylim([energy_low * 0.98, energy_high * 1.0204])
+	energy_ax.get_xaxis().set_visible(False)
 	energy_ax.get_yaxis().set_visible(True)
 	energy_ax.spines['top'].set_visible(False)
 	energy_ax.spines['right'].set_visible(False)
@@ -194,6 +298,17 @@ def main():
 	plt.setp(voltage_ax.get_yticklabels()[-1], visible=False)
 	for item in voltage_ax.get_yticklabels():
 		item.set_fontsize(10)
+
+	if cpu_ax is not None:
+		cpu_ax.spines['top'].set_visible(False)
+		cpu_ax.spines['right'].set_visible(False)
+		cpu_ax.spines['bottom'].set_visible(False)
+		cpu_ax.spines['left'].set_visible(False)
+		cpu_array = np.zeros((len(lines[0].cpu.cpus), len(time_values)))
+		for x, line in enumerate(lines):
+			for y, cpu in enumerate(line.cpu.cpus):
+				cpu_array[y,x] = cpu.load
+		cpu_ax.pcolormesh(time_values, np.arange(len(lines[0].cpu.cpus)), cpu_array, cmap="inferno")
 
 	plt.subplots_adjust(left=0, right=1, top=1, bottom=0, hspace=0)
 	#plt.tight_layout()
