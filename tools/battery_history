@@ -183,7 +183,7 @@ def main():
 		'lines.color': 'white',
 		'patch.edgecolor': 'white',
 		'text.color': 'white',
-		'axes.edgecolor': 'white',
+		'axes.edgecolor': '#ffffff20',
 		'axes.labelcolor': 'white',
 		'xtick.color': 'white',
 		'ytick.color': 'white',
@@ -212,13 +212,13 @@ def main():
 	time_high = max(time_values)
 
 	power_low, power_high = np.percentile([power_values], [2, 98])
-	power_low = power_low * 0.96
-	power_high = power_high * 1.04167
+	power_low = power_low * 0.5
+	power_high = power_high * 1.3
 
 	energy_low, energy_high = np.percentile([energy_values], [0.1, 99.9])
 
-	power_values = scipy.signal.savgol_filter(power_values, 7, 3)
-	voltage_values = scipy.signal.savgol_filter(voltage_values, 5, 3)
+	#power_values = scipy.signal.savgol_filter(power_values, 7, 3)
+	#voltage_values = scipy.signal.savgol_filter(voltage_values, 5, 3)
 
 	#power_ax.title.set_text("Power")
 	#power_ax.yaxis.set_major_locator(matplotlib.ticker.MaxNLocator(prune='both'))
@@ -231,7 +231,7 @@ def main():
 	power_ax.get_yaxis().set_visible(True)
 	power_ax.spines['top'].set_visible(False)
 	power_ax.spines['right'].set_visible(False)
-	power_ax.spines['bottom'].set_visible(False)
+	#power_ax.spines['bottom'].set_visible(False)
 	power_ax.spines['left'].set_visible(False)
 	power_ax.tick_params(axis="y", width=0, direction="in", pad=-50)
 	formatter = matplotlib.ticker.EngFormatter(unit='W')
@@ -251,7 +251,7 @@ def main():
 	power_ax2.tick_params(axis="x", width=0, direction="in", pad=-20)
 	power_ax2.spines['top'].set_visible(False)
 	power_ax2.spines['right'].set_visible(False)
-	power_ax2.spines['bottom'].set_visible(False)
+	#power_ax2.spines['bottom'].set_visible(False)
 	power_ax2.spines['left'].set_visible(False)
 	plt.setp(power_ax2.get_xticklabels()[0], visible=False)
 
@@ -267,7 +267,7 @@ def main():
 	energy_ax.get_yaxis().set_visible(True)
 	energy_ax.spines['top'].set_visible(False)
 	energy_ax.spines['right'].set_visible(False)
-	energy_ax.spines['bottom'].set_visible(False)
+	#energy_ax.spines['bottom'].set_visible(False)
 	energy_ax.spines['left'].set_visible(False)
 	energy_ax.tick_params(axis="y", width=0, direction="in", pad=-55)
 	energy_ax.tick_params(axis="x", width=0, direction="in", pad=-15)
@@ -302,7 +302,7 @@ def main():
 	if cpu_ax is not None:
 		cpu_ax.spines['top'].set_visible(False)
 		cpu_ax.spines['right'].set_visible(False)
-		cpu_ax.spines['bottom'].set_visible(False)
+		#cpu_ax.spines['bottom'].set_visible(False)
 		cpu_ax.spines['left'].set_visible(False)
 		cpu_array = np.zeros((len(lines[0].cpu.cpus), len(time_values)))
 		for x, line in enumerate(lines):
