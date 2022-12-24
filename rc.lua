@@ -8,6 +8,8 @@ local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
 local run_shell = require("widgets.run_shell")
 local popups = require("widgets.popups")
+local lgi = require("lgi")
+local Gio = lgi.Gio
 require("awful.autofocus")
 
 local wibox = require("wibox")
@@ -54,6 +56,10 @@ end
 
 
 -- {{{ Utils
+
+local function get_config_dir()
+	return debug.getinfo(1).source:match("@?(.*/)")
+end
 
 
 local function render_svg(path, scaling)
@@ -135,7 +141,7 @@ gui_editor = "kwrite"
 browser = "firefox-bin"
 tasks = terminal .. " -e htop"
 udisks.filemanager = "konqueror"
-launch_tv = "mpv --demuxer-lavf-analyzeduration=0 --vf=vavpp:deint=auto:interlaced-only=yes --force-window=immediate http://192.168.1.111:8001/"
+launch_tv = "mpv --demuxer=lavf --demuxer-lavf-format=mpegts --vf=vavpp:deint=auto:interlaced-only=yes --demuxer-lavf-o-add=fflags=+nobuffer --demuxer-lavf-probe-info=nostreams --demuxer-lavf-analyzeduration=0 --force-window=immediate http://192.168.1.111:8001/"
 
 modkey = "Mod4"
 altkey = "Mod1"
@@ -218,19 +224,25 @@ volume_changed_timer = gears.timer {
 	timeout = 0.02,
 	callback = volume_changed_callback
 }
+local volume_monitor_ctl = nil;
 local function async_silent(stdout, stderr, reason, exit_code) end
-local volume_channel = "Master"
 local function volume(mode, widget)
+	if volume_monitor_ctl == nil then
+		return
+	end
+
 	if mode == "up" then
-		awful.spawn.easy_async("amixer set "..volume_channel.." playback 1%+", async_silent)
-		vicious.force({volume_widget})
+		volume_monitor_ctl:write('sink change 0.01\n')
+		volume_monitor_ctl:flush()
 	elseif mode == "down" then
-		awful.spawn.easy_async("amixer set "..volume_channel.." playback 1%-", async_silent)
-		vicious.force({volume_widget})
-	else
-		awful.spawn.easy_async("amixer set "..volume_channel.." playback toggle", async_silent)
-		awful.spawn.easy_async("amixer set Speaker playback on", async_silent)
-		vicious.force({volume_widget})
+		volume_monitor_ctl:write('sink change -0.01\n')
+		volume_monitor_ctl:flush()
+	elseif mode == "mute" then
+		volume_monitor_ctl:write('sink mute_toggle\n')
+		volume_monitor_ctl:flush()
+	elseif mode == "micmute" then
+		volume_monitor_ctl:write('source mute_toggle\n')
+		volume_monitor_ctl:flush()
 	end
 end
 local volumekeys = awful.util.table.join(
@@ -241,30 +253,77 @@ local volumekeys = awful.util.table.join(
 volume_widget:buttons(volumekeys)
 local volume_icon = wibox.widget.imagebox(beautiful.widget_vol_no)
 volume_icon:buttons(volumekeys)
-vicious.register(volume_widget, vicious.widgets.volume,
+vicious.register(volume_widget, vicious_extra.volume,
 	function (widget, args)
-		if (args[2] ~= "🔈" ) then
-			if (args[1] == 0) then
-				volume_icon:set_image(beautiful.widget_vol_mute)
-			elseif (args[1] < 10) then
-				volume_icon:set_image(beautiful.widget_vol_0)
-			elseif (args[1] < 40) then
-				volume_icon:set_image(beautiful.widget_vol_1)
-			elseif (args[1] < 70) then
-				volume_icon:set_image(beautiful.widget_vol_2)
-			else
-				volume_icon:set_image(beautiful.widget_vol_3)
-			end
-		else
+		if args.mute or args.value == 0.0 then
 			volume_icon:set_image(beautiful.widget_vol_mute)
+		else
+			if args.value ~= nil then
+				if args.value < 0.1 then
+					volume_icon:set_image(beautiful.widget_vol_0)
+				elseif args.value < 0.4 then
+					volume_icon:set_image(beautiful.widget_vol_1)
+				elseif args.value < 0.7 then
+					volume_icon:set_image(beautiful.widget_vol_2)
+				else
+					volume_icon:set_image(beautiful.widget_vol_3)
+				end
+			end
 		end
-		local font = theme.volume_font or theme.font
-		return '<span font="' .. font .. '">' .. args[1] .. '%</span>'
+		if args.value == nil then
+			return ''
+		else
+			local font = theme.volume_font or theme.font
+			return '<span font="' .. font .. '">' .. math.floor(args.value * 100) .. '%</span>'
+		end
 	end, 15, "Master"
 )
 
-local volume_monitor_pid = awful.spawn.with_line_callback('stdbuf -oL alsactl monitor', {
-	stdout = function()
+function with_line_callback_stdin(cmd, callbacks)
+	local stdout_callback, stderr_callback, done_callback, exit_callback = callbacks.stdout, callbacks.stderr, callbacks.output_done, callbacks.exit
+	local have_stdout, have_stderr = stdout_callback ~= nil, stderr_callback ~= nil
+	local pid, _, stdin, stdout, stderr = capi.awesome.spawn(cmd, false, true, have_stdout, have_stderr, exit_callback)
+	if type(pid) == "string" then
+		-- Error
+		return pid
+	end
+
+	local done_before = false
+	local function step_done()
+		if have_stdout and have_stderr and not done_before then
+			done_before = true
+			return
+		end
+		if done_callback then
+			done_callback()
+		end
+	end
+	if have_stdout then
+		awful.spawn.read_lines(Gio.UnixInputStream.new(stdout, true), stdout_callback, step_done, true)
+	end
+	if have_stderr then
+		awful.spawn.read_lines(Gio.UnixInputStream.new(stderr, true), stderr_callback, step_done, true)
+	end
+	if callbacks.stdin then
+		callbacks.stdin(stdin, pid);
+	end
+	return pid
+end
+
+local volume_monitor_pid = with_line_callback_stdin('stdbuf -oL ' .. get_config_dir() .. 'pulsectrl', {
+	stdout = function(line)
+		local found, __, mute_flag, volume = string.find(line, "^volume sink\t[*](.)\t([0-9.]+)\t.*$")
+		if found ~= nil then
+			local volume_value = tonumber(volume);
+			local volume_mute;
+			if mute_flag == "M" then
+				volume_mute = true
+			else
+				volume_mute = false
+			end
+
+			vicious_extra.volume.set_volume(volume_value, volume_mute);
+		end
 		volume_changed = true
 		if (not volume_changed_timer.started) then
 			volume_changed_timer:start()
@@ -273,10 +332,17 @@ local volume_monitor_pid = awful.spawn.with_line_callback('stdbuf -oL alsactl mo
 	exit = function()
 		volume_monitor_pid = nil;
 	end,
+	stdin = function(stdin, pid)
+		if stdin ~= nil then
+			volume_monitor_ctl = io.open('/proc/' .. pid .. '/fd/0', 'w')
+		end
+	end,
 })
 awesome.connect_signal("exit", function()
 	if (volume_monitor_pid) then
 		awesome.kill(volume_monitor_pid, awesome.unix_signal.SIGTERM)
+		volume_monitor_ctl:close();
+		volume_monitor_ctl = nil;
 	end
 end)
 
@@ -1190,10 +1256,10 @@ globalkeys = gears.table.join(
 	--),
 
 	-- Volume controls
-	awful.key({ }, "XF86AudioRaiseVolume", function () volume("up", volumewidget) end),
-	awful.key({ }, "XF86AudioLowerVolume", function () volume("down", volumewidget) end),
-	awful.key({ }, "XF86AudioMute", function () volume("mute", volumewidget) end),
-	awful.key({ }, "XF86AudioMicMute", function () awful.util.spawn("amixer set Capture capture toggle", false ) end)
+	awful.key({ }, "XF86AudioRaiseVolume", function () volume("up", volume_widget) end),
+	awful.key({ }, "XF86AudioLowerVolume", function () volume("down", volume_widget) end),
+	awful.key({ }, "XF86AudioMute", function () volume("mute", volume_widget) end),
+	awful.key({ }, "XF86AudioMicMute", function () volume("micmute", volume_widget) end)
 	--awful.key({ modkey, "Shift"   }, "d",
 	--	function ()
 	--		awesome.set_cursor_size(48);
