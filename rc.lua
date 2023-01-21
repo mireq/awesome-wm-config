@@ -226,7 +226,7 @@ volume_changed_timer = gears.timer {
 }
 local volume_monitor_ctl = nil;
 local function async_silent(stdout, stderr, reason, exit_code) end
-local function volume(mode, widget)
+local function volume(mode)
 	if volume_monitor_ctl == nil then
 		return
 	end
@@ -246,9 +246,9 @@ local function volume(mode, widget)
 	end
 end
 local volumekeys = awful.util.table.join(
-	awful.button({ }, 4, function () volume("up", volume_widget) end),
-	awful.button({ }, 5, function () volume("down", volume_widget) end),
-	awful.button({ }, 1, function () volume("mute", volume_widget) end)
+	awful.button({ }, 4, function () volume("up") end),
+	awful.button({ }, 5, function () volume("down") end),
+	awful.button({ }, 1, function () volume("mute") end)
 )
 volume_widget:buttons(volumekeys)
 local volume_icon = wibox.widget.imagebox(beautiful.widget_vol_no)
@@ -333,6 +333,7 @@ local volume_monitor_pid = with_line_callback_stdin('stdbuf -oL ' .. get_config_
 		volume_monitor_pid = nil;
 	end,
 	stdin = function(stdin, pid)
+		print(stdin)
 		if stdin ~= nil then
 			volume_monitor_ctl = io.open('/proc/' .. pid .. '/fd/0', 'w')
 		end
@@ -1256,10 +1257,10 @@ globalkeys = gears.table.join(
 	--),
 
 	-- Volume controls
-	awful.key({ }, "XF86AudioRaiseVolume", function () volume("up", volume_widget) end),
-	awful.key({ }, "XF86AudioLowerVolume", function () volume("down", volume_widget) end),
-	awful.key({ }, "XF86AudioMute", function () volume("mute", volume_widget) end),
-	awful.key({ }, "XF86AudioMicMute", function () volume("micmute", volume_widget) end)
+	awful.key({ }, "XF86AudioRaiseVolume", function () volume("up") end),
+	awful.key({ }, "XF86AudioLowerVolume", function () volume("down") end),
+	awful.key({ }, "XF86AudioMute", function () volume("mute") end),
+	awful.key({ }, "XF86AudioMicMute", function () volume("micmute") end)
 	--awful.key({ modkey, "Shift"   }, "d",
 	--	function ()
 	--		awesome.set_cursor_size(48);
