@@ -1641,6 +1641,16 @@ client.connect_signal("request::titlebars", function(c)
 	end
 end)
 
+client.connect_signal("property::fullscreen", function(c)
+	if c.fullscreen then
+		gears.timer.delayed_call(function()
+			if c.valid then
+				c:geometry(c.screen.geometry)
+			end
+		end)
+	end
+end)
+
 --tag.connect_signal("request::screen",
 --	function(t)
 --		local fallback_tag = nil
