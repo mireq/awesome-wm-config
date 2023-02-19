@@ -9,9 +9,6 @@ from multiprocessing import Process, Queue
 from pathlib import Path
 
 
-process_group_queue = Queue(1)
-
-
 BASE_DIR = Path(__file__).parent
 DISPLAY = ':1'
 RESOLUTION = [800, 600]
@@ -30,7 +27,6 @@ def test_monitor_reconnects():
 
 def run_tests():
 	try:
-		process_group_queue.put(os.getpgrp())
 		# run virtual desktop
 		subprocess.Popen(['Xephyr', '-ac', '-noreset', '-screen', f'{RESOLUTION[0]}x{RESOLUTION[1]}', '-dpi', str(DPI), '-host-cursor', '+bs', '+iglx', DISPLAY])
 		os.environ['DISPLAY'] = DISPLAY
@@ -42,11 +38,11 @@ def run_tests():
 
 
 def main():
-	proc = Process(target=run_tests)
-	proc.start()
-	process_group_id = process_group_queue.get()
+	proc = subprocess.Popen([sys.executable, __file__, '--'] + sys.argv[1:], preexec_fn=os.setpgrp)
+	process_group_id = os.getpgid(proc.pid)
+
 	try:
-		proc.join(timeout=10)
+		proc.wait(timeout=10)
 	except KeyboardInterrupt:
 		pass
 
@@ -60,7 +56,6 @@ def main():
 			os.killpg(process_group_id, signal.SIGKILL)
 		except Exception:
 			pass
-		sys.exit()
 
 	atexit.register(at_exit)
 	signal.signal(signal.SIGTERM, at_exit)
@@ -69,4 +64,7 @@ def main():
 
 
 if __name__ == "__main__":
-	main()
+	if len(sys.argv) > 1 and sys.argv[1] == '--':
+		run_tests()
+	else:
+		main()
