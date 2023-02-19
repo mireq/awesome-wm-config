@@ -24,7 +24,8 @@ def test_monitor_reconnects():
 	subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'default'])
 	subprocess.Popen(['xrandr', '--setmonitor', 'RIGHT', f'{half_width}/0x{RESOLUTION[1]}/0+{half_width}+0', 'none'])
 	time.sleep(0.1)
-	subprocess.Popen(['awesome', '-c', BASE_DIR / 'rc_new.lua'])
+	proc = subprocess.Popen(['memusage', '--png=mem.png', 'awesome', '-c', BASE_DIR / 'rc_new.lua'])
+	proc.wait(timeout=10)
 
 
 def run_tests():
@@ -36,7 +37,6 @@ def run_tests():
 		# wait for start
 		time.sleep(0.5)
 		test_monitor_reconnects()
-		time.sleep(10)
 	except KeyboardInterrupt:
 		return
 
@@ -46,7 +46,7 @@ def main():
 	proc.start()
 	process_group_id = process_group_queue.get()
 	try:
-		proc.join()
+		proc.join(timeout=10)
 	except KeyboardInterrupt:
 		pass
 
