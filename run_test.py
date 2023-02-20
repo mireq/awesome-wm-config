@@ -22,6 +22,9 @@ def test_monitor_reconnects():
 	subprocess.Popen(['xrandr', '--setmonitor', 'RIGHT', f'{half_width}/0x{RESOLUTION[1]}/0+{half_width}+0', 'none'])
 	time.sleep(0.1)
 	proc = subprocess.Popen(['memusage', '--png=mem.png', 'awesome', '-c', BASE_DIR / 'rc_new.lua'])
+	time.sleep(1)
+	subprocess.Popen(['awesome-client', 'awesome.quit()'])
+
 	proc.wait(timeout=10)
 
 
@@ -38,12 +41,14 @@ def run_tests():
 
 
 def main():
-	proc = subprocess.Popen([sys.executable, __file__, '--'] + sys.argv[1:], preexec_fn=os.setpgrp)
+	proc = subprocess.Popen(['dbus-launch', sys.executable, __file__, '--'] + sys.argv[1:], preexec_fn=os.setpgrp)
 	process_group_id = os.getpgid(proc.pid)
 
 	try:
 		proc.wait(timeout=10)
 	except KeyboardInterrupt:
+		pass
+	except Exception:
 		pass
 
 	def at_exit(*args):
@@ -61,6 +66,7 @@ def main():
 	signal.signal(signal.SIGTERM, at_exit)
 	signal.signal(signal.SIGINT, at_exit)
 	signal.signal(signal.SIGHUP, at_exit)
+	at_exit()
 
 
 if __name__ == "__main__":

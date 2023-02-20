@@ -10,5 +10,3 @@ end)
 for s in screen do
 	print(s)
 end
-
-awesome.quit()
