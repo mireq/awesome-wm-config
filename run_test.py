@@ -5,7 +5,6 @@ import signal
 import subprocess
 import sys
 import time
-from multiprocessing import Process, Queue
 from pathlib import Path
 
 
@@ -18,8 +17,8 @@ DPI = 96
 def test_monitor_reconnects():
 	# setup dual monitor
 	half_width = RESOLUTION[0] // 2
-	subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'default'])
-	subprocess.Popen(['xrandr', '--setmonitor', 'RIGHT', f'{half_width}/0x{RESOLUTION[1]}/0+{half_width}+0', 'none'])
+	subprocess.Popen(['xrandr', '--setmonitor', 'RIGHT', f'{half_width}/0x{RESOLUTION[1]}/0+{half_width}+0', 'default'])
+	subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
 	time.sleep(0.1)
 	proc = subprocess.Popen(['memusage', '--png=mem.png', 'awesome', '-c', BASE_DIR / 'rc_new.lua'])
 	time.sleep(1)
