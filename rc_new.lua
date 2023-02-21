@@ -1,3 +1,7 @@
+pcall(require, "luarocks.loader")
+
+local awful = require("awful")
+
 
 screen.connect_signal("added", function(s)
 	print(s)
