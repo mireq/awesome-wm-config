@@ -1634,6 +1634,7 @@ client.connect_signal("request::titlebars", function(c)
 		)
 	)
 
+	awful.titlebar.enable_tooltip = false
 	awful.titlebar(c, {position = titlebar_position, size = dpi(18, c.screen)}):set_widget(layout)
 
 	if c.class == 'URxvt' or c.class == 'Firefox' or c.class == 'firefox' or c.class == 'Google-chrome' or c.class == "Wine" or c.class == "kruler" or c.class == "Alacritty" then
