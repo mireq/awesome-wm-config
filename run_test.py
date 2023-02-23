@@ -16,27 +16,30 @@ DPI = 96
 
 def test_monitor_reconnects():
 	# setup dual monitor
-	half_width = RESOLUTION[0] // 2
-	subprocess.Popen(['xrandr', '--setmonitor', 'RIGHT', f'{half_width}/0x{RESOLUTION[1]}/0+{half_width}+0', 'default'])
-	subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
+	#half_width = RESOLUTION[0] // 2
+	#subprocess.Popen(['xrandr', '--setmonitor', 'RIGHT', f'{half_width}/0x{RESOLUTION[1]}/0+{half_width}+0', 'default'])
+	#subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
 	time.sleep(0.1)
 
 
-	#proc = subprocess.Popen(['memusage', '--png=mem.png', 'awesome', '-c', BASE_DIR / 'rc_new.lua'])
-	proc = subprocess.Popen(['awesome', '-c', BASE_DIR / 'rc_new.lua'])
+	proc = subprocess.Popen(['memusage', '--png=mem.png', 'awesome', '-c', BASE_DIR / 'rc_new.lua'])
+	#proc = subprocess.Popen(['awesome', '-c', BASE_DIR / 'rc_new.lua'])
 
 	time.sleep(0.1)
 
-	for __ in range(5):
-		time.sleep(0.0003)
-		subprocess.Popen(['xrandr', '--delmonitor', 'LEFT'])
-		time.sleep(0.0003)
-		subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
+	for __ in range(100):
+		subprocess.Popen(['awesome-client', 's = screen.fake_add(100, 100, 100, 100); s:fake_remove()'])
+		time.sleep(0.1)
+	#for __ in range(1000):
+	#	time.sleep(0.0003)
+	#	subprocess.Popen(['xrandr', '--delmonitor', 'LEFT'])
+	#	time.sleep(0.0003)
+	#	subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
 	time.sleep(0.5)
 
 	subprocess.Popen(['awesome-client', 'awesome.quit()'])
 
-	proc.wait(timeout=10)
+	proc.wait(timeout=60)
 
 
 def run_tests():
