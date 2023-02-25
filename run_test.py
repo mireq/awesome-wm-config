@@ -7,6 +7,7 @@ import sys
 import time
 from multiprocessing import Queue
 from pathlib import Path
+import struct
 
 
 BASE_DIR = Path(__file__).parent
@@ -15,25 +16,38 @@ RESOLUTION = [800, 600]
 DPI = 96
 
 
-process_group_queue = Queue(maxsize=1)
+pid_queue = Queue(maxsize=1)
 
 
 def run_dbus_session():
-	print("session", os.getpgrp())
 	os.setpgrp()
-	print("session", os.getpgrp())
-	process_group_queue.put(os.getpgrp())
-	proc = subprocess.Popen(['dbus-launch', '/bin/cat'])
-	proc.wait()
-	time.sleep(1)
+	pid_queue.put(os.getpgrp())
+	proc = subprocess.Popen(['dbus-launch', '--binary-syntax'], stdout=subprocess.PIPE)
+	data = proc.stdout.read()
+	bus_address = data[:data.find(b'\0')]
+	data = data[data.find(b'\0')+1:]
+	pid = struct.unpack('i', data[:4])[0]
+	pid_queue.put(pid)
+	os.putenv('DBUS_SESSION_BUS_ADDRESS', bus_address)
+	subprocess.Popen(['awesome-client', 's = screen.fake_add(100, 100, 100, 100); s:fake_remove()'])
+	time.sleep(0.5)
 
 
-def terminate(pid, process_group_id):
-	print(pid, process_group_id)
+def terminate(pid, process_group_id, dbus_pid):
+	if dbus_pid is not None:
+		try:
+			os.kill(dbus_pid, signal.SIGINT)
+			os.waitpid(dbus_pid, 0)
+		except Exception:
+			pass
+		try:
+			os.kill(dbus_pid, signal.SIGKILL)
+		except Exception:
+			pass
 	if process_group_id is None:
 		try:
 			os.kill(pid, signal.SIGINT)
-			os.waitid(pid)
+			os.waitpid(pid, 0)
 		except Exception:
 			pass
 		try:
@@ -43,7 +57,7 @@ def terminate(pid, process_group_id):
 	else:
 		try:
 			os.killpg(process_group_id, signal.SIGINT)
-			os.waitid(pid)
+			os.waitpid(pid, 0)
 		except Exception:
 			pass
 		except KeyboardInterrupt:
@@ -56,12 +70,14 @@ def terminate(pid, process_group_id):
 
 def monitor_and_terminate_process(pid):
 	group_id = None
+	dbus_pid = None
 
 	def at_exit(*args):
-		terminate(pid, group_id)
+		terminate(pid, group_id, dbus_pid)
 
 	try:
-		group_id = process_group_queue.get()
+		group_id = pid_queue.get()
+		dbus_pid = pid_queue.get()
 		atexit.register(at_exit)
 		signal.signal(signal.SIGTERM, at_exit)
 		signal.signal(signal.SIGINT, at_exit)
