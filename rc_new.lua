@@ -78,7 +78,7 @@ awful.run_test = function()
 	end
 	gears.timer {
 		timeout   = 0.05,
-		call_now  = true,
+		call_now  = false,
 		autostart = true,
 		callback  = function()
 			for _, w in ipairs(widgets) do
