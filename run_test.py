@@ -30,7 +30,7 @@ def run_dbus_session():
 	pid_queue.put(pid)
 	os.putenv('DBUS_SESSION_BUS_ADDRESS', bus_address)
 	subprocess.Popen(['awesome-client', 's = screen.fake_add(100, 100, 100, 100); s:fake_remove()'])
-	time.sleep(0.5)
+	time.sleep(1)
 
 
 def terminate(pid, process_group_id, dbus_pid):
@@ -44,17 +44,7 @@ def terminate(pid, process_group_id, dbus_pid):
 			os.kill(dbus_pid, signal.SIGKILL)
 		except Exception:
 			pass
-	if process_group_id is None:
-		try:
-			os.kill(pid, signal.SIGINT)
-			os.waitpid(pid, 0)
-		except Exception:
-			pass
-		try:
-			os.kill(pid, signal.SIGKILL)
-		except Exception:
-			pass
-	else:
+	if process_group_id is not None:
 		try:
 			os.killpg(process_group_id, signal.SIGINT)
 			os.waitpid(pid, 0)
@@ -66,6 +56,16 @@ def terminate(pid, process_group_id, dbus_pid):
 			os.killpg(process_group_id, signal.SIGKILL)
 		except Exception:
 			pass
+	elif pid is not None:
+		try:
+			os.kill(pid, signal.SIGINT)
+			os.waitpid(pid, 0)
+		except Exception:
+			pass
+		try:
+			os.kill(pid, signal.SIGKILL)
+		except Exception:
+			pass
 
 
 def monitor_and_terminate_process(pid):
@@ -73,7 +73,11 @@ def monitor_and_terminate_process(pid):
 	dbus_pid = None
 
 	def at_exit(*args):
+		nonlocal pid, group_id, dbus_pid
 		terminate(pid, group_id, dbus_pid)
+		pid = None
+		group_id = None
+		dbus_pid = None
 
 	try:
 		group_id = pid_queue.get()
