@@ -65,24 +65,26 @@ end)
 
 awful.run_test = function()
 	widgets = {}
-	for i=0, 100 do
-		w = wibox({
-			x = 0,
-			y = 0,
-			width = 100,
-			height = 100,
-			bg = '#ff0000',
-		})
-		w.visible = true
-		table.insert(widgets, w)
+	for s in screen do
+		for i=0, 20 do
+			w = awful.wibar({
+				position = "top",
+				screen = s,
+				height = dpi(18, s),
+				bg = '#ff0000',
+				visible = false
+			})
+			table.insert(widgets, w)
+		end
 	end
 	gears.timer {
 		timeout   = 0.05,
 		call_now  = false,
 		autostart = true,
+		single_shot = true,
 		callback  = function()
 			for _, w in ipairs(widgets) do
-				w.visible = false
+				w:remove()
 			end
 			widgets = {}
 			collectgarbage("collect")
