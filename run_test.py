@@ -19,6 +19,50 @@ DPI = 96
 pid_queue = Queue(maxsize=1)
 
 
+def test_monitor_reconnects():
+	# setup dual monitor
+	#half_width = RESOLUTION[0] // 2
+	#subprocess.Popen(['xrandr', '--setmonitor', 'RIGHT', f'{half_width}/0x{RESOLUTION[1]}/0+{half_width}+0', 'default'])
+	#subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
+	time.sleep(0.1)
+
+
+	proc = subprocess.Popen(['memusage' ,'-t', '--png=mem.png', 'awesome', '-c', BASE_DIR / 'rc_new.lua'])
+	#proc = subprocess.Popen(['awesome', '-c', BASE_DIR / 'rc_new.lua'])
+	time.sleep(0.3)
+
+	for i in range(50):
+		subprocess.Popen(['awesome-client', 'require("awful").run_test()'])
+		time.sleep(0.1)
+
+	time.sleep(0.1)
+
+	#for __ in range(100):
+	#	subprocess.Popen(['awesome-client', 's = screen.fake_add(100, 100, 100, 100); s:fake_remove()'])
+	#	time.sleep(0.1)
+	##for __ in range(1000):
+	##	time.sleep(0.0003)
+	##	subprocess.Popen(['xrandr', '--delmonitor', 'LEFT'])
+	##	time.sleep(0.0003)
+	##	subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
+	#time.sleep(0.5)
+
+	subprocess.Popen(['awesome-client', 'awesome.quit()'])
+
+	proc.wait(timeout=60)
+
+
+def run_tests():
+	try:
+		subprocess.Popen(['Xephyr', '-ac', '-noreset', '-screen', f'{RESOLUTION[0]}x{RESOLUTION[1]}', '-dpi', str(DPI), '-host-cursor', '+bs', '+iglx', DISPLAY])
+		os.environ['DISPLAY'] = DISPLAY
+		test_monitor_reconnects()
+	except KeyboardInterrupt:
+		return
+
+	#subprocess.Popen(['awesome-client', 's = screen.fake_add(100, 100, 100, 100); s:fake_remove()'])
+
+
 def run_dbus_session():
 	os.setpgrp()
 	pid_queue.put(os.getpgrp())
@@ -29,8 +73,7 @@ def run_dbus_session():
 	pid = struct.unpack('i', data[:4])[0]
 	pid_queue.put(pid)
 	os.putenv('DBUS_SESSION_BUS_ADDRESS', bus_address)
-	subprocess.Popen(['awesome-client', 's = screen.fake_add(100, 100, 100, 100); s:fake_remove()'])
-	time.sleep(1)
+	run_tests()
 
 
 def terminate(pid, process_group_id, dbus_pid):
@@ -109,32 +152,6 @@ if __name__ == "__main__":
 	main()
 
 
-#def test_monitor_reconnects():
-#	# setup dual monitor
-#	#half_width = RESOLUTION[0] // 2
-#	#subprocess.Popen(['xrandr', '--setmonitor', 'RIGHT', f'{half_width}/0x{RESOLUTION[1]}/0+{half_width}+0', 'default'])
-#	#subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
-#	time.sleep(0.1)
-#
-#
-#	proc = subprocess.Popen(['memusage', '--png=mem.png', 'awesome', '-c', BASE_DIR / 'rc_new.lua'])
-#	#proc = subprocess.Popen(['awesome', '-c', BASE_DIR / 'rc_new.lua'])
-#
-#	time.sleep(0.1)
-#
-#	for __ in range(100):
-#		subprocess.Popen(['awesome-client', 's = screen.fake_add(100, 100, 100, 100); s:fake_remove()'])
-#		time.sleep(0.1)
-#	#for __ in range(1000):
-#	#	time.sleep(0.0003)
-#	#	subprocess.Popen(['xrandr', '--delmonitor', 'LEFT'])
-#	#	time.sleep(0.0003)
-#	#	subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
-#	time.sleep(0.5)
-#
-#	subprocess.Popen(['awesome-client', 'awesome.quit()'])
-#
-#	proc.wait(timeout=60)
 #
 #
 #def run_tests():
