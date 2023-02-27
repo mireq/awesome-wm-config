@@ -63,33 +63,40 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	--end
 end)
 
+local a = function()
+end
+
 awful.run_test = function()
 	widgets = {}
 	for s in screen do
-		for i=0, 20 do
-			w = awful.wibar({
-				position = "top",
-				screen = s,
-				height = dpi(18, s),
-				bg = '#ff0000',
-				visible = false
-			})
-			table.insert(widgets, w)
+		--for i=0, 1 do
+		--	w = awful.wibar({
+		--		position = "top",
+		--		screen = s,
+		--		height = dpi(1, s),
+		--		bg = '#ff0000',
+		--		visible = false
+		--	})
+		--	table.insert(widgets, w)
+		--end
+		for i=0, 100 do
+			s:connect_signal("property::geometry" , a)
+			s:disconnect_signal("property::geometry" , a)
 		end
 	end
-	gears.timer {
-		timeout   = 0.05,
-		call_now  = false,
-		autostart = true,
-		single_shot = true,
-		callback  = function()
-			for _, w in ipairs(widgets) do
-				w:remove()
-			end
-			widgets = {}
-			collectgarbage("collect")
-		end
-	}
+	--for _, w in ipairs(widgets) do
+	--	w:remove()
+	--end
+	widgets = {}
+	collectgarbage("collect")
+	--gears.timer {
+	--	timeout   = 0.05,
+	--	call_now  = false,
+	--	autostart = true,
+	--	single_shot = true,
+	--	callback  = function()
+	--	end
+	--}
 end
 
 --s = screen.fake_add(100, 100, 100, 100); s:fake_remove()
