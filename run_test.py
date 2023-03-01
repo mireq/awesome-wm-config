@@ -26,9 +26,14 @@ def test_monitor_reconnects():
 	#subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
 	time.sleep(0.1)
 
+	search_dir = []
+	awesome_binary = 'awesome'
+	if 'AWESOME_BINARY' in os.environ:
+		awesome_binary = os.environ['AWESOME_BINARY']
+		search_dir = ['-s', Path(awesome_binary).parent / 'lib']
 
-	proc = subprocess.Popen(['memusage' ,'-t', '--png=mem.png', 'awesome', '-c', BASE_DIR / 'rc_new.lua'])
-	#proc = subprocess.Popen(['awesome', '-c', BASE_DIR / 'rc_new.lua'])
+	proc = subprocess.Popen(['memusage' ,'-t', '--png=mem.png', awesome_binary, '-c', BASE_DIR / 'rc_new.lua'] + search_dir)
+	#proc = subprocess.Popen([awesome_binary, '-c', BASE_DIR / 'rc_new.lua'] + search_dir)
 	time.sleep(0.3)
 
 	for __ in range(300):
