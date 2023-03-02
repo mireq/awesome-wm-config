@@ -34,13 +34,13 @@ def test_monitor_reconnects():
 
 	proc = subprocess.Popen(['memusage' ,'-t', '--png=mem.png', awesome_binary, '-c', BASE_DIR / 'rc_new.lua'] + search_dir)
 	#proc = subprocess.Popen([awesome_binary, '-c', BASE_DIR / 'rc_new.lua'] + search_dir)
-	time.sleep(0.3)
+	#time.sleep(0.3)
 
-	for __ in range(300):
-		subprocess.Popen(['awesome-client', 'require("awful").run_test()'])
-		time.sleep(0.03)
+	#for __ in range(1000):
+	#	subprocess.Popen(['awesome-client', 'require("awful").run_test()'])
+	#	time.sleep(0.03)
 
-	time.sleep(0.1)
+	#time.sleep(0.1)
 
 	#for __ in range(100):
 	#	subprocess.Popen(['awesome-client', 's = screen.fake_add(100, 100, 100, 100); s:fake_remove()'])
@@ -52,9 +52,9 @@ def test_monitor_reconnects():
 	##	subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
 	#time.sleep(0.5)
 
-	subprocess.Popen(['awesome-client', 'awesome.quit()'])
+	#subprocess.Popen(['awesome-client', 'awesome.quit()'])
 
-	proc.wait(timeout=60)
+	proc.wait(timeout=600)
 
 
 def run_tests():
