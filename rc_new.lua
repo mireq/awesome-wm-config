@@ -12,6 +12,13 @@ local capi = {
 	screen = screen
 }
 
+home = os.getenv("HOME")
+confdir = home .. "/.config/awesome"
+themes = confdir .. "/themes"
+active_theme = themes .. "/simple-dark"
+
+beautiful.init(active_theme .. "/theme_new.lua")
+
 
 --screen.connect_signal("added", function(s)
 --	print("added", s)
@@ -23,41 +30,12 @@ local capi = {
 --
 
 screen.connect_signal("request::desktop_decoration", function(s)
-	--a = wibox.widget{
-	--	markup = 'This <i>is</i> a <b>textbox</b>!!!',
-	--	align  = 'center',
-	--	valign = 'center',
-	--	widget = wibox.widget.textbox
-	--}
 	s.tool_bar = awful.wibar({
 		position = "top",
 		screen = s,
 		height = dpi(18, s),
 		bg = '#ff0000'
 	})
-	--s.tool_bar:remove()
-	--s.tool_bar = nil
-	--for i=0, 10000 do
-	--	w = wibox({
-	--		x = 0,
-	--		y = 0,
-	--		width = 100,
-	--		height = 100,
-	--		bg = '#ff0000'
-	--	})
-	--	--w.visible = false
-	--	--local w = awful.wibar({
-	--	--	position = "top",
-	--	--	screen = s,
-	--	--	height = dpi(18, s),
-	--	--	bg = '#ff0000'
-	--	--})
-	--	--w.visible = false
-	--	--w:remove()
-	--	if i % 100 == 0 then
-	--		collectgarbage("collect")
-	--	end
-	--end
 end)
 
 awful.run_test = function()
