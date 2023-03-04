@@ -38,7 +38,7 @@ def test_monitor_reconnects():
 
 	for __ in range(10):
 		subprocess.Popen(['awesome-client', 'require("awful").run_test()'])
-		time.sleep(0.15)
+		time.sleep(0.35)
 
 	time.sleep(0.1)
 

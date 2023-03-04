@@ -1013,7 +1013,7 @@ local function setup_screen(s)
 		position = "top",
 		screen = s,
 		height = dpi(18, s),
-		bg = beautiful.wibar_bg or beaaauiful.bg_normal
+		bg = beautiful.wibar_bg or beautiful.bg_normal
 	})
 	s.tool_bar:setup {
 		layout = wibox.layout.align.horizontal,
