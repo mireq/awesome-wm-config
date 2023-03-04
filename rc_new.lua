@@ -41,23 +41,28 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		screen = s,
 		height = dpi(18, s),
 		bgimage = function(context, cr, width, height)
-			if beautiful.wibar_bg_bottom == nil then
-				cr:set_source(gears.color(beautiful.wibar_bg or beautiful.bg_normal))
-			else
-				cr:set_source(gears.color('linear:0,0:0,'..height..':0,'..beautiful.wibar_bg..':1,'..beautiful.wibar_bg_bottom))
-			end
-			cr:rectangle(0, 0, width, height)
-			cr:fill()
+			local bg_start = 0
+			local bg_height = height
 			if beautiful.wibar_border_bottom ~= nil then
 				cr:set_source(gears.color(beautiful.wibar_border_bottom))
 				cr:rectangle(0, height - dpi(1, s), width, dpi(1, s))
 				cr:fill()
+				bg_height = bg_height - dpi(1, s)
 			end
 			if beautiful.wibar_border_top ~= nil then
 				cr:set_source(gears.color(beautiful.wibar_border_top))
 				cr:rectangle(0, 0, width, dpi(1, s))
 				cr:fill()
+				bg_start = bg_start + dpi(1, s)
+				bg_height = bg_height - dpi(1, s)
 			end
+			if beautiful.wibar_bg_bottom == nil then
+				cr:set_source(gears.color(beautiful.wibar_bg or beautiful.bg_normal))
+			else
+				cr:set_source(gears.color('linear:0,0:0,'..height..':0,'..beautiful.wibar_bg..':1,'..beautiful.wibar_bg_bottom))
+			end
+			cr:rectangle(0, bg_start, width, bg_height)
+			cr:fill()
 		end
 	})
 end)
