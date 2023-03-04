@@ -21,9 +21,6 @@ local capi = {
 --	print("list signal")
 --end)
 --
---for s in screen do
---	print("screen", s)
---end
 
 screen.connect_signal("request::desktop_decoration", function(s)
 	--a = wibox.widget{
@@ -32,12 +29,12 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	--	valign = 'center',
 	--	widget = wibox.widget.textbox
 	--}
-	--s.tool_bar = awful.wibar({
-	--	position = "top",
-	--	screen = s,
-	--	height = dpi(18, s),
-	--	bg = '#ff0000'
-	--})
+	s.tool_bar = awful.wibar({
+		position = "top",
+		screen = s,
+		height = dpi(18, s),
+		bg = '#ff0000'
+	})
 	--s.tool_bar:remove()
 	--s.tool_bar = nil
 	--for i=0, 10000 do
@@ -64,32 +61,42 @@ screen.connect_signal("request::desktop_decoration", function(s)
 end)
 
 awful.run_test = function()
-	widgets = {}
-	for s in screen do
-		for i=0, 10 do
-			w = awful.wibar({
-				position = "top",
-				screen = s,
-				height = dpi(1, s),
-				bg = '#ff0000',
-				visible = true
-			})
-			table.insert(widgets, w)
-		end
-	end
+	s = screen.fake_add(20, 20, 500, 400)
 	gears.timer {
 		timeout   = 0.05,
 		call_now  = false,
 		autostart = true,
 		single_shot = true,
 		callback  = function()
-			for _, w in ipairs(widgets) do
-				w:remove()
-			end
-			widgets = {}
+			s:fake_remove()
 			collectgarbage("collect")
 		end
 	}
+	--widgets = {}
+	--for s in screen do
+	--	for i=0, 10 do
+	--		w = awful.wibar({
+	--			position = "top",
+	--			screen = s,
+	--			height = dpi(1, s),
+	--			bg = '#ff0000',
+	--			visible = true
+	--		})
+	--		table.insert(widgets, w)
+	--	end
+	--end
+	--gears.timer {
+	--	timeout   = 0.05,
+	--	call_now  = false,
+	--	autostart = true,
+	--	single_shot = true,
+	--	callback  = function()
+	--		for _, w in ipairs(widgets) do
+	--			w:remove()
+	--		end
+	--		widgets = {}
+	--		collectgarbage("collect")
+	--	end
+	--}
 end
 
---s = screen.fake_add(100, 100, 100, 100); s:fake_remove()

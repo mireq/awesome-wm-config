@@ -36,7 +36,7 @@ def test_monitor_reconnects():
 	#proc = subprocess.Popen([awesome_binary, '-c', BASE_DIR / 'rc_new.lua'] + search_dir)
 	time.sleep(0.3)
 
-	for __ in range(100):
+	for __ in range(10):
 		subprocess.Popen(['awesome-client', 'require("awful").run_test()'])
 		time.sleep(0.15)
 
