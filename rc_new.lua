@@ -162,6 +162,8 @@ local function set_screen_dpi(s, new_dpi)
 		w.right = taglist_margin
 	end
 	s.taglist:_do_taglist_update_now()
+
+	s.launcher:set_image(render_svg(theme.launch, scaling))
 end
 
 screen.connect_signal("request::desktop_decoration", function(s)
@@ -198,9 +200,11 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		end
 	})
 
-	-- launcher as image (because launcher widget don't support svg scaling)
-	s.launcher = wibox.widget.imagebox(beautiful.launch)
-	s.launcher:add_button(awful.button({}, 1, nil, function () main_menu:toggle() end))
+	s.launcher = awful.widget.launcher({
+		image = beautiful.launch,
+		menu = main_menu,
+	})
+	s.launcher:set_image(render_svg(theme.launch, scaling))
 
 	s.taglist_elements = {}
 	s.taglist_args = {
