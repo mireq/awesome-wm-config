@@ -622,15 +622,6 @@ function set_screen_dpi(s)
 	s.cpu_widget.forced_width = cpu_width
 	s.memory_widget.forced_width = memory_width
 	s.temp_widget.forced_width = temp_width
-
-	s.taglist_args.widget_template.forced_width = dpi(6, s)
-	s.taglist_args.widget_template.forced_height = dpi(6, s)
-
-	for _, c in ipairs(s.taglist:get_children()) do
-		c.widget.top = s.taglist_args.widget_template.forced_height
-		c:set_forced_width(s.taglist_args.widget_template.forced_height)
-		c:set_forced_height(s.taglist_args.widget_template.forced_width)
-	end
 end
 
 
@@ -723,11 +714,10 @@ local function setup_screen(s)
 	s.taglist_args = {
 		screen = s,
 		filter = awful.widget.taglist.filter.all,
-		buttons = taglist_defaults.buttons,
-		buttons = taglist_defaults.buttons,
+		buttons = gears.table.join(taglist_buttons),
 		style = {
-			squares_sel = render_svg(theme.taglist_squares_sel, scaling),
-			squares_unsel = render_svg(theme.taglist_squares_unsel, scaling),
+			squares_sel = render_svg(beautiful.taglist_squares_sel, scaling),
+			squares_unsel = render_svg(beautiful.taglist_squares_unsel, scaling),
 		},
 		layout = {
 			spacing = 0,
@@ -736,23 +726,53 @@ local function setup_screen(s)
 			forced_num_rows = 3,
 		},
 		widget_template = {
-			id = "background_role",
-			widget = wibox.container.background,
+			id = "container_role",
+			widget = wibox.container.margin,
 			forced_width = dpi(6, s),
 			forced_height = dpi(6, s),
+			bottom = dpi(1, s),
+			right = dpi(1, s),
 			{
 				{
-					id = "text_role",
-					widget = wibox.widget.textbox,
+					id = "background_role",
+					widget = wibox.container.background,
+				},
+				{
+					top = 1000, -- not visible
+					widget = wibox.container.margin,
+					{
+						id = "text_role",
+						widget = wibox.widget.textbox,
+					}
 				},
 				{
 					id = "icon_role",
 					widget = wibox.widget.imagebox,
+					forced_width = dpi(6, s),
+					forced_height = dpi(6, s),
+					resize = true,
 				},
-				top = dpi(6, s),
 				widget = wibox.container.margin,
-			}
-		}
+			},
+			update_callback = function(self, t, index, objects)
+				local s = t.screen
+				local widgets = self:get_children_by_id('container_role')
+				local size = dpi(6, s)
+				if size ~= widgets[1].forced_width then
+					local scaling = float_dpi(1, s)
+					s.taglist_args.style = {
+						squares_sel = render_svg(beautiful.taglist_squares_sel, scaling),
+						squares_unsel = render_svg(beautiful.taglist_squares_unsel, scaling),
+					}
+					for _, w in ipairs(widgets) do
+						w.forced_width = size
+						w.forced_height = size
+						w.bottom = dpi(1, s)
+						w.right = dpi(1, s)
+					end
+				end
+			end
+		},
 	}
 	s.taglist = awful.widget.taglist(s.taglist_args)
 
@@ -1287,6 +1307,7 @@ beautiful.change_dpi = function(force_dpi)
 	for s in screen do
 		local scaling = float_dpi(1, s)
 		s.dpi = force_dpi
+		s.taglist:_do_taglist_update_now()
 		s.tool_bar.height = dpi(18, s);
 		s.tool_bar.drawin.cursor = "left_ptr";
 		set_screen_dpi(s)
