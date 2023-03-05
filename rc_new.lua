@@ -181,6 +181,7 @@ local function set_screen_dpi(s, new_dpi)
 
 	s.main_menu:hide()
 	s.main_menu = awful.menu(get_main_menu(s))
+	s.main_menu.wibox:set_bg('#ff0000')
 
 	s.launcher:set_image(render_svg(theme.launch, scaling))
 end
@@ -194,28 +195,57 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		screen = s,
 		height = dpi(18, s),
 		bgimage = function(context, cr, width, height)
-			local bg_start = 0
-			local bg_height = height
-			if beautiful.wibar_border_bottom ~= nil then
-				cr:set_source(gears.color(beautiful.wibar_border_bottom))
-				cr:rectangle(0, height - dpi(1, s), width, dpi(1, s))
-				cr:fill()
-				bg_height = bg_height - dpi(1, s)
-			end
+			local gradient_stops = ''
+			local gradient_pos = 0.0
 			if beautiful.wibar_border_top ~= nil then
-				cr:set_source(gears.color(beautiful.wibar_border_top))
-				cr:rectangle(0, 0, width, dpi(1, s))
-				cr:fill()
-				bg_start = bg_start + dpi(1, s)
-				bg_height = bg_height - dpi(1, s)
+				gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_border_top
+				gradient_pos = gradient_pos + float_dpi(1.5, s) / height
 			end
-			if beautiful.wibar_bg_bottom == nil then
-				cr:set_source(gears.color(beautiful.wibar_bg or beautiful.bg_normal))
+			if beautiful.wibar_border_top ~= nil or beautiful.wibar_border_bottom ~= nil or beautiful.wibar_bg_bottom ~= nil then
+				gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_bg
+				if beautiful.wibar_bg_bottom ~= nil then
+					gradient_pos = 1 - float_dpi(1.5, s) / height
+					gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_bg_bottom
+				end
+				gradient_pos = 1
+				if beautiful.wibar_border_bottom ~= nil then
+					gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_border_bottom
+				end
+			end
+
+			if gradient_stops ~= '' then
+				cr:set_source(gears.color('linear:0,0:0,'..height..gradient_stops))
 			else
-				cr:set_source(gears.color('linear:0,0:0,'..height..':0,'..beautiful.wibar_bg..':1,'..beautiful.wibar_bg_bottom))
+				cr:set_source(gears.color(beautiful.wibar_bg or beautiful.bg_normal))
 			end
-			cr:rectangle(0, bg_start, width, bg_height)
+			cr:rectangle(0, 0, width, height)
 			cr:fill()
+
+			--print(gradient_stops)
+
+			--local bg_start = 0
+			--local bg_height = height
+			--if beautiful.wibar_border_bottom ~= nil then
+			--	cr:set_source(gears.color(beautiful.wibar_border_bottom))
+			--	cr:rectangle(0, height - dpi(1, s), width, dpi(1, s))
+			--	cr:fill()
+			--	bg_height = bg_height - dpi(1, s)
+			--end
+			--if beautiful.wibar_border_top ~= nil then
+			--	cr:set_source(gears.color(beautiful.wibar_border_top))
+			--	cr:rectangle(0, 0, width, dpi(1, s))
+			--	cr:fill()
+			--	bg_start = bg_start + dpi(1, s)
+			--	bg_height = bg_height - dpi(1, s)
+			--end
+			--if beautiful.wibar_bg_bottom == nil then
+			--	cr:set_source(gears.color(beautiful.wibar_bg or beautiful.bg_normal))
+			--else
+			--	cr:set_source(gears.color('linear:0,0:0,'..height..':0,'..beautiful.wibar_bg..':1,'..beautiful.wibar_bg_bottom))
+			--end
+			--cr:rectangle(0, bg_start, width, bg_height)
+			--print(tostring(0.5))
+			--cr:fill()
 		end
 	})
 
@@ -296,7 +326,7 @@ end)
 awful.run_test = function()
 	--s = screen.fake_add(20, 20, 500, 400)
 	for s in screen do
-		set_screen_dpi(s, 192)
+		set_screen_dpi(s, 384)
 	end
 	gears.timer {
 		timeout   = 0.05,
@@ -306,7 +336,7 @@ awful.run_test = function()
 		callback  = function()
 			--set_screen_dpi(s, 384)
 			for s in screen do
-				set_screen_dpi(s, 384)
+				set_screen_dpi(s, 192)
 			end
 			--s:fake_remove()
 			collectgarbage("collect")
