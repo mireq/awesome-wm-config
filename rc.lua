@@ -167,7 +167,8 @@ tag.connect_signal("request::default_layouts", function()
 end)
 
 
-local taglist_buttons = gears.table.join(
+local taglist_common = {}
+taglist_common.buttons = gears.table.join(
 	awful.button({ }, 1, function(t) t:view_only() end),
 	awful.button({ modkey }, 1, function(t) if client.focus then client.focus:move_to_tag(t) end end),
 	awful.button({ }, 3, awful.tag.viewtoggle),
@@ -175,7 +176,6 @@ local taglist_buttons = gears.table.join(
 	awful.button({ }, 4, function(t) awful.tag.viewprev(t.screen) end),
 	awful.button({ }, 5, function(t) awful.tag.viewnext(t.screen) end)
 )
-
 local tasklist_defaults = {}
 tasklist_defaults.buttons = gears.table.join(
 	awful.button({ }, 1, function (c)
@@ -333,7 +333,6 @@ local volume_monitor_pid = with_line_callback_stdin('stdbuf -oL ' .. get_config_
 		volume_monitor_pid = nil;
 	end,
 	stdin = function(stdin, pid)
-		print(stdin)
 		if stdin ~= nil then
 			volume_monitor_ctl = io.open('/proc/' .. pid .. '/fd/0', 'w')
 		end
@@ -590,6 +589,8 @@ local mymainmenu = nil
 
 function set_screen_dpi(s)
 	local scaling = float_dpi(1, s)
+	local taglist_size = dpi(6, s)
+	local taglist_margin = dpi(1, s)
 	local menu = s.main_menu;
 	menu.theme.width = theme.menu_width * scaling;
 	menu.theme.height = theme.menu_height * scaling;
@@ -606,6 +607,17 @@ function set_screen_dpi(s)
 			item.widget:get_first():get_children()[1]:set_left(item.height + dpi(2, s))
 		end
 	end
+	s.taglist_args.style = {
+		squares_sel = render_svg(beautiful.taglist_squares_sel, scaling),
+		squares_unsel = render_svg(beautiful.taglist_squares_unsel, scaling),
+	}
+	for _, w in ipairs(s.taglist_elements) do
+		w.forced_width = taglist_size
+		w.forced_height = taglist_size
+		w.bottom = taglist_margin
+		w.right = taglist_margin
+	end
+	s.taglist:_do_taglist_update_now()
 
 	s.launcher:set_image(render_svg(theme.launch, scaling))
 
@@ -711,10 +723,11 @@ local function setup_screen(s)
 	})
 	s.launcher = launcher
 
+	s.taglist_elements = {}
 	s.taglist_args = {
 		screen = s,
 		filter = awful.widget.taglist.filter.all,
-		buttons = gears.table.join(taglist_buttons),
+		buttons = gears.table.join(taglist_common.buttons),
 		style = {
 			squares_sel = render_svg(beautiful.taglist_squares_sel, scaling),
 			squares_unsel = render_svg(beautiful.taglist_squares_unsel, scaling),
@@ -754,26 +767,13 @@ local function setup_screen(s)
 				},
 				widget = wibox.container.margin,
 			},
-			update_callback = function(self, t, index, objects)
+			create_callback = function(self, t, index, objects)
 				local s = t.screen
-				local widgets = self:get_children_by_id('container_role')
-				local size = dpi(6, s)
-				if size ~= widgets[1].forced_width then
-					local scaling = float_dpi(1, s)
-					s.taglist_args.style = {
-						squares_sel = render_svg(beautiful.taglist_squares_sel, scaling),
-						squares_unsel = render_svg(beautiful.taglist_squares_unsel, scaling),
-					}
-					for _, w in ipairs(widgets) do
-						w.forced_width = size
-						w.forced_height = size
-						w.bottom = dpi(1, s)
-						w.right = dpi(1, s)
-					end
-				end
-			end
+				table.insert(s.taglist_elements, self)
+			end,
 		},
 	}
+
 	s.taglist = awful.widget.taglist(s.taglist_args)
 
 	s.tasklist = awful.widget.tasklist {

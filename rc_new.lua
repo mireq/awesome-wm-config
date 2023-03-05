@@ -116,7 +116,8 @@ local function render_svg(path, scaling)
 end
 
 
-local taglist_buttons = gears.table.join(
+local taglist_common = {}
+taglist_common.buttons = gears.table.join(
 	awful.button({ }, 1, function(t) t:view_only() end),
 	awful.button({ modkey }, 1, function(t) if client.focus then client.focus:move_to_tag(t) end end),
 	awful.button({ }, 3, awful.tag.viewtoggle),
@@ -143,7 +144,23 @@ awful.screen.connect_for_each_screen(setup_screen)
 --
 local function set_screen_dpi(s, new_dpi)
 	s.dpi = new_dpi
+
+	local scaling = float_dpi(1, s)
+	local taglist_size = dpi(6, s)
+	local taglist_margin = dpi(1, s)
+
 	s.tool_bar.height = dpi(18, s)
+
+	s.taglist_args.style = {
+		squares_sel = render_svg(beautiful.taglist_squares_sel, scaling),
+		squares_unsel = render_svg(beautiful.taglist_squares_unsel, scaling),
+	}
+	for _, w in ipairs(s.taglist_elements) do
+		w.forced_width = taglist_size
+		w.forced_height = taglist_size
+		w.bottom = taglist_margin
+		w.right = taglist_margin
+	end
 	s.taglist:_do_taglist_update_now()
 end
 
@@ -185,10 +202,11 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	s.launcher = wibox.widget.imagebox(beautiful.launch)
 	s.launcher:add_button(awful.button({}, 1, nil, function () main_menu:toggle() end))
 
+	s.taglist_elements = {}
 	s.taglist_args = {
 		screen = s,
 		filter = awful.widget.taglist.filter.all,
-		buttons = gears.table.join(taglist_buttons),
+		buttons = gears.table.join(taglist_common.buttons),
 		style = {
 			squares_sel = render_svg(beautiful.taglist_squares_sel, scaling),
 			squares_unsel = render_svg(beautiful.taglist_squares_unsel, scaling),
@@ -228,24 +246,10 @@ screen.connect_signal("request::desktop_decoration", function(s)
 				},
 				widget = wibox.container.margin,
 			},
-			update_callback = function(self, t, index, objects)
+			create_callback = function(self, t, index, objects)
 				local s = t.screen
-				local widgets = self:get_children_by_id('container_role')
-				local size = dpi(6, s)
-				if size ~= widgets[1].forced_width then
-					local scaling = float_dpi(1, s)
-					s.taglist_args.style = {
-						squares_sel = render_svg(beautiful.taglist_squares_sel, scaling),
-						squares_unsel = render_svg(beautiful.taglist_squares_unsel, scaling),
-					}
-					for _, w in ipairs(widgets) do
-						w.forced_width = size
-						w.forced_height = size
-						w.bottom = dpi(1, s)
-						w.right = dpi(1, s)
-					end
-				end
-			end
+				table.insert(s.taglist_elements, self)
+			end,
 		},
 	}
 
@@ -262,7 +266,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 end)
 
 awful.run_test = function()
-	s = screen.fake_add(20, 20, 500, 400)
+	--s = screen.fake_add(20, 20, 500, 400)
 	gears.timer {
 		timeout   = 0.5,
 		call_now  = false,
@@ -270,10 +274,10 @@ awful.run_test = function()
 		single_shot = true,
 		callback  = function()
 			--set_screen_dpi(s, 384)
-			--for s in screen do
-			--	set_screen_dpi(s, 384)
-			--end
-			s:fake_remove()
+			for s in screen do
+				set_screen_dpi(s, 384)
+			end
+			--s:fake_remove()
 			collectgarbage("collect")
 		end
 	}
