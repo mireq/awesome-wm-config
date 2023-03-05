@@ -80,7 +80,7 @@ local menu_demo = {
 	{ "Hex voxel scene" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/4dsBz4-hex-voxel-scene.json --resolution 480x260 --tile-size 240x130 --fps 30' },
 	{ "Fractal land" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/XsBXWt-fractal-land/XsBXWt-fractal-land.json --resolution 640x360 --fps 30 --tile-size 320x180' }
 }
-local main_menu = awful.menu({
+local main_menu = {
 	items = {
 		{ "accessories" , menu_accessories },
 		{ "graphics" , menu_graphics },
@@ -96,12 +96,28 @@ local main_menu = awful.menu({
 		width = beautiful.menu_width,
 		submenu_icon = beautiful.menu_submenu_icon
 	}
-})
+}
 
 
 local function float_dpi(size, s)
 	local ratio = s.dpi / 96
 	return size * ratio
+end
+
+
+local function get_main_menu(s)
+	local scaling = float_dpi(1, s)
+
+	return gears.table.join(
+		gears.table.clone(main_menu),
+		{
+			theme = {
+				height = beautiful.menu_height * scaling,
+				width = beautiful.menu_width * scaling,
+				submenu_icon = beautiful.menu_submenu_icon
+			}
+		}
+	)
 end
 
 
@@ -163,6 +179,9 @@ local function set_screen_dpi(s, new_dpi)
 	end
 	s.taglist:_do_taglist_update_now()
 
+	s.main_menu:hide()
+	s.main_menu = awful.menu(get_main_menu(s))
+
 	s.launcher:set_image(render_svg(theme.launch, scaling))
 end
 
@@ -200,11 +219,16 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		end
 	})
 
+	s.main_menu = awful.menu(get_main_menu(s))
+
 	s.launcher = awful.widget.launcher({
 		image = beautiful.launch,
-		menu = main_menu,
+		menu = s.main_menu
 	})
 	s.launcher:set_image(render_svg(theme.launch, scaling))
+	s.launcher:set_buttons(gears.table.join(
+		awful.button({ }, 1, function() s.main_menu:toggle() end)
+	))
 
 	s.taglist_elements = {}
 	s.taglist_args = {
@@ -271,8 +295,11 @@ end)
 
 awful.run_test = function()
 	--s = screen.fake_add(20, 20, 500, 400)
+	for s in screen do
+		set_screen_dpi(s, 192)
+	end
 	gears.timer {
-		timeout   = 0.5,
+		timeout   = 0.05,
 		call_now  = false,
 		autostart = true,
 		single_shot = true,
