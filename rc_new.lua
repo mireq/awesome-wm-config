@@ -200,14 +200,24 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			forced_num_rows = 3,
 		},
 		widget_template = {
-			id = "background_role",
-			widget = wibox.container.background,
+			id = "container_role",
+			widget = wibox.container.margin,
 			forced_width = dpi(6, s),
 			forced_height = dpi(6, s),
+			bottom = dpi(1, s),
+			right = dpi(1, s),
 			{
 				{
-					id = "text_role",
-					widget = wibox.widget.textbox,
+					id = "background_role",
+					widget = wibox.container.background,
+				},
+				{
+					top = 1000, -- not visible
+					widget = wibox.container.margin,
+					{
+						id = "text_role",
+						widget = wibox.widget.textbox,
+					}
 				},
 				{
 					id = "icon_role",
@@ -216,12 +226,11 @@ screen.connect_signal("request::desktop_decoration", function(s)
 					forced_height = dpi(6, s),
 					resize = true,
 				},
-				top = 1000, -- not visible
 				widget = wibox.container.margin,
 			},
 			update_callback = function(self, t, index, objects)
 				local s = t.screen
-				local widgets = self:get_children_by_id('background_role')
+				local widgets = self:get_children_by_id('container_role')
 				local size = dpi(6, s)
 				if size ~= widgets[1].forced_width then
 					local scaling = float_dpi(1, s)
@@ -232,6 +241,8 @@ screen.connect_signal("request::desktop_decoration", function(s)
 					for _, w in ipairs(widgets) do
 						w.forced_width = size
 						w.forced_height = size
+						w.bottom = dpi(1, s)
+						w.right = dpi(1, s)
 					end
 				end
 			end
