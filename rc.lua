@@ -167,8 +167,7 @@ tag.connect_signal("request::default_layouts", function()
 end)
 
 
-local taglist_defaults = {}
-taglist_defaults.buttons = awful.util.table.join(
+local taglist_buttons = gears.table.join(
 	awful.button({ }, 1, function(t) t:view_only() end),
 	awful.button({ modkey }, 1, function(t) if client.focus then client.focus:move_to_tag(t) end end),
 	awful.button({ }, 3, awful.tag.viewtoggle),
@@ -176,6 +175,7 @@ taglist_defaults.buttons = awful.util.table.join(
 	awful.button({ }, 4, function(t) awful.tag.viewprev(t.screen) end),
 	awful.button({ }, 5, function(t) awful.tag.viewnext(t.screen) end)
 )
+
 local tasklist_defaults = {}
 tasklist_defaults.buttons = gears.table.join(
 	awful.button({ }, 1, function (c)
