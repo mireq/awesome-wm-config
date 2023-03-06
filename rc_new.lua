@@ -143,6 +143,29 @@ taglist_common.buttons = gears.table.join(
 )
 
 
+local tasklist_defaults = {}
+tasklist_defaults.buttons = gears.table.join(
+	awful.button({ }, 1, function (c)
+		if c == client.focus then
+			c.minimized = true
+		else
+			c.minimized = false
+		if not c:isvisible() and c.first_tag then
+			c.first_tag:view_only()
+		end
+			client.focus = c
+			c:raise()
+		end
+	end),
+	--awful.button({ }, 3, client_menu_toggle_fn(c)),
+	awful.button({ }, 4, function ()
+		awful.client.focus.byidx(1)
+	end),
+	awful.button({ }, 5, function ()
+		awful.client.focus.byidx(-1)
+	end)
+)
+
 for s in screen do
 	gears.wallpaper.maximized(beautiful.wallpaper, s, false)
 end
@@ -220,32 +243,6 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			end
 			cr:rectangle(0, 0, width, height)
 			cr:fill()
-
-			--print(gradient_stops)
-
-			--local bg_start = 0
-			--local bg_height = height
-			--if beautiful.wibar_border_bottom ~= nil then
-			--	cr:set_source(gears.color(beautiful.wibar_border_bottom))
-			--	cr:rectangle(0, height - dpi(1, s), width, dpi(1, s))
-			--	cr:fill()
-			--	bg_height = bg_height - dpi(1, s)
-			--end
-			--if beautiful.wibar_border_top ~= nil then
-			--	cr:set_source(gears.color(beautiful.wibar_border_top))
-			--	cr:rectangle(0, 0, width, dpi(1, s))
-			--	cr:fill()
-			--	bg_start = bg_start + dpi(1, s)
-			--	bg_height = bg_height - dpi(1, s)
-			--end
-			--if beautiful.wibar_bg_bottom == nil then
-			--	cr:set_source(gears.color(beautiful.wibar_bg or beautiful.bg_normal))
-			--else
-			--	cr:set_source(gears.color('linear:0,0:0,'..height..':0,'..beautiful.wibar_bg..':1,'..beautiful.wibar_bg_bottom))
-			--end
-			--cr:rectangle(0, bg_start, width, bg_height)
-			--print(tostring(0.5))
-			--cr:fill()
 		end
 	})
 
@@ -313,6 +310,74 @@ screen.connect_signal("request::desktop_decoration", function(s)
 
 	s.taglist = awful.widget.taglist(s.taglist_args)
 
+	s.tasklist = awful.widget.tasklist {
+		screen = s,
+		filter = awful.widget.tasklist.filter.currenttags,
+		buttons = tasklist_defaults.buttons,
+		widget_template = {
+			{
+				{
+					{
+						{
+							id = 'icon_role',
+							widget = wibox.widget.imagebox,
+						},
+						top = dpi(1, s),
+						bottom = dpi(1, s),
+						left = dpi(4, s),
+						widget = wibox.container.margin,
+					},
+					{
+						{
+							id = 'text_role',
+							widget = wibox.widget.textbox,
+						},
+						left = dpi(4, s),
+						widget = wibox.container.margin,
+					},
+					layout = wibox.layout.fixed.horizontal,
+				},
+				{
+					id = "background_role",
+					widget = wibox.container.background,
+					forced_height = dpi(1, s),
+				},
+				layout = wibox.layout.stack,
+			},
+			widget = wibox.container.margin,
+			--{
+			--	widget = wibox.container.background,
+			--	forced_height = dpi(2, s),
+			--	bg = '#00000000'
+			--},
+			--{
+			--	{
+			--		{
+			--			{
+			--				id = 'icon_role',
+			--				widget = wibox.widget.imagebox,
+			--			},
+			--			top = dpi(-1, s),
+			--			bottom = dpi(-1, s),
+			--			right = dpi(4, s),
+			--			widget = wibox.container.margin,
+			--		},
+			--		layout = wibox.layout.fixed.horizontal,
+			--	},
+			--	left = dpi(4, s),
+			--	right = dpi(4, s),
+			--	widget = wibox.container.margin,
+			--	forced_height = dpi(14, s),
+			--},
+			--{
+			--	id = "background_role",
+			--	widget = wibox.container.background,
+			--	forced_height = dpi(2, s),
+			--},
+			--widget = wibox.layout.fixed.vertical,
+		}
+	}
+
 	local left_layout = wibox.layout.fixed.horizontal()
 	left_layout:add(s.launcher)
 	left_layout:add(s.taglist)
@@ -320,6 +385,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	s.tool_bar:setup {
 		layout = wibox.layout.align.horizontal,
 		left_layout,
+		s.tasklist,
 	}
 end)
 
