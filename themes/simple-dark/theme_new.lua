@@ -13,7 +13,7 @@ theme.wibar_border_bottom                   = "#111214f8"
 theme.fg_accent                             = "#ffffff"
 theme.fg_normal                             = "#cccdcf"
 theme.fg_secondary                          = "#88898c"
-theme.fg_focus                              = "#A1D0D0"
+theme.fg_focus                              = "#ffffff"
 theme.fg_urgent                             = "#CC9393"
 theme.bg_normal                             = "#222528"
 theme.bg_focus                              = "#186dfe"
@@ -26,6 +26,7 @@ theme.menu_height                           = 20
 theme.menu_width                            = 140
 theme.menu_submenu_icon                     = themes_dir .. "/icons/submenu.svg"
 theme.menu_border_width                     = 0
+theme.menu_fg_focus                         = '#ffffff'
 
 theme.taglist_fg_focus                      = '#00000000'
 theme.taglist_fg_urgent                     = '#00000000'
@@ -37,5 +38,12 @@ theme.taglist_bg_empty                      = "#00000040"
 theme.taglist_bg_occupied                   = "#00000040"
 theme.taglist_squares_sel                   = themes_dir .. "/icons/square_sel.svg"
 theme.taglist_squares_unsel                 = themes_dir .. "/icons/square_unsel.svg"
+
+theme.tasklist_bg_normal                    = '#00000000'
+theme.tasklist_bg_focus                     = '#00000000'
+theme.tasklist_fg_normal                    = "#8a8b8f"
+theme.tasklist_fg_focus                     = "#cccdcf"
+--theme.tasklist_fg_focus                   = "#A1D0D0"
+theme.tasklist_font_focus                   = "Ubuntu Bold 9"
 
 return theme
