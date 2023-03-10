@@ -314,8 +314,18 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		screen = s,
 		filter = awful.widget.tasklist.filter.currenttags,
 		buttons = tasklist_defaults.buttons,
+		layout = {
+			max_widget_size = dpi(240, s),
+			spacing = dpi(8, s),
+			layout = wibox.layout.flex.horizontal
+		},
 		widget_template = {
 			{
+				{
+					id = "background_role",
+					widget = wibox.container.background,
+					forced_height = dpi(1, s),
+				},
 				{
 					{
 						{
@@ -337,13 +347,9 @@ screen.connect_signal("request::desktop_decoration", function(s)
 					},
 					layout = wibox.layout.fixed.horizontal,
 				},
-				{
-					id = "background_role",
-					widget = wibox.container.background,
-					forced_height = dpi(1, s),
-				},
 				layout = wibox.layout.stack,
 			},
+			--max_widget_size = 100,
 			widget = wibox.container.margin,
 			--{
 			--	widget = wibox.container.background,
@@ -375,7 +381,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			--	forced_height = dpi(2, s),
 			--},
 			--widget = wibox.layout.fixed.vertical,
-		}
+		},
 	}
 
 	local left_layout = wibox.layout.fixed.horizontal()
