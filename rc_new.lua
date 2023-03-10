@@ -202,6 +202,10 @@ local function set_screen_dpi(s, new_dpi)
 	end
 	s.taglist:_do_taglist_update_now()
 
+	s.tasklist_args.layout.max_widget_size = dpi(200, s)
+	s.tasklist_args.layout.spacing = dpi(8, s)
+	s.tasklist:set_base_layout(s.tasklist_args.layout)
+
 	s.main_menu:hide()
 	s.main_menu = awful.menu(get_main_menu(s))
 	s.main_menu.wibox:set_bg('#ff0000')
@@ -310,7 +314,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 
 	s.taglist = awful.widget.taglist(s.taglist_args)
 
-	s.tasklist = awful.widget.tasklist {
+	s.tasklist_args = {
 		screen = s,
 		filter = awful.widget.tasklist.filter.currenttags,
 		buttons = tasklist_defaults.buttons,
@@ -332,6 +336,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 							id = 'icon_role',
 							widget = wibox.widget.imagebox,
 						},
+						id = 'icon_margin_role',
 						top = dpi(1, s),
 						bottom = dpi(1, s),
 						left = dpi(4, s),
@@ -349,6 +354,14 @@ screen.connect_signal("request::desktop_decoration", function(s)
 				},
 				layout = wibox.layout.stack,
 			},
+			create_callback = function(self, c, index, objects)
+				if c.icon == nil then
+					local widgets = self:get_children_by_id('icon_margin_role')
+					for _, w in ipairs(widgets) do
+						w:set_left(0)
+					end
+				end
+			end,
 			--max_widget_size = 100,
 			widget = wibox.container.margin,
 			--{
@@ -383,6 +396,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			--widget = wibox.layout.fixed.vertical,
 		},
 	}
+	s.tasklist = awful.widget.tasklist(s.tasklist_args)
 
 	local left_layout = wibox.layout.fixed.horizontal()
 	left_layout:add(s.launcher)
