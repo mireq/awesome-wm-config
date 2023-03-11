@@ -199,11 +199,11 @@ local function set_screen_dpi(s, new_dpi)
 	s.taglist_args.widget_template.forced_height = taglist_size
 	s.taglist_args.widget_template[1].bottom = taglist_margin
 	s.taglist_args.widget_template[1].right = taglist_margin
-	s.tasklist:set_base_layout(s.taglist_args.layout)
+	s.taglist:set_widget_template(s.taglist_args.widget_template)
 
 	s.tasklist_args.layout.max_widget_size = dpi(240, s)
 	s.tasklist_args.layout.spacing = dpi(8, s)
-	s.tasklist_args.widget_template[1][1][2].left = dpi(4, s)
+	--s.tasklist_args.widget_template[1][1][2].left = dpi(4, s)
 	s.tasklist:set_widget_template(s.tasklist_args.widget_template)
 
 	s.main_menu:hide()
@@ -326,6 +326,9 @@ screen.connect_signal("request::desktop_decoration", function(s)
 				local margin_widget = w:get_children()[1]
 				margin_widget.bottom = taglist_margin
 				margin_widget.right = taglist_margin
+				local icon_widget = w:get_children_by_id('icon_role')[1]
+				icon_widget.forced_width = taglist_size
+				icon_widget.forced_height = taglist_size
 			end,
 		},
 	}
@@ -343,34 +346,25 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		},
 		widget_template = {
 			{
-				--{
-				--	id = "background_role",
-				--	widget = wibox.container.background,
-				--	forced_height = dpi(1, s),
-				--},
 				{
 					{
-						{
-							id = 'icon_role',
-							widget = wibox.widget.imagebox,
-						},
-						id = 'icon_margin_role',
-						top = dpi(1, s),
-						bottom = dpi(1, s),
-						left = dpi(4, s),
-						widget = wibox.container.margin,
+						widget = awful.widget.clienticon,
 					},
-					{
-						{
-							id = 'text_role',
-							widget = wibox.widget.textbox,
-						},
-						left = dpi(4, s),
-						widget = wibox.container.margin,
-					},
-					layout = wibox.layout.fixed.horizontal,
+					id = 'icon_margin_role',
+					top = dpi(1, s),
+					bottom = dpi(1, s),
+					left = dpi(4, s),
+					widget = wibox.container.margin,
 				},
-				layout = wibox.layout.stack,
+				{
+					{
+						id = 'text_role',
+						widget = wibox.widget.textbox,
+					},
+					left = dpi(2, s),
+					widget = wibox.container.margin,
+				},
+				layout = wibox.layout.fixed.horizontal,
 			},
 			create_callback = function(self, c, index, objects)
 				if c.icon == nil then
@@ -380,38 +374,14 @@ screen.connect_signal("request::desktop_decoration", function(s)
 					end
 				end
 			end,
-			--max_widget_size = 100,
-			widget = wibox.container.margin,
-			--{
-			--	widget = wibox.container.background,
-			--	forced_height = dpi(2, s),
-			--	bg = '#00000000'
-			--},
-			--{
-			--	{
-			--		{
-			--			{
-			--				id = 'icon_role',
-			--				widget = wibox.widget.imagebox,
-			--			},
-			--			top = dpi(-1, s),
-			--			bottom = dpi(-1, s),
-			--			right = dpi(4, s),
-			--			widget = wibox.container.margin,
-			--		},
-			--		layout = wibox.layout.fixed.horizontal,
-			--	},
-			--	left = dpi(4, s),
-			--	right = dpi(4, s),
-			--	widget = wibox.container.margin,
-			--	forced_height = dpi(14, s),
-			--},
-			--{
-			--	id = "background_role",
-			--	widget = wibox.container.background,
-			--	forced_height = dpi(2, s),
-			--},
-			--widget = wibox.layout.fixed.vertical,
+			dpi_callback = function(w)
+				local widgets = w:get_children_by_id('icon_margin_role')
+				for _, w in ipairs(widgets) do
+					w:set_top(dpi(1, s))
+					w:set_bottom(dpi(1, s))
+				end
+			end,
+			widget = dpi_watcher,
 		},
 	}
 	s.tasklist = awful.widget.tasklist(s.tasklist_args)
