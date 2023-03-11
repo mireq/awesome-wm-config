@@ -199,12 +199,11 @@ local function set_screen_dpi(s, new_dpi)
 	s.taglist_args.widget_template.forced_height = taglist_size
 	s.taglist_args.widget_template[1].bottom = taglist_margin
 	s.taglist_args.widget_template[1].right = taglist_margin
-	s.taglist:_do_taglist_update_now()
-	
+	s.tasklist:set_base_layout(s.taglist_args.layout)
+
 	s.tasklist_args.layout.max_widget_size = dpi(240, s)
 	s.tasklist_args.layout.spacing = dpi(8, s)
 	s.tasklist_args.widget_template[1][1][2].left = dpi(4, s)
-	s.tasklist:set_base_layout(s.tasklist_args.layout)
 	s.tasklist:set_widget_template(s.tasklist_args.widget_template)
 
 	s.main_menu:hide()
@@ -212,6 +211,18 @@ local function set_screen_dpi(s, new_dpi)
 	s.main_menu.wibox:set_bg('#ff0000')
 
 	s.launcher:set_image(render_svg(theme.launch, scaling))
+
+	-- Schedule update
+	gears.timer {
+		timeout   = 0,
+		call_now  = false,
+		autostart = true,
+		single_shot = true,
+		callback  = function()
+			s.taglist:set_base_layout(s.taglist_args.layout)
+			s.tasklist:set_base_layout(s.tasklist_args.layout)
+		end
+	}
 end
 
 screen.connect_signal("request::desktop_decoration", function(s)
