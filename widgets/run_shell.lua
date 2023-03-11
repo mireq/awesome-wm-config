@@ -70,6 +70,7 @@ function widget.new()
 		if not self._cached_wiboxes[s][1] then
 			self._cached_wiboxes[s][1] = self:_create_wibox()
 		end
+		self._cached_wiboxes[s][1]:get_children_by_id('margin')[1]:set_left(dpi(8, s))
 		local w = self._cached_wiboxes[s][1]
 
 		if capi.awesome.composite_manager_running then
