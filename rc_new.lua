@@ -229,6 +229,17 @@ local globalkeys = gears.table.join(
 			awful.client.focus.byidx(-1)
 		end,
 		{description = "Focus previous", group = "Client"}
+	),
+	awful.key({ modkey }, "a",
+		function ()
+			awful.prompt.run({
+				prompt = " Run Lua code: ",
+				textbox = awful.screen.focused().lua_prompt.widget,
+				exe_callback = awful.util.eval,
+				history_path = awful.util.get_cache_dir() .. "/history_eval"
+			})
+		end,
+		{description = "Lua prompt", group = "Awesome"}
 	)
 )
 root.keys(globalkeys)
@@ -466,16 +477,18 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		},
 	}
 	s.tasklist = awful.widget.tasklist(s.tasklist_args)
+	s.lua_prompt = awful.widget.prompt()
 
-	local left_layout = wibox.layout.fixed.horizontal()
-	left_layout:add(s.launcher)
-	left_layout:add(s.taglist)
-
-	s.tool_bar:setup {
-		layout = wibox.layout.align.horizontal,
-		left_layout,
+	s.tool_bar:setup({
+		{
+			s.launcher,
+			s.taglist,
+			s.lua_prompt,
+			layout = wibox.layout.fixed.horizontal
+		},
 		s.tasklist,
-	}
+		layout = wibox.layout.align.horizontal
+	})
 end)
 
 awful.run_test = function()
