@@ -37,8 +37,8 @@ theme.taglist_fg_occupied                   = '#00000000'
 theme.taglist_fg_empty                      = '#00000000'
 theme.taglist_fg_volatile                   = '#00000000'
 theme.taglist_bg_focus                      = "#186dfe"
-theme.taglist_bg_empty                      = "#00000040"
-theme.taglist_bg_occupied                   = "#00000040"
+theme.taglist_bg_empty                      = "#00000080"
+theme.taglist_bg_occupied                   = "#00000080"
 theme.taglist_squares_sel                   = themes_dir .. "/icons/square_sel.svg"
 theme.taglist_squares_unsel                 = themes_dir .. "/icons/square_unsel.svg"
 
