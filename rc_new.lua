@@ -31,6 +31,9 @@ browser = "firefox-bin"
 tasks = terminal .. " -e htop"
 launch_tv = "mpv --demuxer=lavf --demuxer-lavf-format=mpegts --vf=vavpp:deint=auto:interlaced-only=yes --demuxer-lavf-o-add=fflags=+nobuffer --demuxer-lavf-probe-info=nostreams --demuxer-lavf-analyzeduration=0 --force-window=immediate http://192.168.1.111:8001/"
 
+modkey = "Mod4"
+altkey = "Mod1"
+
 beautiful.init(active_theme .. "/theme_new.lua")
 
 -- {{{ Menu
@@ -193,6 +196,15 @@ root.buttons(gears.table.join(
 ))
 -- }}}
 
+
+-- {{{ Key bindings
+local globalkeys = gears.table.join(
+	awful.key({ modkey,           }, "h",
+		hotkeys_popup.show_help,
+		{description="Show help", group="awesome"})
+)
+root.keys(globalkeys)
+-- }}}
 
 
 --screen.connect_signal("list", function()

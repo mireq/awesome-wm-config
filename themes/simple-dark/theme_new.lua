@@ -5,6 +5,9 @@ themes_dir = os.getenv("HOME") .. "/.config/awesome/themes/simple-dark"
 theme.wallpaper                             = themes_dir .. "/wall_tmb.jpg"
 
 theme.font                                  = "Ubuntu 9"
+theme.border_width                          = 1
+theme.border_normal                         = "#2b2e32"
+theme.border_focus                          = "#7f7f7f"
 
 theme.wibar_bg                              = "#2b2e32f8"
 theme.wibar_bg_bottom                       = "#282a2ef8"
@@ -45,5 +48,16 @@ theme.tasklist_fg_normal                    = "#8a8b8f"
 theme.tasklist_fg_focus                     = "#cccdcf"
 --theme.tasklist_fg_focus                   = "#A1D0D0"
 theme.tasklist_font_focus                   = "Ubuntu Bold 9"
+
+theme.notify_fg                             = theme.fg_normal
+theme.notify_bg                             = theme.bg_normal
+theme.notify_border                         = '#2b2e32'
+
+theme.hotkeys_bg                            = theme.bg_normal
+theme.hotkeys_border_color                  = theme.notify_border
+theme.hotkeys_fg                            = theme.fg_normal
+theme.hotkeys_modifiers_fg                  = theme.fg_secondary
+theme.hotkeys_font                          = "Ubuntu Mono Bold 8"
+theme.hotkeys_description_font              = "Ubuntu Mono 8"
 
 return theme
