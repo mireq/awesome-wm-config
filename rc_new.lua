@@ -5,6 +5,7 @@ local gdebug = require("gears.debug")
 local awful = require("awful")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
+local utils = require("utils")
 local cairo = require("lgi").cairo
 local Rsvg = require('lgi').Rsvg
 local dpi = beautiful.xresources.apply_dpi
@@ -195,15 +196,30 @@ local function set_screen_dpi(s, new_dpi)
 		squares_sel = render_svg(beautiful.taglist_squares_sel, scaling),
 		squares_unsel = render_svg(beautiful.taglist_squares_unsel, scaling),
 	}
-	s.taglist_args.widget_template.forced_width = taglist_size
-	s.taglist_args.widget_template.forced_height = taglist_size
-	s.taglist_args.widget_template[1].bottom = taglist_margin
-	s.taglist_args.widget_template[1].right = taglist_margin
+	utils.update_widget_template_attributes(s.taglist_args.widget_template, {
+		container_role = {
+			forced_width = taglist_size,
+			forced_height = taglist_size,
+		},
+		margin_role = {
+			bottom = taglist_margin,
+			right = taglist_margin,
+		},
+	})
 	s.taglist:set_widget_template(s.taglist_args.widget_template)
 
 	s.tasklist_args.layout.max_widget_size = dpi(240, s)
 	s.tasklist_args.layout.spacing = dpi(8, s)
-	--s.tasklist_args.widget_template[1][1][2].left = dpi(4, s)
+	utils.update_widget_template_attributes(s.tasklist_args.widget_template, {
+		icon_margin_role = {
+			top = dpi(1, s),
+			bottom = dpi(1, s),
+			left = dpi(2, s),
+		},
+		text_margin_role = {
+			left = dpi(2, s),
+		}
+	})
 	s.tasklist:set_widget_template(s.tasklist_args.widget_template)
 
 	s.main_menu:hide()
@@ -314,6 +330,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 					},
 					widget = wibox.container.margin,
 				},
+				id = "margin_role",
 				bottom = dpi(1, s),
 				right = dpi(1, s),
 				widget = wibox.container.margin
@@ -353,7 +370,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 					id = 'icon_margin_role',
 					top = dpi(1, s),
 					bottom = dpi(1, s),
-					left = dpi(4, s),
+					left = dpi(2, s),
 					widget = wibox.container.margin,
 				},
 				{
@@ -361,12 +378,14 @@ screen.connect_signal("request::desktop_decoration", function(s)
 						id = 'text_role',
 						widget = wibox.widget.textbox,
 					},
+					id = 'text_margin_role',
 					left = dpi(2, s),
 					widget = wibox.container.margin,
 				},
 				layout = wibox.layout.fixed.horizontal,
 			},
 			create_callback = function(self, c, index, objects)
+				self.client = c
 				if c.icon == nil then
 					local widgets = self:get_children_by_id('icon_margin_role')
 					for _, w in ipairs(widgets) do
@@ -376,9 +395,15 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			end,
 			dpi_callback = function(w)
 				local widgets = w:get_children_by_id('icon_margin_role')
+				local c = w.client
 				for _, w in ipairs(widgets) do
 					w:set_top(dpi(1, s))
 					w:set_bottom(dpi(1, s))
+					if c and c.icon then
+						w:set_left(dpi(1, s))
+					else
+						w:set_left(0)
+					end
 				end
 			end,
 			widget = dpi_watcher,
