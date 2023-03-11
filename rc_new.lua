@@ -208,7 +208,6 @@ local function set_screen_dpi(s, new_dpi)
 
 	s.main_menu:hide()
 	s.main_menu = awful.menu(get_main_menu(s))
-	s.main_menu.wibox:set_bg('#ff0000')
 
 	s.launcher:set_image(render_svg(theme.launch, scaling))
 
