@@ -117,4 +117,11 @@ function widget.launch(...)
 end
 
 
+capi.screen.connect_signal("removed", function(s)
+	if widget.default_widget then
+		widget.default_widget._cached_wiboxes[s] = nil
+	end
+end)
+
+
 return widget
