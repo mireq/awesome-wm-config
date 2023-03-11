@@ -7,6 +7,7 @@ local beautiful = require("beautiful")
 local wibox = require("wibox")
 local utils = require("utils")
 local cairo = require("lgi").cairo
+local run_shell = require("widgets.run_shell")
 local Rsvg = require('lgi').Rsvg
 local dpi = beautiful.xresources.apply_dpi
 local dpi_watcher = require("widgets.dpi_watcher")
@@ -240,6 +241,10 @@ local globalkeys = gears.table.join(
 			})
 		end,
 		{description = "Lua prompt", group = "Awesome"}
+	),
+	awful.key({modkey}, "r",
+		run_shell.launch,
+		{description = "run shell", group = "Awesome"}
 	)
 )
 root.keys(globalkeys)
@@ -294,17 +299,8 @@ local function set_screen_dpi(s, new_dpi)
 
 	s.launcher:set_image(render_svg(theme.launch, scaling))
 
-	-- Schedule update
-	gears.timer {
-		timeout   = 0,
-		call_now  = false,
-		autostart = true,
-		single_shot = true,
-		callback  = function()
-			s.taglist:set_base_layout(s.taglist_args.layout)
-			s.tasklist:set_base_layout(s.tasklist_args.layout)
-		end
-	}
+	s.taglist:set_base_layout(s.taglist_args.layout)
+	s.tasklist:set_base_layout(s.tasklist_args.layout)
 end
 
 screen.connect_signal("request::desktop_decoration", function(s)
