@@ -10,6 +10,7 @@ local cairo = require("lgi").cairo
 local Rsvg = require('lgi').Rsvg
 local dpi = beautiful.xresources.apply_dpi
 local dpi_watcher = require("widgets.dpi_watcher")
+local hotkeys_popup = require("awful.hotkeys_popup")
 local capi = {
 	drawin = drawin,
 	root = root,
@@ -178,7 +179,22 @@ local function setup_screen(s)
 end
 
 awful.screen.connect_for_each_screen(setup_screen)
---
+
+-- {{{ Mouse bindings
+root.buttons(gears.table.join(
+	awful.button({ }, 3, function()
+		local s = awful.screen.focused()
+		if s and s.main_menu then
+			s.main_menu:toggle()
+		end
+	end),
+	awful.button({ }, 4, awful.tag.viewnext),
+	awful.button({ }, 5, awful.tag.viewprev)
+))
+-- }}}
+
+
+
 --screen.connect_signal("list", function()
 --	print("list signal")
 --end)
