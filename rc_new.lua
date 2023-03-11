@@ -199,9 +199,37 @@ root.buttons(gears.table.join(
 
 -- {{{ Key bindings
 local globalkeys = gears.table.join(
-	awful.key({ modkey,           }, "h",
+	awful.key(
+		{ modkey }, "h",
 		hotkeys_popup.show_help,
-		{description="Show help", group="awesome"})
+		{description = "Show help", group = "Awesome"}
+	),
+	awful.key(
+		{ modkey }, "Left",
+		awful.tag.viewprev,
+		{description = "View previous", group = "Tag"}
+	),
+	awful.key(
+		{ modkey }, "Right",
+		awful.tag.viewnext,
+		{description = "View next", group = "Tag"}
+	),
+	awful.key({ modkey }, "Tab",
+		awful.tag.history.restore,
+		{description = "Tag history", group = "Tag"}
+	),
+	awful.key({ modkey }, "j",
+		function ()
+			awful.client.focus.byidx(1)
+		end,
+		{description = "Focus next", group = "Client"}
+	),
+	awful.key({ modkey }, "k",
+		function ()
+			awful.client.focus.byidx(-1)
+		end,
+		{description = "Focus previous", group = "Client"}
+	)
 )
 root.keys(globalkeys)
 -- }}}
@@ -465,6 +493,7 @@ awful.run_test = function()
 			for s in screen do
 				set_screen_dpi(s, 192)
 			end
+			hotkeys_popup.show_help()
 			--s:fake_remove()
 			collectgarbage("collect")
 		end

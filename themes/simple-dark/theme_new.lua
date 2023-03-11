@@ -51,7 +51,8 @@ theme.tasklist_font_focus                   = "Ubuntu Bold 9"
 
 theme.notify_fg                             = theme.fg_normal
 theme.notify_bg                             = theme.bg_normal
-theme.notify_border                         = '#2b2e32'
+--theme.notify_border                       = '#2b2e32'
+theme.notify_border                         = theme.border_focus
 
 theme.hotkeys_bg                            = theme.bg_normal
 theme.hotkeys_border_color                  = theme.notify_border
