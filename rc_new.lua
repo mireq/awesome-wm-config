@@ -62,7 +62,7 @@ local menu_office = {
 local menu_system = {
 	{ "htop" , terminal .. " -e htop " },
 	--{ "htop", 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=18" -depth 32 -background "rgba:0000/0000/0000/2000" -e htop'},
-	{ "hotkeys", function() return false, hotkeys_popup.show_help end},
+	{ "hotkeys", function() return false, utils.show_hotkeys_help end},
 	{ "quit", function() awesome.quit() end},
 	{ "reboot", "loginctl reboot"},
 	{ "poweroff", "loginctl poweroff"},
@@ -201,7 +201,7 @@ root.buttons(gears.table.join(
 local globalkeys = gears.table.join(
 	awful.key(
 		{ modkey }, "h",
-		hotkeys_popup.show_help,
+		utils.show_hotkeys_help,
 		{description = "Show help", group = "Awesome"}
 	),
 	awful.key(
@@ -493,7 +493,7 @@ awful.run_test = function()
 			for s in screen do
 				set_screen_dpi(s, 192)
 			end
-			hotkeys_popup.show_help()
+			utils.show_hotkeys_help()
 			--s:fake_remove()
 			collectgarbage("collect")
 		end

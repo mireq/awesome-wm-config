@@ -60,5 +60,6 @@ theme.hotkeys_fg                            = theme.fg_normal
 theme.hotkeys_modifiers_fg                  = theme.fg_secondary
 theme.hotkeys_font                          = "Ubuntu Mono Bold 8"
 theme.hotkeys_description_font              = "Ubuntu Mono 8"
+theme.hotkeys_group_margin                  = 6
 
 return theme
