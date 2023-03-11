@@ -8,6 +8,7 @@ local wibox = require("wibox")
 local cairo = require("lgi").cairo
 local Rsvg = require('lgi').Rsvg
 local dpi = beautiful.xresources.apply_dpi
+local dpi_watcher = require("widgets.dpi_watcher")
 local capi = {
 	drawin = drawin,
 	root = root,
@@ -196,15 +197,8 @@ local function set_screen_dpi(s, new_dpi)
 	}
 	s.taglist_args.widget_template.forced_width = taglist_size
 	s.taglist_args.widget_template.forced_height = taglist_size
-	s.taglist_args.widget_template.bottom = taglist_margin
-	s.taglist_args.widget_template.right = taglist_margin
-	for _, w in ipairs(s.taglist_elements) do
-		w.forced_width = taglist_size
-		w.forced_height = taglist_size
-		w.bottom = taglist_margin
-		w.right = taglist_margin
-	end
-	s.taglist:set_widget_template(s.taglist.widget_template)
+	s.taglist_args.widget_template[1].bottom = taglist_margin
+	s.taglist_args.widget_template[1].right = taglist_margin
 	s.taglist:_do_taglist_update_now()
 	
 	s.tasklist_args.layout.max_widget_size = dpi(240, s)
@@ -268,7 +262,6 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		awful.button({ }, 1, function() s.main_menu:toggle() end)
 	))
 
-	s.taglist_elements = {}
 	s.taglist_args = {
 		screen = s,
 		filter = awful.widget.taglist.filter.all,
@@ -285,36 +278,44 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		},
 		widget_template = {
 			id = "container_role",
-			widget = wibox.container.margin,
+			widget = dpi_watcher,
 			forced_width = dpi(6, s),
 			forced_height = dpi(6, s),
-			bottom = dpi(1, s),
-			right = dpi(1, s),
 			{
 				{
-					id = "background_role",
-					widget = wibox.container.background,
-				},
-				{
-					top = 1000, -- not visible
-					widget = wibox.container.margin,
 					{
-						id = "text_role",
-						widget = wibox.widget.textbox,
-					}
+						id = "background_role",
+						widget = wibox.container.background,
+					},
+					{
+						top = 1000, -- not visible
+						widget = wibox.container.margin,
+						{
+							id = "text_role",
+							widget = wibox.widget.textbox,
+						}
+					},
+					{
+						id = "icon_role",
+						widget = wibox.widget.imagebox,
+						forced_width = dpi(6, s),
+						forced_height = dpi(6, s),
+						resize = true,
+					},
+					widget = wibox.container.margin,
 				},
-				{
-					id = "icon_role",
-					widget = wibox.widget.imagebox,
-					forced_width = dpi(6, s),
-					forced_height = dpi(6, s),
-					resize = true,
-				},
-				widget = wibox.container.margin,
+				bottom = dpi(1, s),
+				right = dpi(1, s),
+				widget = wibox.container.margin
 			},
-			create_callback = function(self, t, index, objects)
-				local s = t.screen
-				table.insert(s.taglist_elements, self)
+			dpi_callback = function(w)
+				local taglist_size = dpi(6, s)
+				local taglist_margin = dpi(1, s)
+				w.forced_width = taglist_size
+				w.forced_height = taglist_size
+				local margin_widget = w:get_children()[1]
+				margin_widget.bottom = taglist_margin
+				margin_widget.right = taglist_margin
 			end,
 		},
 	}
