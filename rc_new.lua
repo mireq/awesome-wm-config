@@ -194,17 +194,24 @@ local function set_screen_dpi(s, new_dpi)
 		squares_sel = render_svg(beautiful.taglist_squares_sel, scaling),
 		squares_unsel = render_svg(beautiful.taglist_squares_unsel, scaling),
 	}
+	s.taglist_args.widget_template.forced_width = taglist_size
+	s.taglist_args.widget_template.forced_height = taglist_size
+	s.taglist_args.widget_template.bottom = taglist_margin
+	s.taglist_args.widget_template.right = taglist_margin
 	for _, w in ipairs(s.taglist_elements) do
 		w.forced_width = taglist_size
 		w.forced_height = taglist_size
 		w.bottom = taglist_margin
 		w.right = taglist_margin
 	end
+	s.taglist:set_widget_template(s.taglist.widget_template)
 	s.taglist:_do_taglist_update_now()
-
-	s.tasklist_args.layout.max_widget_size = dpi(200, s)
+	
+	s.tasklist_args.layout.max_widget_size = dpi(240, s)
 	s.tasklist_args.layout.spacing = dpi(8, s)
+	s.tasklist_args.widget_template[1][1][2].left = dpi(4, s)
 	s.tasklist:set_base_layout(s.tasklist_args.layout)
+	s.tasklist:set_widget_template(s.tasklist_args.widget_template)
 
 	s.main_menu:hide()
 	s.main_menu = awful.menu(get_main_menu(s))
@@ -325,11 +332,11 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		},
 		widget_template = {
 			{
-				{
-					id = "background_role",
-					widget = wibox.container.background,
-					forced_height = dpi(1, s),
-				},
+				--{
+				--	id = "background_role",
+				--	widget = wibox.container.background,
+				--	forced_height = dpi(1, s),
+				--},
 				{
 					{
 						{
@@ -415,7 +422,7 @@ awful.run_test = function()
 		set_screen_dpi(s, 384)
 	end
 	gears.timer {
-		timeout   = 0.05,
+		timeout   = 0.5,
 		call_now  = false,
 		autostart = true,
 		single_shot = true,
