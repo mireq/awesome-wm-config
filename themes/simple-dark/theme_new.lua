@@ -5,6 +5,7 @@ themes_dir = os.getenv("HOME") .. "/.config/awesome/themes/simple-dark"
 theme.wallpaper                             = themes_dir .. "/wall_tmb.jpg"
 
 theme.font                                  = "Ubuntu 9"
+theme.sensor_font                           = "UbuntuCondensed 8"
 theme.border_width                          = 1
 theme.border_normal                         = "#2b2e32"
 theme.border_focus                          = "#7f7f7f"

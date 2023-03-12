@@ -286,6 +286,9 @@ local function update_widgets()
 				for _, w in ipairs(s.temperature_widget:get_children_by_id('icon')) do
 					w.stylesheet = 'svg { fill: '..color..'; }'
 				end
+				for _, w in ipairs(s.temperature_widget:get_children_by_id('temperature')) do
+					w:set_markup('<span font="'..(theme.temp_font or theme.sensor_font)..'">' .. temp .. ' °C</span>')
+				end
 			end
 		end,
 		{"thermal_zone0", "sys"}
@@ -354,6 +357,12 @@ local function set_screen_dpi(s, new_dpi)
 
 	s.taglist:set_base_layout(s.taglist_args.layout)
 	s.tasklist:set_base_layout(s.tasklist_args.layout)
+
+	for s in screen do
+		for _, w in ipairs(s.temperature_widget:get_children_by_id('temperature')) do
+			w:set_forced_width(utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 °C</span>'))
+		end
+	end
 end
 
 screen.connect_signal("request::desktop_decoration", function(s)
@@ -546,6 +555,12 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			image = beautiful.widget_temp,
 			stylesheet = 'svg { fill: '..theme.fg_normal..'; }',
 			widget = wibox.widget.imagebox
+		},
+		{
+			id = 'temperature',
+			text = '',
+			widget = wibox.widget.textbox,
+			forced_width = utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 °C</span>')
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
