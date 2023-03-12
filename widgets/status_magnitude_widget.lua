@@ -9,7 +9,9 @@ local status_magnitude_widget = { mt = {} }
 function status_magnitude_widget:layout(context, ...)
 	local result = {}
 	for _, w in pairs(self._private.widgets) do
-		table.insert(result, base.place_widget_at(w, 0, 0, ...))
+		if w.visible then
+			table.insert(result, base.place_widget_at(w, 0, 0, ...))
+		end
 	end
 	return result
 end
@@ -32,6 +34,55 @@ function status_magnitude_widget:set_children(children)
 	self._private.widgets = children
 end
 
+function status_magnitude_widget:get_value()
+	return self._private.value
+end
+
+function status_magnitude_widget:set_value(value)
+	self._private.value = value
+	self:update_contents()
+end
+
+function status_magnitude_widget:get_special()
+	return self._private.special
+end
+
+function status_magnitude_widget:set_special(special)
+	self._private.special = special
+	self:update_contents()
+end
+
+function status_magnitude_widget:update_contents(special)
+	if self._private.special == nil then
+		for name, w in pairs(self._private.widgets_special) do
+			w:set_visible(false)
+		end
+		local value = 1 + self._private.value * self._private.count
+		for num, w in ipairs(self._private.widgets_value) do
+			local opacity = value - num
+			if opacity < 0 then
+				w:set_visible(false)
+			else
+				if opacity > 1 then
+					w:set_opacity(1)
+				else
+					w:set_opacity(opacity)
+				end
+				w:set_visible(true)
+			end
+		end
+	else
+		for _, w in ipairs(self._private.widgets_value) do
+			w:set_visible(false)
+		end
+		for name, w in pairs(self._private.widgets_special) do
+			w:set_visible(name == self._private.special)
+		end
+	end
+	self:emit_signal("widget::layout_changed")
+	self:emit_signal("widget::redraw_needed")
+end
+
 local function new(opts)
 	local ret = fixed.horizontal()
 	local widgets_value = {}
@@ -42,22 +93,26 @@ local function new(opts)
 		local w = wibox.widget.imagebox(opts.icon .. i .. '.svg')
 		table.insert(ret._private.widgets, w)
 		table.insert(widgets_value, w)
-		w:set_opacity(0)
+		w:set_visible(false)
 	end
 	if opts.special ~= nil then
 		for _, special_key in ipairs(opts.special) do
 			local w = wibox.widget.imagebox(opts.icon .. special_key .. '.svg')
 			table.insert(ret._private.widgets, w)
 			widgets_special[special_key] = w
-			w:set_opacity(0)
+			w:set_visible(false)
 		end
 	end
 
+	ret._private.count = opts.count
 	ret._private.widgets_value = widgets_value
 	ret._private.widgets_special = widgets_special
 
 	ret._private.h_offset = 0
 	ret._private.v_offset = 0
+
+	ret._private.value = 0
+	ret._private.special = nil
 
 	gtable.crush(ret, status_magnitude_widget, true)
 	return ret
