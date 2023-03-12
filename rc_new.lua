@@ -1,20 +1,21 @@
 pcall(require, "luarocks.loader")
 
-local gears = require("gears")
-local gdebug = require("gears.debug")
 local awful = require("awful")
 local beautiful = require("beautiful")
-local wibox = require("wibox")
+local cairo = require("lgi").cairo
+local cyclefocus = require('cyclefocus')
+local dpi = beautiful.xresources.apply_dpi
+local dpi_watcher = require("widgets.dpi_watcher")
+local gdebug = require("gears.debug")
+local gears = require("gears")
+local hotkeys_popup = require("awful.hotkeys_popup")
+local popups = require("widgets.popups")
+local run_shell = require("widgets.run_shell")
+local status_magnitude_widget = require("widgets.status_magnitude_widget")
 local utils = require("utils")
 local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
-local cairo = require("lgi").cairo
-local run_shell = require("widgets.run_shell")
-local popups = require("widgets.popups")
-local dpi_watcher = require("widgets.dpi_watcher")
-local status_magnitude_widget = require("widgets.status_magnitude_widget")
-local dpi = beautiful.xresources.apply_dpi
-local hotkeys_popup = require("awful.hotkeys_popup")
+local wibox = require("wibox")
 local capi = {
 	drawin = drawin,
 	root = root,
@@ -218,19 +219,19 @@ local globalkeys = gears.table.join(
 		{description = "Tag history", group = "Tag"}
 	),
 	awful.key({ modkey }, "j",
-		function ()
+		function()
 			awful.client.focus.byidx(1)
 		end,
 		{description = "Focus next", group = "Client"}
 	),
 	awful.key({ modkey }, "k",
-		function ()
+		function()
 			awful.client.focus.byidx(-1)
 		end,
 		{description = "Focus previous", group = "Client"}
 	),
 	awful.key({ modkey }, "a",
-		function ()
+		function()
 			awful.prompt.run({
 				prompt = " Run Lua code: ",
 				textbox = awful.screen.focused().lua_prompt.widget,
@@ -240,12 +241,48 @@ local globalkeys = gears.table.join(
 		end,
 		{description = "Lua prompt", group = "Awesome"}
 	),
-	awful.key({modkey}, "r",
+	awful.key({ modkey }, "r",
 		run_shell.launch,
-		{description = "run shell", group = "Awesome"}
+		{description = "Run shell", group = "Awesome"}
 	)
 )
 root.keys(globalkeys)
+
+
+
+local clientkeys = gears.table.join(
+	awful.key({ altkey }, "Tab",
+		function(c)
+			cyclefocus.cycle({ modifier="Alt_L" })
+		end,
+		{description = "Focus next by history", group = "Client"}
+	),
+	awful.key({ altkey, 'Shift' }, "Tab",
+		function(c)
+			cyclefocus.cycle({ modifier="Alt_L" })
+		end,
+		{description = "Focus previous by history", group = "Client"}
+	)
+)
+-- }}}
+
+-- {{{ Rules
+awful.rules.rules = {
+	-- All clients will match this rule.
+	{
+		rule = { },
+		properties = {
+			--border_width = beautiful.border_width,
+			border_color = beautiful.border_normal,
+			focus = awful.client.focus.filter,
+			raise = true,
+			keys = clientkeys,
+			buttons = clientbuttons,
+			screen = awful.screen.preferred,
+			placement = awful.placement.no_overlap+awful.placement.no_offscreen
+		}
+	},
+}
 -- }}}
 
 
