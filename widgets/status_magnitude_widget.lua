@@ -80,6 +80,12 @@ function status_magnitude_widget:set_options(options)
 		end
 	end
 
+	if options.stylesheet ~= nil then
+		for _, w in pairs(widgets) do
+			w.stylesheet = options.stylesheet
+		end
+	end
+
 	self._private.count = options.count
 	self._private.widgets = widgets
 	self._private.widgets_value = widgets_value
