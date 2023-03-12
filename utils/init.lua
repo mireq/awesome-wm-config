@@ -1,5 +1,6 @@
 local M = {}
 
+local gears = require("gears")
 local gdebug = require("gears.debug")
 local beautiful = require("beautiful")
 local hotkeys_popup = require("awful.hotkeys_popup")
@@ -52,6 +53,46 @@ end
 M.calculate_text_width = function(s, text)
 	text_width_calculator_widget:set_markup(text)
 	return select(1, text_width_calculator_widget:get_preferred_size(s))
+end
+
+
+M.mix_color = function(c1, c2, value)
+	if value <= 0 then
+		return c1
+	end
+	if value >= 1 then
+		return c2
+	end
+	local value_neg = 1.0 - value
+	local r1, g1, b1, a1 = gears.color.parse_color(c1)
+	local r2, g2, b2, a2 = gears.color.parse_color(c2)
+
+	return string.format(
+		"#%02x%02x%02x%02x",
+		math.floor((r1 * value_neg + r2 * value) * 255),
+		math.floor((g1 * value_neg + g2 * value) * 255),
+		math.floor((b1 * value_neg + b2 * value) * 255),
+		math.floor((a1 * value_neg + a2 * value) * 255)
+	)
+end
+
+
+M.calculate_gradient_color = function(value, gradient)
+	local previous = gradient[1]
+	local ratio = 0
+	local color = previous[2]
+	for i, step in ipairs(gradient) do
+		if i ~= 1 then
+			step_value = step[1]
+			ratio = (value - previous[1]) / (step_value - previous[1])
+			color = M.mix_color(previous[2], step[2], ratio)
+		end
+		if value < previous[1] then
+			break
+		end
+		previous = step
+	end
+	return color
 end
 
 
