@@ -6,11 +6,14 @@ local awful = require("awful")
 local beautiful = require("beautiful")
 local wibox = require("wibox")
 local utils = require("utils")
+local vicious = require("vicious")
+local vicious_extra = require("vicious_extra")
 local cairo = require("lgi").cairo
 local run_shell = require("widgets.run_shell")
+local dpi_watcher = require("widgets.dpi_watcher")
+local status_magnitude_widget = require("widgets.status_magnitude_widget")
 local Rsvg = require('lgi').Rsvg
 local dpi = beautiful.xresources.apply_dpi
-local dpi_watcher = require("widgets.dpi_watcher")
 local hotkeys_popup = require("awful.hotkeys_popup")
 local capi = {
 	drawin = drawin,
@@ -251,6 +254,40 @@ root.keys(globalkeys)
 -- }}}
 
 
+-- {{{ Widget update
+local function update_widgets()
+	vicious.call(
+		vicious_extra.network,
+		function (widget, args)
+			local network_current = args
+			local link_quality = args.link_quality
+			if link_quality ~= 0 then
+				link_quality = link_quality * 1.2 + 0.1
+			end
+			for s in screen do
+				if link_quality == 0 then
+					s.wifi_widget:set_special('no')
+				else
+					s.wifi_widget:set_special(nil)
+					s.wifi_widget:set_value(link_quality)
+				end
+			end
+		end
+	)
+end
+-- }}}
+
+
+gears.timer {
+	timeout   = 10,
+	call_now  = false,
+	autostart = true,
+	single_shot = false,
+	callback  = update_widgets
+}
+-- }}}
+
+
 --screen.connect_signal("list", function()
 --	print("list signal")
 --end)
@@ -474,6 +511,12 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	}
 	s.tasklist = awful.widget.tasklist(s.tasklist_args)
 	s.lua_prompt = awful.widget.prompt()
+	s.wifi_widget = status_magnitude_widget({
+		icon = beautiful.net_wireless,
+		count = 4,
+		special = {'no'},
+		stylesheet = 'svg { color: '..theme.fg_normal..'; }'
+	})
 
 	s.tool_bar:setup({
 		{
@@ -483,8 +526,14 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			layout = wibox.layout.fixed.horizontal
 		},
 		s.tasklist,
+		{
+			s.wifi_widget,
+			layout = wibox.layout.fixed.horizontal
+		},
 		layout = wibox.layout.align.horizontal
 	})
+
+	update_widgets()
 end)
 
 awful.run_test = function()
