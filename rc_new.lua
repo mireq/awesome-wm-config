@@ -23,21 +23,22 @@ local capi = {
 	screen = screen
 }
 
-home = os.getenv("HOME")
-confdir = home .. "/.config/awesome"
-themes = confdir .. "/themes"
-active_theme = themes .. "/simple-dark"
+local home = os.getenv("HOME")
+local confdir = home .. "/.config/awesome"
+local themes = confdir .. "/themes"
+local active_theme = themes .. "/simple-dark"
 
 --terminal = "alacrittyc"
-terminal = "urxvtc"
-editor = os.getenv("EDITOR")
-gui_editor = "kwrite"
-browser = "firefox-bin"
-tasks = terminal .. " -e htop"
-launch_tv = "mpv --demuxer=lavf --demuxer-lavf-format=mpegts --vf=vavpp:deint=auto:interlaced-only=yes --demuxer-lavf-o-add=fflags=+nobuffer --demuxer-lavf-probe-info=nostreams --demuxer-lavf-analyzeduration=0 --force-window=immediate http://192.168.1.111:8001/"
+local terminal = "urxvtc"
+local editor = os.getenv("EDITOR")
+local gui_editor = "kwrite"
+local browser = "firefox-bin"
+local tasks = terminal .. " -e htop"
+local wireless_settings = "wpa_gui"
+local launch_tv = "mpv --demuxer=lavf --demuxer-lavf-format=mpegts --vf=vavpp:deint=auto:interlaced-only=yes --demuxer-lavf-o-add=fflags=+nobuffer --demuxer-lavf-probe-info=nostreams --demuxer-lavf-analyzeduration=0 --force-window=immediate http://192.168.1.111:8001/"
 
-modkey = "Mod4"
-altkey = "Mod1"
+local modkey = "Mod4"
+local altkey = "Mod1"
 
 beautiful.init(active_theme .. "/theme_new.lua")
 
@@ -175,6 +176,10 @@ tasklist_defaults.buttons = gears.table.join(
 	awful.button({ }, 5, function ()
 		awful.client.focus.byidx(-1)
 	end)
+)
+
+local wireless_buttons = gears.table.join(
+	awful.button({ }, 1, function() awful.spawn(wireless_settings) end)
 )
 
 for s in screen do
@@ -518,6 +523,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		special = {'no'},
 		stylesheet = 'svg { color: '..theme.fg_normal..'; }'
 	})
+	s.wifi_widget:set_buttons(wireless_buttons)
 	popups.netstat(s.wifi_widget, {
 		title_color = "#ffffff",
 		established_color = "#ffff00",
