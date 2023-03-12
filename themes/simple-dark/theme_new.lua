@@ -59,8 +59,12 @@ theme.notify_bg                             = theme.bg_normal
 --theme.notify_border                       = '#2b2e32'
 theme.notify_border                         = theme.border_focus
 
+theme.notification_bg                       = theme.bg_normal
+theme.notification_fg                       = theme.fg_normal
+theme.notification_border_color             = theme.border_focus
+
 theme.hotkeys_bg                            = theme.bg_normal
-theme.hotkeys_border_color                  = theme.notify_border
+theme.hotkeys_border_color                  = theme.border_focus
 theme.hotkeys_fg                            = theme.fg_normal
 theme.hotkeys_modifiers_fg                  = theme.fg_secondary
 theme.hotkeys_font                          = "Ubuntu Mono Bold 8"

@@ -123,7 +123,6 @@ local function show_netinfo(my_title_color, my_established_color, my_listen_colo
 			netpopup = naughty.notify({
 				text = '<span font="'..beautiful.process_font..'">'..str..'</span>',
 				timeout = 0, hover_timeout = 0.5,
-				bg = "#1A1A1A80"
 			})
 		end
 	end)

@@ -600,6 +600,7 @@ awful.run_test = function()
 				set_screen_dpi(s, 192)
 			end
 			--s:fake_remove()
+			utils.show_hotkeys_help()
 			collectgarbage("collect")
 		end
 	}
