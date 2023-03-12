@@ -7,6 +7,10 @@ local awful = require("awful")
 local Rsvg = require('lgi').Rsvg
 local cairo = require("lgi").cairo
 local dpi = beautiful.xresources.apply_dpi
+local wibox = require("wibox")
+
+
+local text_width_calculator_widget = wibox.widget.textbox()
 
 
 M.update_widget_template_attributes = function(widget_template, attributes)
@@ -42,6 +46,12 @@ M.render_svg = function(path, scaling)
 	cr:scale(scaling, scaling)
 	svg:render_cairo(cr)
 	return img
+end
+
+
+M.calculate_text_width = function(s, text)
+	text_width_calculator_widget:set_markup(text)
+	return select(1, text_width_calculator_widget:get_preferred_size(s))
 end
 
 
