@@ -10,6 +10,7 @@ local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
 local cairo = require("lgi").cairo
 local run_shell = require("widgets.run_shell")
+local popups = require("widgets.popups")
 local dpi_watcher = require("widgets.dpi_watcher")
 local status_magnitude_widget = require("widgets.status_magnitude_widget")
 local Rsvg = require('lgi').Rsvg
@@ -517,6 +518,11 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		special = {'no'},
 		stylesheet = 'svg { color: '..theme.fg_normal..'; }'
 	})
+	popups.netstat(s.wifi_widget, {
+		title_color = "#ffffff",
+		established_color = "#ffff00",
+		listen_color = "#00ff00"
+	})
 
 	s.tool_bar:setup({
 		{
@@ -551,7 +557,6 @@ awful.run_test = function()
 			for s in screen do
 				set_screen_dpi(s, 192)
 			end
-			utils.show_hotkeys_help()
 			--s:fake_remove()
 			collectgarbage("collect")
 		end

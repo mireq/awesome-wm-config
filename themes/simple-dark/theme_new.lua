@@ -23,6 +23,8 @@ theme.bg_focus                              = "#186dfe"
 theme.bg_urgent                             = "#1A1A1A"
 theme.bg_systray                            = theme.wibar_bg
 
+theme.process_font                          = "Ubuntu Mono 8"
+
 theme.launch                                = themes_dir .. "/icons/launch.svg"
 
 theme.menu_height                           = 20
