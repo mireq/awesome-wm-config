@@ -337,7 +337,7 @@ local function set_screen_dpi(s, new_dpi)
 	s.taglist:set_widget_template(s.taglist_args.widget_template)
 
 	s.tasklist_args.layout.max_widget_size = dpi(240, s)
-	s.tasklist_args.layout.spacing = dpi(8, s)
+	s.tasklist_args.layout.spacing = dpi(0, s)
 	utils.update_widget_template_attributes(s.tasklist_args.widget_template, {
 		icon_margin_role = {
 			top = dpi(1, s),
@@ -346,6 +346,9 @@ local function set_screen_dpi(s, new_dpi)
 		},
 		text_margin_role = {
 			left = dpi(2, s),
+		},
+		background_border_role = {
+			top = dpi(1, s),
 		}
 	})
 	s.tasklist:set_widget_template(s.tasklist_args.widget_template)
@@ -365,6 +368,36 @@ local function set_screen_dpi(s, new_dpi)
 	end
 end
 
+local function draw_wibar_background(context, cr, width, height)
+	local s = context.screen
+	local gradient_stops = ''
+	local gradient_pos = 0.0
+	if beautiful.wibar_border_top ~= nil then
+		gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_border_top
+		gradient_pos = gradient_pos + float_dpi(1.5, s) / height
+	end
+	if beautiful.wibar_border_top ~= nil or beautiful.wibar_border_bottom ~= nil or beautiful.wibar_bg_bottom ~= nil then
+		gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_bg
+		if beautiful.wibar_bg_bottom ~= nil then
+			gradient_pos = 1 - float_dpi(1.5, s) / height
+			gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_bg_bottom
+		end
+		gradient_pos = 1
+		if beautiful.wibar_border_bottom ~= nil then
+			gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_border_bottom
+		end
+	end
+
+	if gradient_stops ~= '' then
+		cr:set_source(gears.color('linear:0,0:0,'..height..gradient_stops))
+	else
+		cr:set_source(gears.color(beautiful.wibar_bg or beautiful.bg_normal))
+	end
+	cr:rectangle(0, 0, width, height)
+	cr:fill()
+end
+
+
 screen.connect_signal("request::desktop_decoration", function(s)
 	local scaling = float_dpi(1, s)
 
@@ -373,33 +406,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		position = "top",
 		screen = s,
 		height = dpi(18, s),
-		bgimage = function(context, cr, width, height)
-			local gradient_stops = ''
-			local gradient_pos = 0.0
-			if beautiful.wibar_border_top ~= nil then
-				gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_border_top
-				gradient_pos = gradient_pos + float_dpi(1.5, s) / height
-			end
-			if beautiful.wibar_border_top ~= nil or beautiful.wibar_border_bottom ~= nil or beautiful.wibar_bg_bottom ~= nil then
-				gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_bg
-				if beautiful.wibar_bg_bottom ~= nil then
-					gradient_pos = 1 - float_dpi(1.5, s) / height
-					gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_bg_bottom
-				end
-				gradient_pos = 1
-				if beautiful.wibar_border_bottom ~= nil then
-					gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_border_bottom
-				end
-			end
-
-			if gradient_stops ~= '' then
-				cr:set_source(gears.color('linear:0,0:0,'..height..gradient_stops))
-			else
-				cr:set_source(gears.color(beautiful.wibar_bg or beautiful.bg_normal))
-			end
-			cr:rectangle(0, 0, width, height)
-			cr:fill()
-		end
+		bgimage = draw_wibar_background
 	})
 
 	s.main_menu = awful.menu(get_main_menu(s))
@@ -483,31 +490,48 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		buttons = tasklist_defaults.buttons,
 		layout = {
 			max_widget_size = dpi(240, s),
-			spacing = dpi(8, s),
+			spacing = dpi(0, s),
 			layout = wibox.layout.flex.horizontal
 		},
 		widget_template = {
 			{
 				{
+					id = "background_role",
+					widget = wibox.container.background,
+				},
+				{
 					{
-						widget = awful.widget.clienticon,
+						widget = wibox.container.background,
+						opacity = 1 - (beautiful.tasklist_bg_opacity or 0.2),
+						bgimage = draw_wibar_background
 					},
-					id = 'icon_margin_role',
+					id = "background_border_role",
 					top = dpi(1, s),
-					bottom = dpi(1, s),
-					left = dpi(2, s),
 					widget = wibox.container.margin,
 				},
 				{
 					{
-						id = 'text_role',
-						widget = wibox.widget.textbox,
+						{
+							widget = awful.widget.clienticon,
+						},
+						id = 'icon_margin_role',
+						top = dpi(1, s),
+						bottom = dpi(1, s),
+						left = dpi(2, s),
+						widget = wibox.container.margin,
 					},
-					id = 'text_margin_role',
-					left = dpi(2, s),
-					widget = wibox.container.margin,
+					{
+						{
+							id = 'text_role',
+							widget = wibox.widget.textbox,
+						},
+						id = 'text_margin_role',
+						left = dpi(2, s),
+						widget = wibox.container.margin,
+					},
+					layout = wibox.layout.fixed.horizontal,
 				},
-				layout = wibox.layout.fixed.horizontal,
+				layout = wibox.layout.stack,
 			},
 			create_callback = function(self, c, index, objects)
 				self.client = c
@@ -529,6 +553,10 @@ screen.connect_signal("request::desktop_decoration", function(s)
 					else
 						w:set_left(0)
 					end
+				end
+				widgets = w:get_children_by_id('background_border_role')
+				for _, w in ipairs(widgets) do
+					w:set_top(dpi(1, s))
 				end
 			end,
 			widget = dpi_watcher,

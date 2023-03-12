@@ -41,16 +41,17 @@ theme.taglist_fg_urgent                     = '#00000000'
 theme.taglist_fg_occupied                   = '#00000000'
 theme.taglist_fg_empty                      = '#00000000'
 theme.taglist_fg_volatile                   = '#00000000'
-theme.taglist_bg_focus                      = "#186dfe"
+theme.taglist_bg_focus                      = theme.bg_focus
 theme.taglist_bg_empty                      = "#00000080"
 theme.taglist_bg_occupied                   = "#00000080"
 theme.taglist_squares_sel                   = themes_dir .. "/icons/square_sel.svg"
 theme.taglist_squares_unsel                 = themes_dir .. "/icons/square_unsel.svg"
 
 theme.tasklist_bg_normal                    = '#00000000'
-theme.tasklist_bg_focus                     = '#00000000'
+theme.tasklist_bg_focus                     = theme.bg_focus
 theme.tasklist_fg_normal                    = "#8a8b8f"
-theme.tasklist_fg_focus                     = "#cccdcf"
+theme.tasklist_fg_focus                     = theme.fg_focus
+theme.tasklist_bg_opacity                   = 0.2
 --theme.tasklist_fg_focus                   = "#A1D0D0"
 theme.tasklist_font_focus                   = "Ubuntu Bold 9"
 
