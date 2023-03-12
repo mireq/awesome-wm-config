@@ -9,4 +9,4 @@
 	url = https://github.com/vicious-widgets/vicious.git
 [submodule "cyclefocus"]
 	path = cyclefocus
-	url = git@github.com:mireq/awesome-cyclefocus.git
+	url = https://github.com/mireq/awesome-cyclefocus.git
