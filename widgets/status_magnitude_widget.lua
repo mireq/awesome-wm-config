@@ -34,6 +34,13 @@ function status_magnitude_widget:set_children(children)
 	self._private.widgets = children
 end
 
+function status_magnitude_widget:get_options()
+end
+
+function status_magnitude_widget:set_options(options)
+	self:update_contents()
+end
+
 function status_magnitude_widget:get_value()
 	return self._private.value
 end
@@ -49,6 +56,35 @@ end
 
 function status_magnitude_widget:set_special(special)
 	self._private.special = special
+	self:update_contents()
+end
+
+function status_magnitude_widget:set_options(options)
+	local widgets = {}
+	local widgets_value = {}
+	local widgets_special = {}
+
+	table.insert(widgets, wibox.widget.imagebox(options.icon .. 'base.svg'))
+	for i = 1, options.count do
+		local w = wibox.widget.imagebox(options.icon .. i .. '.svg')
+		table.insert(widgets, w)
+		table.insert(widgets_value, w)
+		w:set_visible(false)
+	end
+	if options.special ~= nil then
+		for _, special_key in ipairs(options.special) do
+			local w = wibox.widget.imagebox(options.icon .. special_key .. '.svg')
+			table.insert(widgets, w)
+			widgets_special[special_key] = w
+			w:set_visible(false)
+		end
+	end
+
+	self._private.count = options.count
+	self._private.widgets = widgets
+	self._private.widgets_value = widgets_value
+	self._private.widgets_special = widgets_special
+
 	self:update_contents()
 end
 
@@ -83,30 +119,10 @@ function status_magnitude_widget:update_contents(special)
 	self:emit_signal("widget::redraw_needed")
 end
 
-local function new(opts)
+local function new(options)
 	local ret = fixed.horizontal()
-	local widgets_value = {}
-	local widgets_special = {}
 
-	table.insert(ret._private.widgets, wibox.widget.imagebox(opts.icon .. 'base.svg'))
-	for i = 1, opts.count do
-		local w = wibox.widget.imagebox(opts.icon .. i .. '.svg')
-		table.insert(ret._private.widgets, w)
-		table.insert(widgets_value, w)
-		w:set_visible(false)
-	end
-	if opts.special ~= nil then
-		for _, special_key in ipairs(opts.special) do
-			local w = wibox.widget.imagebox(opts.icon .. special_key .. '.svg')
-			table.insert(ret._private.widgets, w)
-			widgets_special[special_key] = w
-			w:set_visible(false)
-		end
-	end
-
-	ret._private.count = opts.count
-	ret._private.widgets_value = widgets_value
-	ret._private.widgets_special = widgets_special
+	gtable.crush(ret, status_magnitude_widget, true)
 
 	ret._private.h_offset = 0
 	ret._private.v_offset = 0
@@ -114,7 +130,10 @@ local function new(opts)
 	ret._private.value = 0
 	ret._private.special = nil
 
-	gtable.crush(ret, status_magnitude_widget, true)
+	if options ~= nil then
+		ret:set_options(options)
+	end
+
 	return ret
 end
 
