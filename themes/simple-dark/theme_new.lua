@@ -24,6 +24,8 @@ theme.bg_urgent                             = "#1A1A1A"
 theme.bg_systray                            = theme.wibar_bg
 
 theme.process_font                          = "Ubuntu Mono 8"
+theme.widget_temp                           = themes_dir .. "/icons/temp.svg"
+theme.widget_wireless                       = themes_dir .. "/icons/net_wireless_"
 
 theme.launch                                = themes_dir .. "/icons/launch.svg"
 
@@ -64,6 +66,5 @@ theme.hotkeys_font                          = "Ubuntu Mono Bold 8"
 theme.hotkeys_description_font              = "Ubuntu Mono 8"
 theme.hotkeys_group_margin                  = 6
 
-theme.net_wireless                          = themes_dir .. "/icons/net_wireless_"
 
 return theme

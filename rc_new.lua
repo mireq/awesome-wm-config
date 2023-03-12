@@ -250,6 +250,13 @@ root.keys(globalkeys)
 
 
 -- {{{ Widget update
+
+local temperature_gradient = {
+	{50, beautiful.fg_normal},
+	{60, '#d7d087'},
+	{80, '#d78382'},
+}
+
 local function update_widgets()
 	vicious.call(
 		vicious_extra.network,
@@ -268,6 +275,20 @@ local function update_widgets()
 				end
 			end
 		end
+	)
+
+	vicious.call(
+		vicious.widgets.thermal,
+		function (widget, args)
+			local temp = args[1]
+			local color = utils.calculate_gradient_color(temp, temperature_gradient)
+			for s in screen do
+				for _, w in ipairs(s.temperature_widget:get_children_by_id('icon')) do
+					w.stylesheet = 'svg { fill: '..color..'; }'
+				end
+			end
+		end,
+		{"thermal_zone0", "sys"}
 	)
 end
 -- }}}
@@ -507,7 +528,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	s.tasklist = awful.widget.tasklist(s.tasklist_args)
 	s.lua_prompt = awful.widget.prompt()
 	s.wifi_widget = status_magnitude_widget({
-		icon = beautiful.net_wireless,
+		icon = beautiful.widget_wireless,
 		count = 4,
 		special = {'no'},
 		stylesheet = 'svg { color: '..theme.fg_normal..'; }'
@@ -517,6 +538,16 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		title_color = "#ffffff",
 		established_color = "#ffff00",
 		listen_color = "#00ff00"
+	})
+
+	s.temperature_widget = wibox.widget({
+		{
+			id = 'icon',
+			image = beautiful.widget_temp,
+			stylesheet = 'svg { fill: '..theme.fg_normal..'; }',
+			widget = wibox.widget.imagebox
+		},
+		layout = wibox.layout.fixed.horizontal
 	})
 
 	s.tool_bar:setup({
@@ -529,6 +560,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		s.tasklist,
 		{
 			s.wifi_widget,
+			s.temperature_widget,
 			layout = wibox.layout.fixed.horizontal
 		},
 		layout = wibox.layout.align.horizontal
