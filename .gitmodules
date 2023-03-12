@@ -7,3 +7,6 @@
 [submodule "vicious"]
 	path = vicious
 	url = https://github.com/vicious-widgets/vicious.git
+[submodule "cyclefocus"]
+	path = cyclefocus
+	url = https://github.com/blueyed/awesome-cyclefocus
