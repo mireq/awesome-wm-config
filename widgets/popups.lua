@@ -3,6 +3,7 @@ local os = require("os")
 local awful = require("awful")
 local string = require("string")
 local beautiful = require("beautiful")
+local dpi = beautiful.xresources.apply_dpi
 
 local module = {};
 
@@ -45,8 +46,7 @@ local function show_process_info(inc_proc_offset, title_color,user_color, root_c
 		if processpopup_visible then
 			processpopup = naughty.notify({
 				text = '<span font="'..(beautiful.process_font)..'" color="'..(beautiful.notify_fg or beautiful.fg_normal)..'">'..processstats..'</span>',
-				timeout = 0, hover_timeout = 0.5,
-				bg = "#1A1A1A80"
+				timeout = 0, hover_timeout = 0.5, border_width = dpi(1, awful.screen.focused())
 			})
 		end
 	end)
@@ -122,7 +122,7 @@ local function show_netinfo(my_title_color, my_established_color, my_listen_colo
 		if netpopup_visible then
 			netpopup = naughty.notify({
 				text = '<span font="'..beautiful.process_font..'">'..str..'</span>',
-				timeout = 0, hover_timeout = 0.5,
+				timeout = 0, hover_timeout = 0.5, border_width = dpi(1, awful.screen.focused())
 			})
 		end
 	end)
