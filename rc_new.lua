@@ -13,7 +13,6 @@ local run_shell = require("widgets.run_shell")
 local popups = require("widgets.popups")
 local dpi_watcher = require("widgets.dpi_watcher")
 local status_magnitude_widget = require("widgets.status_magnitude_widget")
-local Rsvg = require('lgi').Rsvg
 local dpi = beautiful.xresources.apply_dpi
 local hotkeys_popup = require("awful.hotkeys_popup")
 local capi = {
@@ -132,16 +131,6 @@ local function get_main_menu(s)
 	)
 end
 
-
-local function render_svg(path, scaling)
-	local svg = Rsvg.Handle.new_from_file(path)
-	local dim = svg:get_dimensions()
-	local img = cairo.ImageSurface(cairo.Format.ARGB32, dim.width * scaling, dim.height * scaling)
-	local cr = cairo.Context(img)
-	cr:scale(scaling, scaling)
-	svg:render_cairo(cr)
-	return img
-end
 
 
 local taglist_common = {}
@@ -308,8 +297,8 @@ local function set_screen_dpi(s, new_dpi)
 	s.tool_bar.height = dpi(18, s)
 
 	s.taglist_args.style = {
-		squares_sel = render_svg(beautiful.taglist_squares_sel, scaling),
-		squares_unsel = render_svg(beautiful.taglist_squares_unsel, scaling),
+		squares_sel = utils.render_svg(beautiful.taglist_squares_sel, scaling),
+		squares_unsel = utils.render_svg(beautiful.taglist_squares_unsel, scaling),
 	}
 	utils.update_widget_template_attributes(s.taglist_args.widget_template, {
 		container_role = {
@@ -340,7 +329,7 @@ local function set_screen_dpi(s, new_dpi)
 	s.main_menu:hide()
 	s.main_menu = awful.menu(get_main_menu(s))
 
-	s.launcher:set_image(render_svg(theme.launch, scaling))
+	s.launcher:set_image(utils.render_svg(theme.launch, scaling))
 
 	s.taglist:set_base_layout(s.taglist_args.layout)
 	s.tasklist:set_base_layout(s.tasklist_args.layout)
@@ -389,7 +378,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		image = beautiful.launch,
 		menu = s.main_menu
 	})
-	s.launcher:set_image(render_svg(theme.launch, scaling))
+	s.launcher:set_image(utils.render_svg(theme.launch, scaling))
 	s.launcher:set_buttons(gears.table.join(
 		awful.button({ }, 1, function() s.main_menu:toggle() end)
 	))
@@ -399,8 +388,8 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		filter = awful.widget.taglist.filter.all,
 		buttons = gears.table.join(taglist_common.buttons),
 		style = {
-			squares_sel = render_svg(beautiful.taglist_squares_sel, scaling),
-			squares_unsel = render_svg(beautiful.taglist_squares_unsel, scaling),
+			squares_sel = utils.render_svg(beautiful.taglist_squares_sel, scaling),
+			squares_unsel = utils.render_svg(beautiful.taglist_squares_unsel, scaling),
 		},
 		layout = {
 			spacing = 0,
