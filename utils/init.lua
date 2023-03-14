@@ -77,6 +77,19 @@ M.mix_color = function(c1, c2, value)
 end
 
 
+M.set_color_alpha = function(c, alpha)
+	local r, g, b, a = gears.color.parse_color(c)
+	a = a * alpha
+	return string.format(
+		"#%02x%02x%02x%02x",
+		math.floor((r) * 255),
+		math.floor((g) * 255),
+		math.floor((b) * 255),
+		math.floor((a) * 255)
+	)
+end
+
+
 M.calculate_gradient_color = function(value, gradient)
 	local previous = gradient[1]
 	local ratio = 0
