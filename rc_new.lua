@@ -253,13 +253,19 @@ root.keys(globalkeys)
 local clientkeys = gears.table.join(
 	awful.key({ altkey }, "Tab",
 		function(c)
-			cyclefocus.cycle({ modifier="Alt_L" })
+			cyclefocus.cycle({
+				modifier = "Alt_L",
+				centered = true
+			})
 		end,
 		{description = "Focus next by history", group = "Client"}
 	),
 	awful.key({ altkey, 'Shift' }, "Tab",
 		function(c)
-			cyclefocus.cycle({ modifier="Alt_L" })
+			cyclefocus.cycle({
+				modifier = "Alt_L",
+				centered = true
+			})
 		end,
 		{description = "Focus previous by history", group = "Client"}
 	)
@@ -533,18 +539,18 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		widget_template = {
 			{
 				{
-					id = "background_role",
-					widget = wibox.container.background,
-				},
-				{
 					{
+						id = "background_role",
 						widget = wibox.container.background,
-						opacity = 1 - (beautiful.tasklist_bg_opacity or 0.2),
-						bgimage = draw_wibar_background
+						forced_height = dpi(1, s)
 					},
-					id = "background_border_role",
-					top = dpi(1, s),
-					widget = wibox.container.margin,
+					{
+						id = "background_shading_role",
+						widget = wibox.container.background,
+						bg = '#00000000',
+					},
+					fill_space = true,
+					widget = wibox.layout.fixed.vertical,
 				},
 				{
 					{
@@ -570,6 +576,19 @@ screen.connect_signal("request::desktop_decoration", function(s)
 				},
 				layout = wibox.layout.stack,
 			},
+			update_common = function(self, c, index, objects)
+				local widgets = self:get_children_by_id('background_shading_role')
+				local bg = '#00000000'
+				if c.active then
+					bg = beautiful.tasklist_bg_focus or beautiful.bg_focus or bg_normal
+				elseif c.urgent then
+					bg = beautiful.tasklist_bg_urgent or beautiful.bg_urgent or bg_normal
+				end
+				bg = utils.set_color_alpha(bg, beautiful.tasklist_bg_opacity or 0.2)
+				for _, w in ipairs(widgets) do
+					w:set_bg(bg)
+				end
+			end,
 			create_callback = function(self, c, index, objects)
 				self.client = c
 				if c.icon == nil then
@@ -578,6 +597,10 @@ screen.connect_signal("request::desktop_decoration", function(s)
 						w:set_left(0)
 					end
 				end
+				self.update_common(self, c, index, objects)
+			end,
+			update_callback = function(self, c, index, objects)
+				self.update_common(self, c, index, objects)
 			end,
 			dpi_callback = function(w)
 				local widgets = w:get_children_by_id('icon_margin_role')
@@ -591,9 +614,9 @@ screen.connect_signal("request::desktop_decoration", function(s)
 						w:set_left(0)
 					end
 				end
-				widgets = w:get_children_by_id('background_border_role')
+				widgets = w:get_children_by_id('background_role')
 				for _, w in ipairs(widgets) do
-					w:set_top(dpi(1, s))
+					w:set_forced_height(dpi(1, s))
 				end
 			end,
 			widget = dpi_watcher,

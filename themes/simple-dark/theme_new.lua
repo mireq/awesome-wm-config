@@ -21,7 +21,8 @@ theme.fg_focus                              = "#ffffff"
 theme.fg_urgent                             = "#CC9393"
 theme.bg_normal                             = "#222528"
 theme.bg_focus                              = "#186dfe"
-theme.bg_urgent                             = "#1A1A1A"
+--theme.bg_urgent                             = "#1A1A1A"
+theme.bg_urgent                             = "#D78382"
 theme.bg_systray                            = theme.wibar_bg
 
 theme.process_font                          = "Ubuntu Mono 8"
