@@ -555,6 +555,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 				{
 					{
 						{
+							id = 'client_icon_role',
 							widget = awful.widget.clienticon,
 						},
 						id = 'icon_margin_role',
@@ -579,14 +580,21 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			update_common = function(self, c, index, objects)
 				local widgets = self:get_children_by_id('background_shading_role')
 				local bg = '#00000000'
+				local icon_opacity = beautiful.tasklist_icon_opacity_normal or 1
 				if c.active then
 					bg = beautiful.tasklist_bg_focus or beautiful.bg_focus or bg_normal
+					icon_opacity = beautiful.tasklist_icon_opacity_focus or 1
 				elseif c.urgent then
 					bg = beautiful.tasklist_bg_urgent or beautiful.bg_urgent or bg_normal
+					icon_opacity = beautiful.tasklist_icon_opacity_focus or 1
 				end
 				bg = utils.set_color_alpha(bg, beautiful.tasklist_bg_opacity or 0.2)
 				for _, w in ipairs(widgets) do
 					w:set_bg(bg)
+				end
+				widgets = self:get_children_by_id('client_icon_role')
+				for _, w in ipairs(widgets) do
+					w:set_opacity(icon_opacity)
 				end
 			end,
 			create_callback = function(self, c, index, objects)

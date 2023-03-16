@@ -53,6 +53,8 @@ theme.tasklist_bg_focus                     = theme.bg_focus
 theme.tasklist_fg_normal                    = "#8a8b8f"
 theme.tasklist_fg_focus                     = theme.fg_focus
 theme.tasklist_bg_opacity                   = 0.2
+theme.tasklist_icon_opacity_normal          = 0.5
+theme.tasklist_icon_opacity_focus           = 1
 --theme.tasklist_fg_focus                   = "#A1D0D0"
 theme.tasklist_font_focus                   = "Ubuntu Bold 9"
 
