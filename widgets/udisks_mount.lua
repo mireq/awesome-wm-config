@@ -4,6 +4,7 @@ local common = require("awful.widget.common")
 local gtable = require("gears.table")
 local fixed = require("wibox.layout.fixed")
 local gdebug = require("gears.debug")
+local timer = require("gears.timer")
 local beautiful = require("beautiful")
 
 
@@ -55,27 +56,38 @@ function udisks_mount_widget:fit(context, width, height)
 end
 
 local function new(args)
-	local ret = base.make_widget(nil, nil, {
+	local w = base.make_widget(nil, nil, {
 		enable_properties = true,
 	})
 
-	gtable.crush(ret, udisks_mount_widget, true)
+	gtable.crush(w, udisks_mount_widget, true)
 
-	print(args.screen)
 	local screen = get_screen(args.screen)
 
-	ret._private.screen = screen
-	ret._private.base_layout = fixed.horizontal()
-	print(screen)
+	w._private.screen = screen
+	w._private.base_layout = fixed.horizontal()
+	w._private.pending_update = false
 
-	local data = setmetatable({"a", "b"}, { __mode = 'k' })
 	local uf = common.list_update;
+	local data = setmetatable({}, { __mode = 'k' })
 
-	widget_update(ret._private.screen, ret, ret._private.buttons, ret._private.filter, data, args.style, uf, args)
+	function w._do_update_now()
+		widget_update(w._private.screen, w, w._private.buttons, w._private.filter, data, args.style, uf, args)
+		w._private.pending_update = false
+	end
 
-	gtable.crush(ret, udisks_mount_widget, true)
+	function w._do_update()
+		if not w._private.pending_update then
+			timer.delayed_call(w._do_update_now)
+			w._private.pending_update = true
+		end
+	end
 
-	return ret
+	w._do_update_now()
+
+	gtable.crush(w, udisks_mount_widget, true)
+
+	return w
 end
 
 function udisks_mount_widget.mt:__call(...)
