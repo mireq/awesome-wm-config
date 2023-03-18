@@ -334,7 +334,7 @@ function udisks_mount_widget:set_base_layout(layout)
 	self:emit_signal("property::base_layout", layout)
 end
 
-function udisks_mount_widget.mount(device)
+function udisks_mount_widget.mount(device, cb)
 	if device['Mounted'] then
 		print("already mounted", device["Mounted"])
 	else
@@ -353,21 +353,25 @@ function udisks_mount_widget.mount(device)
 			nil,
 			function(conn, res)
 				local ret, err = system_bus:call_finish(res)
+				local path = nil
 				if err then
 					naughty.notify({
 						preset = naughty.config.presets.critical,
 						text = tostring(err),
 					})
 				else
-					local path = ret.value[1]
-					print(path)
+					path = ret.value[1]
+					device['Mounted'] = path
+				end
+				if cb ~= nil then
+					cb(path, device, err)
 				end
 			end
 		)
 	end
 end
 
-function udisks_mount_widget.unmount(device)
+function udisks_mount_widget.unmount(device, cb)
 	if device['Mounted'] then
 		local path = device['Mounted']
 		system_bus:call(
@@ -389,14 +393,16 @@ function udisks_mount_widget.unmount(device)
 						preset = naughty.config.presets.critical,
 						text = tostring(err),
 					})
-				else
+				end
+				if cb ~= nil then
+					cb(path, device, err)
 				end
 			end
 		)
 	end
 end
 
-function udisks_mount_widget.eject(device)
+function udisks_mount_widget.eject(device, cb)
 	if device['Drive']['Ejectable'] then
 		local path = device['Mounted']
 		system_bus:call(
@@ -418,12 +424,15 @@ function udisks_mount_widget.eject(device)
 						preset = naughty.config.presets.critical,
 						text = tostring(err),
 					})
-				else
+				end
+				if cb ~= nil then
+					cb(path, device, err)
 				end
 			end
 		)
 	end
 end
+
 
 local function new(args)
 	local w = base.make_widget(nil, nil, {
