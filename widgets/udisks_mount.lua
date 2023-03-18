@@ -85,15 +85,36 @@ local function parse_devices(conn, res, callback)
 					drive_info = {}
 					drives[drive_path] = drive_info
 				end
-				block_info['drive'] = drive_info
+				block_info['Drive'] = drive_info
 
 				for __, attribute in ipairs({'HintAuto', 'HintIconName', 'HintIgnore', 'HintName', 'HintPartitionable', 'HintSymbolicIconName', 'HintSystem', 'Id', 'IdLabel', 'IdType', 'IdUUID', 'IdUsage', 'IdVersion', 'ReadOnly', 'Size'}) do
 					block_info[attribute] = block_data[attribute]
 				end
+				block_info['HasFilesystem'] = filesystem_data ~= nil
 
 				block_devices[path] = block_info
 			end
 		end
+	end
+
+	local to_remove = {}
+	local to_check = {}
+	for path, info in pairs(drives) do
+		if device_manager.drives[path] == nil then
+			device_manager.drives[path] = info
+			print("added", path)
+		else
+			table.insert(to_check, path)
+		end
+	end
+	for path, info in pairs(device_manager.drives) do
+		if drives[path] == nil then
+			table.insert(to_remove, path)
+		end
+	end
+	for _, path in ipairs(to_remove) do
+		device_manager.drives[path] = nil
+		print("removed", path)
 	end
 end
 
