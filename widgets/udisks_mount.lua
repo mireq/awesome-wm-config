@@ -5,10 +5,12 @@ local fixed = require("wibox.layout.fixed")
 local gears = require("gears")
 local gdebug = require("gears.debug")
 local gtable = require("gears.table")
+local naughty = require("naughty")
 local timer = require("gears.timer")
 local wibox = require("wibox")
 local lgi = require("lgi")
 local Gio = lgi.Gio
+local GLib = lgi.GLib
 local GObject = lgi.GObject
 
 -- Connect so system DBus
@@ -115,9 +117,9 @@ local function parse_devices(conn, res, callback)
 					block_info[attribute] = block_data[attribute]
 				end
 				block_info['HasFilesystem'] = filesystem_data ~= nil
-				block_info['Mounted'] = false
+				block_info['Mounted'] = nil
 				if filesystem_data ~= nil then
-					block_info['Mounted'] = filesystem_data['MountPoints'][1] ~= nil
+					block_info['Mounted'] = filesystem_data['MountPoints'][1]
 				end
 
 				block_devices[path] = block_info
@@ -250,14 +252,17 @@ local function default_template()
 		{
 			id = 'icon_role',
 			widget = wibox.widget.imagebox,
-			image = beautiful.widget_temp,
 			stylesheet = 'svg { fill: '..beautiful.fg_normal..' }',
 		}
 	}
 end
 
-local function widget_label(c, args, tb)
-	return "", nil, nil, beautiful.widget_temp, {}
+local function widget_label(dev, args, tb)
+	local icon = beautiful.widget_temp
+	if dev['Mounted'] then
+		icon = beautiful.launch
+	end
+	return "", nil, nil, icon, {}
 end
 
 local function widget_update(s, self, buttons, filter, data, style, update_function, args)
@@ -307,6 +312,67 @@ function udisks_mount_widget:set_base_layout(layout)
 	self:emit_signal("widget::layout_changed")
 	self:emit_signal("widget::redraw_needed")
 	self:emit_signal("property::base_layout", layout)
+end
+
+function udisks_mount_widget.mount(device)
+	if device['Mounted'] then
+		print("already mounted", device["Mounted"])
+	else
+		print(device['path'])
+		system_bus:call(
+			'org.freedesktop.UDisks2',
+			device['path'],
+			'org.freedesktop.UDisks2.Filesystem',
+			'Mount',
+			GLib.Variant.new_tuple({
+				GLib.Variant('a{sv}', {})
+			}, 1),
+			nil,
+			Gio.DBusConnectionFlags.NONE,
+			-1,
+			nil,
+			function(conn, res)
+				local ret, err = system_bus:call_finish(res);
+				if err then
+					naughty.notify({
+						preset = naughty.config.presets.critical,
+						text = tostring(err),
+					});
+				else
+					local path = ret.value[1]
+					print(path)
+				end
+			end
+		)
+	end
+end
+
+function udisks_mount_widget.unmount(device)
+	if device['Mounted'] then
+		print(device['path'])
+		system_bus:call(
+			'org.freedesktop.UDisks2',
+			device['path'],
+			'org.freedesktop.UDisks2.Filesystem',
+			'Unmount',
+			GLib.Variant.new_tuple({
+				GLib.Variant('a{sv}', {})
+			}, 1),
+			nil,
+			Gio.DBusConnectionFlags.NONE,
+			-1,
+			nil,
+			function(conn, res)
+				local ret, err = system_bus:call_finish(res);
+				if err then
+					naughty.notify({
+						preset = naughty.config.presets.critical,
+						text = tostring(err),
+					});
+				end
+			end
+		)
+	end
 end
 
 local function new(args)
