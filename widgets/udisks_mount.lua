@@ -90,6 +90,7 @@ local function parse_devices(conn, res, callback)
 			if drive_info == nil then
 				drive_info = {}
 			end
+			drive_info['path'] = path
 			drives[path] = drive_info
 			-- fill important properties
 			for __, attribute in ipairs({'CanPowerOff', 'ConnectionBus', 'Id', 'Media', 'MediaAvailable', 'MediaRemovable', 'Model', 'Removable', 'Serial', 'Size', 'SortKey', 'Vendor'}) do
@@ -108,6 +109,7 @@ local function parse_devices(conn, res, callback)
 					drives[drive_path] = drive_info
 				end
 				block_info['Drive'] = drive_info
+				block_info['path'] = path
 
 				for __, attribute in ipairs({'HintAuto', 'HintIconName', 'HintIgnore', 'HintName', 'HintPartitionable', 'HintSymbolicIconName', 'HintSystem', 'Id', 'IdLabel', 'IdType', 'IdUUID', 'IdUsage', 'IdVersion', 'ReadOnly', 'Size'}) do
 					block_info[attribute] = block_data[attribute]
@@ -261,7 +263,11 @@ end
 local function widget_update(s, self, buttons, filter, data, style, update_function, args)
 	local function label(c, tb) return widget_label(c, style, tb) end
 	local devices = {}
-	gdebug.dump(data)
+	for __, device in pairs(data) do
+		if self._private.filter(device) then
+			table.insert(devices, device)
+		end
+	end
 
 	update_function(self._private.base_layout, buttons, label, data, devices, {
 		widget_template = self._private.widget_template or default_template(),
@@ -286,7 +292,7 @@ end
 udisks_mount_widget.filter = {}
 
 function udisks_mount_widget.filter.removable(v)
-	return v['Removable']
+	return v['Drive'] ~= nil and v['Drive']['Removable'] and v['HasFilesystem']
 end
 
 local function new(args)
