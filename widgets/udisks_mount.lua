@@ -295,6 +295,20 @@ function udisks_mount_widget.filter.removable(v)
 	return v['Drive'] ~= nil and v['Drive']['Removable'] and v['HasFilesystem']
 end
 
+function udisks_mount_widget:set_base_layout(layout)
+	self._private.base_layout = base.make_widget_from_value(
+		layout or fixed.horizontal
+	)
+
+	assert(self._private.base_layout.is_widget)
+
+	self._do_update()
+
+	self:emit_signal("widget::layout_changed")
+	self:emit_signal("widget::redraw_needed")
+	self:emit_signal("property::base_layout", layout)
+end
+
 local function new(args)
 	local w = base.make_widget(nil, nil, {
 		enable_properties = true,
@@ -313,7 +327,6 @@ local function new(args)
 		screen = screen
 	})
 
-	w._private.base_layout = fixed.horizontal()
 	w._private.pending_update = false
 
 	local data = setmetatable(device_manager.block_devices, { __mode = 'k' })
@@ -334,7 +347,7 @@ local function new(args)
 		w._do_update()
 	end
 
-	w._do_update()
+	w:set_base_layout()
 	device_manager:weak_connect_signal('changed', w._on_devices_changed)
 
 	gtable.crush(w, udisks_mount_widget, true)
