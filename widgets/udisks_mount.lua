@@ -15,7 +15,7 @@ local system_bus = nil
 
 -- global device manager state
 local signals = {}
-local device_manager = {devices = {}, drives={}}
+local device_manager = {drives={}, block_devices={}}
 
 function device_manager.connect_signal(name, callback)
 	signals[name] = signals[name] or {}
@@ -58,13 +58,24 @@ local function parse_devices(conn, res, callback)
 		local path = dev_info[1]
 		local device_data = dev_info[2]
 
-		if device_data['org.freedesktop.UDisks2.Block'] ~= nil then
-			block_devices[path] = device_data
-		end
-		if device_data['org.freedesktop.UDisks2.Drive'] ~= nil then
-			drives[path] = device_data
+		local drive_data = device_data['org.freedesktop.UDisks2.Drive']
+		local block_data = device_data['org.freedesktop.UDisks2.Block']
+
+		if drive_data ~= nil then
+			-- retrieve drive info object or create
+			local drive_info = drives[path]
+			if drive_info == nil then
+				drive_info = {}
+			end
+			drives[path] = drive_info
+			-- fill important properties
+			for __, attribute in ipairs({'CanPowerOff', 'ConnectionBus', 'Id', 'Media', 'MediaAvailable', 'MediaRemovable', 'Model', 'Removable', 'Serial', 'Size', 'SortKey', 'Vendor'}) do
+				drive_info[attribute] = drive_data[attribute]
+			end
 		end
 	end
+
+	gdebug.dump(drives)
 end
 
 
