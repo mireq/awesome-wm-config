@@ -336,9 +336,8 @@ end
 
 function udisks_mount_widget.mount(device, cb)
 	if device['Mounted'] then
-		print("already mounted", device["Mounted"])
+		cb(device["Mounted"], device, nil)
 	else
-		print(device['path'])
 		system_bus:call(
 			'org.freedesktop.UDisks2',
 			device['path'],
@@ -399,12 +398,14 @@ function udisks_mount_widget.unmount(device, cb)
 				end
 			end
 		)
+	else
+		cb(nil, device, "Device not mounted")
 	end
 end
 
 function udisks_mount_widget.eject(device, cb)
+	local path = device['Mounted']
 	if device['Drive']['Ejectable'] then
-		local path = device['Mounted']
 		system_bus:call(
 			'org.freedesktop.UDisks2',
 			device['Drive']['path'],
@@ -430,9 +431,19 @@ function udisks_mount_widget.eject(device, cb)
 				end
 			end
 		)
+	else
+		cb(path, device, "Device not ejectable")
 	end
 end
 
+function udisks_mount_widget.unmount_and_eject(device, cb)
+	udisks_mount_widget.unmount(device, function(path, device, err)
+		local outer_path = path
+		udisks_mount_widget.eject(device, function(path, device, err)
+			cb(outer_path, device, err)
+		end)
+	end)
+end
 
 local function new(args)
 	local w = base.make_widget(nil, nil, {
