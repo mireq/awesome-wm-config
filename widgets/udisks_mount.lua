@@ -15,7 +15,7 @@ local system_bus = nil
 
 -- global device manager state
 local signals = {}
-local device_manager = {devices = {}}
+local device_manager = {devices = {}, drives={}}
 
 function device_manager.connect_signal(name, callback)
 	signals[name] = signals[name] or {}
@@ -41,6 +41,48 @@ function device_manager.emit_signal(name, ...)
 	end
 end
 
+local function rescan_devices()
+	print("rescan")
+end
+
+local function register_listeners()
+	system_bus:signal_subscribe(
+		'org.freedesktop.UDisks2',
+		'org.freedesktop.DBus.ObjectManager',
+		'InterfacesAdded',
+		nil,
+		nil,
+		Gio.DBusSignalFlags.NONE,
+		function(conn, sender, path, interface_name, signal_name, user_data)
+			rescan_devices()
+		end
+	)
+	system_bus:signal_subscribe(
+		'org.freedesktop.UDisks2',
+		'org.freedesktop.DBus.ObjectManager',
+		'InterfacesRemoved',
+		nil,
+		nil,
+		Gio.DBusSignalFlags.NONE,
+		function(conn, sender, path, interface_name, signal_name, user_data)
+			rescan_devices()
+		end
+	)
+	system_bus:signal_subscribe(
+		'org.freedesktop.UDisks2',
+		'org.freedesktop.DBus.Properties',
+		'PropertiesChanged',
+		nil,
+		nil,
+		Gio.DBusSignalFlags.NONE,
+		function(conn, sender, path, interface_name, signal_name, user_data)
+			rescan_devices()
+		end
+	)
+	rescan_devices()
+end
+
+
 local cancellable = Gio.Cancellable()
 Gio.bus_get(
 	Gio.BusType.SYSTEM,
@@ -51,6 +93,7 @@ Gio.bus_get(
 			print(tostring(err))
 		else
 			system_bus = connection
+			register_listeners()
 		end
 	end
 )
