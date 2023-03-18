@@ -252,6 +252,25 @@ local function default_template()
 	return {
 		id = 'icon_margin_role',
 		widget = wibox.container.margin,
+		update_common = function(self, device, index, objects)
+			local icon = self:get_children_by_id('icon_role')[1]
+			if icon ~= nil then
+				local opacity = 1
+				if not device['Mounted']  then
+					opacity = beautiful.udisks_umounted_opacity
+					if opacity == nil then
+						opacity = 1
+					end
+				end
+				icon:set_opacity(opacity)
+			end
+		end,
+		create_callback = function(self, device, index, objects)
+			self.update_common(self, device, index, objects)
+		end,
+		update_callback = function(self, device, index, objects)
+			self.update_common(self, device, index, objects)
+		end,
 		{
 			id = 'icon_role',
 			widget = wibox.widget.imagebox,
@@ -273,16 +292,14 @@ local function widget_label(dev, args, tb)
 	if beautiful['udisks_' .. icon_name] ~= nil then
 		final_icon = beautiful['udisks_' .. icon_name]
 	end
+	if beautiful['udisks_storage' .. suffix] ~= nil then
+		final_icon = beautiful['udisks_storage' .. suffix]
+	end
 	if beautiful['udisks_' .. icon_name .. suffix] ~= nil then
 		final_icon = beautiful['udisks_' .. icon_name .. suffix]
 	end
 
-	local icon = beautiful.widget_temp
-	if dev['Mounted'] then
-		icon = beautiful.launch
-	end
-
-	return "", nil, nil, icon, {}
+	return "", nil, nil, final_icon, {}
 end
 
 local function widget_update(s, self, buttons, filter, data, style, update_function, args)
