@@ -11,6 +11,7 @@ local gears = require("gears")
 local hotkeys_popup = require("awful.hotkeys_popup")
 local popups = require("widgets.popups")
 local run_shell = require("widgets.run_shell")
+local udisks_mount = require("widgets.udisks_mount")
 local status_magnitude_widget = require("widgets.status_magnitude_widget")
 local utils = require("utils")
 local vicious = require("vicious")
@@ -660,6 +661,9 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
+	local w = udisks_mount({
+		screen = s,
+	});
 
 	s.tool_bar:setup({
 		{
@@ -672,6 +676,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		{
 			s.wifi_widget,
 			s.temperature_widget,
+			w,
 			layout = wibox.layout.fixed.horizontal
 		},
 		layout = wibox.layout.align.horizontal
@@ -696,7 +701,7 @@ awful.run_test = function()
 				set_screen_dpi(s, 192)
 			end
 			--s:fake_remove()
-			utils.show_hotkeys_help()
+			--utils.show_hotkeys_help()
 			collectgarbage("collect")
 		end
 	}
