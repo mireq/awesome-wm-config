@@ -663,6 +663,14 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	})
 	local w = udisks_mount({
 		screen = s,
+		buttons = gears.table.join(
+			awful.button({ }, 1, function(dev)
+				udisks_mount.mount(dev, function(path) print("mounted", path); end)
+			end),
+			awful.button({ }, 3, function(dev)
+				udisks_mount.unmount(dev, function(path) print("unmounted", path); end)
+			end)
+		)
 	});
 
 	s.tool_bar:setup({
@@ -686,21 +694,21 @@ screen.connect_signal("request::desktop_decoration", function(s)
 end)
 
 awful.run_test = function()
-	--s = screen.fake_add(20, 20, 500, 400)
-	for s in screen do
-		set_screen_dpi(s, 384)
-	end
+	s = screen.fake_add(20, 20, 500, 400)
+	--for s in screen do
+	--	set_screen_dpi(s, 384)
+	--end
 	gears.timer {
-		timeout   = 0.5,
+		timeout   = 0.05,
 		call_now  = false,
 		autostart = true,
 		single_shot = true,
 		callback  = function()
 			--set_screen_dpi(s, 384)
-			for s in screen do
-				set_screen_dpi(s, 192)
-			end
-			--s:fake_remove()
+			--for s in screen do
+			--	set_screen_dpi(s, 192)
+			--end
+			s:fake_remove()
 			--utils.show_hotkeys_help()
 			collectgarbage("collect")
 		end
