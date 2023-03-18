@@ -41,6 +41,48 @@ function device_manager.emit_signal(name, ...)
 	end
 end
 
+local function object_changed(a, b)
+	for key, value in pairs(a) do
+		if value ~= b[key] and key ~= 'Drive' then
+			return true
+		end
+		if a['Drive'] ~= nil and b['Drive'] ~= nil and object_changed(a['Drive'], b['Drive']) then
+			return true
+		end
+	end
+	return false
+end
+
+local function update_list(old, new, cb_create, cb_remove, cb_change)
+	local to_remove = {}
+	local to_check = {}
+	for path, info in pairs(new) do
+		if old[path] == nil then
+			old[path] = info
+			cb_create(path, new)
+		else
+			table.insert(to_check, path)
+		end
+	end
+	for path, info in pairs(old) do
+		if new[path] == nil then
+			table.insert(to_remove, path)
+		end
+	end
+	for _, path in ipairs(to_remove) do
+		local instance = old[path]
+		old[path] = nil
+		cb_remove(path, instance)
+	end
+	for _, path in ipairs(to_check) do
+		if object_changed(old[path], new[path]) then
+			local instance = old[path]
+			old[path] = new[path]
+			cb_change(path, new[path], instance)
+		end
+	end
+end
+
 local function parse_devices(conn, res, callback)
 	local ret, err = system_bus:call_finish(res);
 
@@ -91,31 +133,50 @@ local function parse_devices(conn, res, callback)
 					block_info[attribute] = block_data[attribute]
 				end
 				block_info['HasFilesystem'] = filesystem_data ~= nil
+				block_info['Mounted'] = false
+				if filesystem_data ~= nil then
+					block_info['Mounted'] = filesystem_data['MountPoints'][1] ~= nil
+				end
 
 				block_devices[path] = block_info
 			end
 		end
 	end
 
-	local to_remove = {}
-	local to_check = {}
-	for path, info in pairs(drives) do
-		if device_manager.drives[path] == nil then
-			device_manager.drives[path] = info
-			print("added", path)
-		else
-			table.insert(to_check, path)
+	local changed = false
+
+	update_list(
+		device_manager.drives,
+		drives,
+		function(path, new) -- on create
+			print("Created", path)
+			changed = true
+		end,
+		function(path, old) -- on remove
+			print("Removed", path)
+			changed = true
+		end,
+		function(path, new, old) -- on change
+			print("Chaned", path)
+			changed = true
 		end
-	end
-	for path, info in pairs(device_manager.drives) do
-		if drives[path] == nil then
-			table.insert(to_remove, path)
+	)
+	update_list(
+		device_manager.block_devices,
+		block_devices,
+		function(path, new) -- on create
+			print("Created", path)
+			changed = true
+		end,
+		function(path, old) -- on remove
+			print("Removed", path)
+			changed = true
+		end,
+		function(path, new, old) -- on change
+			print("Chaned", path)
+			changed = true
 		end
-	end
-	for _, path in ipairs(to_remove) do
-		device_manager.drives[path] = nil
-		print("removed", path)
-	end
+	)
 end
 
 
