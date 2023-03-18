@@ -13,18 +13,47 @@ local GObject = lgi.GObject
 -- Connect so system DBus
 local system_bus = nil
 
+-- global device manager state
+local signals = {}
+local device_manager = {devices = {}}
+
+function device_manager.connect_signal(name, callback)
+	signals[name] = signals[name] or {}
+	table.insert(signals[name], callback)
+end
+
+function device_manager.disconnect_signal(name, callback)
+	signals[name] = signals[name] or {}
+
+	for k, v in ipairs(signals[name]) do
+		if v == callback then
+			table.remove(signals[name], k)
+			break
+		end
+	end
+end
+
+function device_manager.emit_signal(name, ...)
+	signals[name] = signals[name] or {}
+
+	for _, cb in ipairs(signals[name]) do
+		cb(...)
+	end
+end
+
 local cancellable = Gio.Cancellable()
 Gio.bus_get(
 	Gio.BusType.SYSTEM,
 	cancellable,
 	function (object, result)
 		local connection, err = Gio.bus_get_finish(result)
-		if not err then
+		if err then
+			print(tostring(err))
+		else
 			system_bus = connection
 		end
 	end
 )
-
 
 local udisks_mount_widget = { mt = {} }
 
@@ -51,7 +80,6 @@ end
 
 local function widget_update(s, self, buttons, filter, data, style, update_function, args)
 	local function label(c, tb) return widget_label(c, style, tb) end
-	gdebug.dump(data)
 
 	update_function(self._private.base_layout, buttons, label, data, data, {
 		widget_template = self._private.widget_template or default_template(),
@@ -107,7 +135,7 @@ local function new(args)
 		end
 	end
 
-	w._do_update_now()
+	w._do_update()
 
 	gtable.crush(w, udisks_mount_widget, true)
 
