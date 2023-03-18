@@ -75,6 +75,9 @@ theme.hotkeys_font                          = "Ubuntu Mono Bold 8"
 theme.hotkeys_description_font              = "Ubuntu Mono 8"
 theme.hotkeys_group_margin                  = 6
 
+theme.udisks_storage                        = themes_dir .. "/icons/temp.svg"
+theme.udisks_storage_mounted                = themes_dir .. "/icons/launch.svg"
+
 theme.cyclefocus_margin                     = 0
 
 return theme

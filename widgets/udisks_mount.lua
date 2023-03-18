@@ -66,7 +66,7 @@ local function update_list(old, new, cb_create, cb_remove, cb_change)
 end
 
 local function parse_devices(conn, res, callback)
-	local ret, err = system_bus:call_finish(res);
+	local ret, err = system_bus:call_finish(res)
 
 	if err then
 		print(err)
@@ -261,10 +261,26 @@ local function default_template()
 end
 
 local function widget_label(dev, args, tb)
+	local icon_name = dev['Drive']['Media'] or 'storage'
+	local suffix = ''
+	local prefix = 'udisks_'
+	if dev['Mounted'] then
+		suffix = '_mounted'
+	end
+
+	local final_icon = beautiful[prefix .. 'storage']
+	if beautiful['udisks_' .. icon_name] ~= nil then
+		final_icon = beautiful['udisks_' .. icon_name]
+	end
+	if beautiful['udisks_' .. icon_name .. suffix] ~= nil then
+		final_icon = beautiful['udisks_' .. icon_name .. suffix]
+	end
+
 	local icon = beautiful.widget_temp
 	if dev['Mounted'] then
 		icon = beautiful.launch
 	end
+
 	return "", nil, nil, icon, {}
 end
 
@@ -335,12 +351,12 @@ function udisks_mount_widget.mount(device)
 			-1,
 			nil,
 			function(conn, res)
-				local ret, err = system_bus:call_finish(res);
+				local ret, err = system_bus:call_finish(res)
 				if err then
 					naughty.notify({
 						preset = naughty.config.presets.critical,
 						text = tostring(err),
-					});
+					})
 				else
 					local path = ret.value[1]
 					print(path)
@@ -352,7 +368,7 @@ end
 
 function udisks_mount_widget.unmount(device)
 	if device['Mounted'] then
-		print(device['path'])
+		local path = device['Mounted']
 		system_bus:call(
 			'org.freedesktop.UDisks2',
 			device['path'],
@@ -366,12 +382,13 @@ function udisks_mount_widget.unmount(device)
 			-1,
 			nil,
 			function(conn, res)
-				local ret, err = system_bus:call_finish(res);
+				local ret, err = system_bus:call_finish(res)
 				if err then
 					naughty.notify({
 						preset = naughty.config.presets.critical,
 						text = tostring(err),
-					});
+					})
+				else
 				end
 			end
 		)
@@ -413,7 +430,6 @@ local function new(args)
 	end
 
 	function w._on_devices_changed()
-		print("changed")
 		w._do_update()
 	end
 
