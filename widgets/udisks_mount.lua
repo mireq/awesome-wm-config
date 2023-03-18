@@ -41,36 +41,6 @@ function device_manager.emit_signal(name, ...)
 	end
 end
 
-local function parse_drives(conn, res, callback)
-	local ret, err = system_bus:call_finish(res)
-	local xml = ret.value[1]
-
-	if err then
-		print(err)
-		return
-	end
-
-	local node = Gio.DBusNodeInfo.new_for_xml(xml)
-	for _, node in ipairs(node.nodes) do
-		print(node.path)
-	end
-end
-
-local function parse_block_devices(conn, res, callback)
-	local ret, err = system_bus:call_finish(res)
-	local xml = ret.value[1]
-
-	if err then
-		print(err)
-		return
-	end
-
-	local node = Gio.DBusNodeInfo.new_for_xml(xml)
-	for _, node in ipairs(node.nodes) do
-		print(node.path)
-	end
-end
-
 local function parse_devices(conn, res, callback)
 	local ret, err = system_bus:call_finish(res);
 
@@ -79,44 +49,26 @@ local function parse_devices(conn, res, callback)
 		return
 	end
 
+	local drives = {}
+	local block_devices = {}
+
 	local object_list = ret:get_child_value(0)
 	for num = 0, #object_list-1 do
 		local dev_info = object_list:get_child_value(num)
-		gdebug.dump(dev_info[1])
-		print(dev_info[2]['org.freedesktop.UDisks2.Block'])
+		local path = dev_info[1]
+		local device_data = dev_info[2]
+
+		if device_data['org.freedesktop.UDisks2.Block'] ~= nil then
+			block_devices[path] = device_data
+		end
+		if device_data['org.freedesktop.UDisks2.Drive'] ~= nil then
+			drives[path] = device_data
+		end
 	end
 end
 
 
 local function rescan_devices()
-	system_bus:call(
-		'org.freedesktop.UDisks2',
-		'/org/freedesktop/UDisks2/drives',
-		'org.freedesktop.DBus.Introspectable',
-		'Introspect',
-		nil,
-		nil,
-		Gio.DBusConnectionFlags.NONE,
-		-1,
-		nil,
-		function(conn, res)
-			parse_drives(conn, res, callback)
-		end
-	)
-	system_bus:call(
-		'org.freedesktop.UDisks2',
-		'/org/freedesktop/UDisks2/block_devices',
-		'org.freedesktop.DBus.Introspectable',
-		'Introspect',
-		nil,
-		nil,
-		Gio.DBusConnectionFlags.NONE,
-		-1,
-		nil,
-		function(conn, res)
-			parse_block_devices(conn, res, callback)
-		end
-	)
 	system_bus:call(
 		'org.freedesktop.UDisks2',
 		'/org/freedesktop/UDisks2',
@@ -135,6 +87,7 @@ end
 
 
 local function register_listeners()
+	rescan_devices()
 	system_bus:signal_subscribe(
 		'org.freedesktop.UDisks2',
 		'org.freedesktop.DBus.ObjectManager',
@@ -168,7 +121,6 @@ local function register_listeners()
 			rescan_devices()
 		end
 	)
-	rescan_devices()
 end
 
 
