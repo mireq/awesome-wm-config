@@ -6,6 +6,24 @@ local fixed = require("wibox.layout.fixed")
 local gdebug = require("gears.debug")
 local timer = require("gears.timer")
 local beautiful = require("beautiful")
+local lgi = require 'lgi'
+local Gio = lgi.Gio
+local GObject = lgi.GObject
+
+-- Connect so system DBus
+local system_bus = nil
+
+local cancellable = Gio.Cancellable()
+Gio.bus_get(
+	Gio.BusType.SYSTEM,
+	cancellable,
+	function (object, result)
+		local connection, err = Gio.bus_get_finish(result)
+		if not err then
+			system_bus = connection
+		end
+	end
+)
 
 
 local udisks_mount_widget = { mt = {} }
@@ -60,15 +78,21 @@ local function new(args)
 		enable_properties = true,
 	})
 
-	gtable.crush(w, udisks_mount_widget, true)
-
 	local screen = get_screen(args.screen)
+	local uf = args.update_function or common.list_update
 
-	w._private.screen = screen
+	gtable.crush(w, udisks_mount_widget, true)
+	gtable.crush(w._private, {
+		style = args.style or {},
+		buttons = args.buttons,
+		update_function = args.update_function,
+		widget_template = args.widget_template,
+		screen = screen
+	})
+
 	w._private.base_layout = fixed.horizontal()
 	w._private.pending_update = false
 
-	local uf = common.list_update;
 	local data = setmetatable({}, { __mode = 'k' })
 
 	function w._do_update_now()
@@ -91,7 +115,6 @@ local function new(args)
 end
 
 function udisks_mount_widget.mt:__call(...)
-	print("new")
 	return new(...)
 end
 
