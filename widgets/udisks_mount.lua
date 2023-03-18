@@ -1,12 +1,13 @@
-local wibox = require("wibox")
 local base = require("wibox.widget.base")
-local common = require("awful.widget.common")
-local gtable = require("gears.table")
-local fixed = require("wibox.layout.fixed")
-local gdebug = require("gears.debug")
-local timer = require("gears.timer")
 local beautiful = require("beautiful")
-local lgi = require 'lgi'
+local common = require("awful.widget.common")
+local fixed = require("wibox.layout.fixed")
+local gears = require("gears")
+local gdebug = require("gears.debug")
+local gtable = require("gears.table")
+local timer = require("gears.timer")
+local wibox = require("wibox")
+local lgi = require("lgi")
 local Gio = lgi.Gio
 local GObject = lgi.GObject
 
@@ -15,31 +16,10 @@ local system_bus = nil
 
 -- global device manager state
 local signals = {}
-local device_manager = {drives={}, block_devices={}}
+local device_manager = gears.object()
+device_manager.drives = {}
+device_manager.block_devices = {}
 
-function device_manager.connect_signal(name, callback)
-	signals[name] = signals[name] or {}
-	table.insert(signals[name], callback)
-end
-
-function device_manager.disconnect_signal(name, callback)
-	signals[name] = signals[name] or {}
-
-	for k, v in ipairs(signals[name]) do
-		if v == callback then
-			table.remove(signals[name], k)
-			break
-		end
-	end
-end
-
-function device_manager.emit_signal(name, ...)
-	signals[name] = signals[name] or {}
-
-	for _, cb in ipairs(signals[name]) do
-		cb(...)
-	end
-end
 
 local function object_changed(a, b)
 	for key, value in pairs(a) do
@@ -178,7 +158,9 @@ local function parse_devices(conn, res, callback)
 		end
 	)
 
-	device_manager:emit_signal('changed')
+	if changed then
+		device_manager:emit_signal('changed')
+	end
 end
 
 
@@ -278,8 +260,10 @@ end
 
 local function widget_update(s, self, buttons, filter, data, style, update_function, args)
 	local function label(c, tb) return widget_label(c, style, tb) end
+	local devices = {}
+	gdebug.dump(data)
 
-	update_function(self._private.base_layout, buttons, label, data, data, {
+	update_function(self._private.base_layout, buttons, label, data, devices, {
 		widget_template = self._private.widget_template or default_template(),
 		create_callback = create_callback,
 	})
@@ -299,6 +283,12 @@ function udisks_mount_widget:fit(context, width, height)
 	return base.fit_widget(self, context, self._private.base_layout, width, height)
 end
 
+udisks_mount_widget.filter = {}
+
+function udisks_mount_widget.filter.removable(v)
+	return v['Removable']
+end
+
 local function new(args)
 	local w = base.make_widget(nil, nil, {
 		enable_properties = true,
@@ -313,13 +303,14 @@ local function new(args)
 		buttons = args.buttons,
 		update_function = args.update_function,
 		widget_template = args.widget_template,
+		filter = udisks_mount_widget.filter.removable,
 		screen = screen
 	})
 
 	w._private.base_layout = fixed.horizontal()
 	w._private.pending_update = false
 
-	local data = setmetatable({}, { __mode = 'k' })
+	local data = setmetatable(device_manager.block_devices, { __mode = 'k' })
 
 	function w._do_update_now()
 		widget_update(w._private.screen, w, w._private.buttons, w._private.filter, data, args.style, uf, args)
@@ -333,7 +324,12 @@ local function new(args)
 		end
 	end
 
+	function w._on_devices_changed()
+		w._do_update()
+	end
+
 	w._do_update()
+	device_manager:weak_connect_signal('changed', w._on_devices_changed)
 
 	gtable.crush(w, udisks_mount_widget, true)
 
