@@ -41,9 +41,68 @@ function device_manager.emit_signal(name, ...)
 	end
 end
 
-local function rescan_devices()
-	print("rescan")
+local function parse_drives(conn, res, callback)
+	local ret, err = system_bus:call_finish(res);
+	local xml = ret.value[1];
+
+	if err then
+		print(err);
+		return;
+	end
+
+	local node = Gio.DBusNodeInfo.new_for_xml(xml)
+	for _, node in ipairs(node.nodes) do
+		print(node.path)
+	end
 end
+
+local function parse_block_devices(conn, res, callback)
+	local ret, err = system_bus:call_finish(res);
+	local xml = ret.value[1];
+
+	if err then
+		print(err);
+		return;
+	end
+
+	local node = Gio.DBusNodeInfo.new_for_xml(xml)
+	for _, node in ipairs(node.nodes) do
+		print(node.path)
+	end
+end
+
+
+local function rescan_devices()
+	system_bus:call(
+		'org.freedesktop.UDisks2',
+		'/org/freedesktop/UDisks2/drives',
+		'org.freedesktop.DBus.Introspectable',
+		'Introspect',
+		nil,
+		nil,
+		Gio.DBusConnectionFlags.NONE,
+		-1,
+		nil,
+		function(conn, res)
+			parse_drives(conn, res, callback);
+		end
+	)
+	system_bus:call(
+		'org.freedesktop.UDisks2',
+		'/org/freedesktop/UDisks2/block_devices',
+		'org.freedesktop.DBus.Introspectable',
+		'Introspect',
+		nil,
+		nil,
+		Gio.DBusConnectionFlags.NONE,
+		-1,
+		nil,
+		function(conn, res)
+			parse_block_devices(conn, res, callback);
+		end
+	)
+end
+
 
 local function register_listeners()
 	system_bus:signal_subscribe(
