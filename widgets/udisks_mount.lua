@@ -95,7 +95,7 @@ local function parse_devices(conn, res, callback)
 			drive_info['path'] = path
 			drives[path] = drive_info
 			-- fill important properties
-			for __, attribute in ipairs({'CanPowerOff', 'ConnectionBus', 'Id', 'Media', 'MediaAvailable', 'MediaRemovable', 'Model', 'Removable', 'Serial', 'Size', 'SortKey', 'Vendor'}) do
+			for __, attribute in ipairs({'CanPowerOff', 'ConnectionBus', 'Id', 'Ejectable', 'Media', 'MediaAvailable', 'MediaRemovable', 'Model', 'Removable', 'Serial', 'Size', 'SortKey', 'Vendor'}) do
 				drive_info[attribute] = drive_data[attribute]
 			end
 		end
@@ -264,6 +264,7 @@ local function widget_label(dev, args, tb)
 	local icon_name = dev['Drive']['Media'] or 'storage'
 	local suffix = ''
 	local prefix = 'udisks_'
+
 	if dev['Mounted'] then
 		suffix = '_mounted'
 	end
@@ -374,6 +375,35 @@ function udisks_mount_widget.unmount(device)
 			device['path'],
 			'org.freedesktop.UDisks2.Filesystem',
 			'Unmount',
+			GLib.Variant.new_tuple({
+				GLib.Variant('a{sv}', {})
+			}, 1),
+			nil,
+			Gio.DBusConnectionFlags.NONE,
+			-1,
+			nil,
+			function(conn, res)
+				local ret, err = system_bus:call_finish(res)
+				if err then
+					naughty.notify({
+						preset = naughty.config.presets.critical,
+						text = tostring(err),
+					})
+				else
+				end
+			end
+		)
+	end
+end
+
+function udisks_mount_widget.eject(device)
+	if device['Drive']['Ejectable'] then
+		local path = device['Mounted']
+		system_bus:call(
+			'org.freedesktop.UDisks2',
+			device['Drive']['path'],
+			'org.freedesktop.UDisks2.Drive',
+			'Eject',
 			GLib.Variant.new_tuple({
 				GLib.Variant('a{sv}', {})
 			}, 1),
