@@ -149,15 +149,15 @@ local function parse_devices(conn, res, callback)
 		device_manager.drives,
 		drives,
 		function(path, new) -- on create
-			print("Created", path)
+			device_manager:emit_signal('drive_created', {path = path, new = new})
 			changed = true
 		end,
 		function(path, old) -- on remove
-			print("Removed", path)
+			device_manager:emit_signal('drive_removed', {path = path, old = old})
 			changed = true
 		end,
 		function(path, new, old) -- on change
-			print("Chaned", path)
+			device_manager:emit_signal('drive_changed', {path = path, new = new, old = old})
 			changed = true
 		end
 	)
@@ -165,18 +165,20 @@ local function parse_devices(conn, res, callback)
 		device_manager.block_devices,
 		block_devices,
 		function(path, new) -- on create
-			print("Created", path)
+			device_manager:emit_signal('block_device_created', {path = path, new = new})
 			changed = true
 		end,
 		function(path, old) -- on remove
-			print("Removed", path)
+			device_manager:emit_signal('block_device_removed', {path = path, old = old})
 			changed = true
 		end,
 		function(path, new, old) -- on change
-			print("Chaned", path)
+			device_manager:emit_signal('block_device_changed', {path = path, new = new, old = old})
 			changed = true
 		end
 	)
+
+	device_manager:emit_signal('changed')
 end
 
 
