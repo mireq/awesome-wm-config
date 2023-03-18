@@ -42,12 +42,12 @@ function device_manager.emit_signal(name, ...)
 end
 
 local function parse_drives(conn, res, callback)
-	local ret, err = system_bus:call_finish(res);
-	local xml = ret.value[1];
+	local ret, err = system_bus:call_finish(res)
+	local xml = ret.value[1]
 
 	if err then
-		print(err);
-		return;
+		print(err)
+		return
 	end
 
 	local node = Gio.DBusNodeInfo.new_for_xml(xml)
@@ -57,17 +57,33 @@ local function parse_drives(conn, res, callback)
 end
 
 local function parse_block_devices(conn, res, callback)
-	local ret, err = system_bus:call_finish(res);
-	local xml = ret.value[1];
+	local ret, err = system_bus:call_finish(res)
+	local xml = ret.value[1]
 
 	if err then
-		print(err);
-		return;
+		print(err)
+		return
 	end
 
 	local node = Gio.DBusNodeInfo.new_for_xml(xml)
 	for _, node in ipairs(node.nodes) do
 		print(node.path)
+	end
+end
+
+local function parse_devices(conn, res, callback)
+	local ret, err = system_bus:call_finish(res);
+
+	if err then
+		print(err)
+		return
+	end
+
+	local object_list = ret:get_child_value(0)
+	for num = 0, #object_list-1 do
+		local dev_info = object_list:get_child_value(num)
+		gdebug.dump(dev_info[1])
+		print(dev_info[2]['org.freedesktop.UDisks2.Block'])
 	end
 end
 
@@ -84,7 +100,7 @@ local function rescan_devices()
 		-1,
 		nil,
 		function(conn, res)
-			parse_drives(conn, res, callback);
+			parse_drives(conn, res, callback)
 		end
 	)
 	system_bus:call(
@@ -98,7 +114,21 @@ local function rescan_devices()
 		-1,
 		nil,
 		function(conn, res)
-			parse_block_devices(conn, res, callback);
+			parse_block_devices(conn, res, callback)
+		end
+	)
+	system_bus:call(
+		'org.freedesktop.UDisks2',
+		'/org/freedesktop/UDisks2',
+		'org.freedesktop.DBus.ObjectManager',
+		'GetManagedObjects',
+		nil,
+		nil,
+		Gio.DBusConnectionFlags.NONE,
+		-1,
+		nil,
+		function(conn, res)
+			parse_devices(conn, res, callback)
 		end
 	)
 end
@@ -171,7 +201,7 @@ local function default_template()
 			id = 'icon_role',
 			widget = wibox.widget.imagebox,
 			image = beautiful.widget_temp,
-			stylesheet = 'svg { fill: '..beautiful.fg_normal..'; }',
+			stylesheet = 'svg { fill: '..beautiful.fg_normal..' }',
 		}
 	}
 end
