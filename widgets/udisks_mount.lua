@@ -117,9 +117,12 @@ local function parse_devices(conn, res, callback)
 					block_info[attribute] = block_data[attribute]
 				end
 				block_info['HasFilesystem'] = filesystem_data ~= nil
-				block_info['Mounted'] = nil
+				block_info['Mounted'] = false
 				if filesystem_data ~= nil then
 					block_info['Mounted'] = filesystem_data['MountPoints'][1]
+					if block_info['Mounted'] == nil then
+						block_info['Mounted'] = false
+					end
 				end
 
 				block_devices[path] = block_info
@@ -410,6 +413,7 @@ local function new(args)
 	end
 
 	function w._on_devices_changed()
+		print("changed")
 		w._do_update()
 	end
 
