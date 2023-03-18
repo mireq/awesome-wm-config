@@ -60,6 +60,7 @@ local function parse_devices(conn, res, callback)
 
 		local drive_data = device_data['org.freedesktop.UDisks2.Drive']
 		local block_data = device_data['org.freedesktop.UDisks2.Block']
+		local filesystem_data = device_data['org.freedesktop.UDisks2.Filesystem']
 
 		if drive_data ~= nil then
 			-- retrieve drive info object or create
@@ -73,9 +74,27 @@ local function parse_devices(conn, res, callback)
 				drive_info[attribute] = drive_data[attribute]
 			end
 		end
-	end
 
-	gdebug.dump(drives)
+		if block_data ~= nil then
+			local block_info = {}
+			local drive_path = block_data['Drive']
+			if drive_path ~= '/' then
+				-- get drive info or create (later fill in loop)
+				local drive_info = drives[block_data['Drive']]
+				if drive_info == nil then
+					drive_info = {}
+					drives[drive_path] = drive_info
+				end
+				block_info['drive'] = drive_info
+
+				for __, attribute in ipairs({'HintAuto', 'HintIconName', 'HintIgnore', 'HintName', 'HintPartitionable', 'HintSymbolicIconName', 'HintSystem', 'Id', 'IdLabel', 'IdType', 'IdUUID', 'IdUsage', 'IdVersion', 'ReadOnly', 'Size'}) do
+					block_info[attribute] = block_data[attribute]
+				end
+
+				block_devices[path] = block_info
+			end
+		end
+	end
 end
 
 
