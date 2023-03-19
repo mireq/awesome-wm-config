@@ -41,6 +41,14 @@ local launch_tv = "mpv --demuxer=lavf --demuxer-lavf-format=mpegts --vf=vavpp:de
 local modkey = "Mod4"
 local altkey = "Mod1"
 
+local terminal = "urxvtc"
+local editor = os.getenv("EDITOR")
+local gui_editor = "kwrite"
+local browser = "firefox-bin"
+local tasks = terminal .. " -e htop"
+local filemanager = "konqueror"
+local launch_tv = "mpv --demuxer=lavf --demuxer-lavf-format=mpegts --vf=vavpp:deint=auto:interlaced-only=yes --demuxer-lavf-o-add=fflags=+nobuffer --demuxer-lavf-probe-info=nostreams --demuxer-lavf-analyzeduration=0 --force-window=immediate http://192.168.1.111:8001/"
+
 beautiful.init(active_theme .. "/theme_new.lua")
 
 -- {{{ Menu
@@ -118,11 +126,11 @@ local function float_dpi(size, s)
 end
 
 
-local function get_main_menu(s)
+local function style_menu(menu, s)
 	local scaling = float_dpi(1, s)
 
 	return gears.table.join(
-		gears.table.clone(main_menu),
+		menu,
 		{
 			theme = {
 				height = beautiful.menu_height * scaling,
@@ -131,6 +139,11 @@ local function get_main_menu(s)
 			}
 		}
 	)
+end
+
+
+local function get_main_menu(s)
+	return style_menu(gears.table.clone(main_menu), s)
 end
 
 
@@ -663,15 +676,66 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
-	local w = udisks_mount({
+	local function on_mount(path, err)
+		if err then
+			naughty.notify({
+				preset = naughty.config.presets.critical,
+				text = tostring(err),
+			})
+		else
+			if path ~= nil and filemanager ~= nil then
+				awful.spawn({filemanager, path})
+			end
+		end
+	end
+
+	local function on_unmount(path, err)
+		if err then
+			naughty.notify({
+				preset = naughty.config.presets.critical,
+				text = tostring(err),
+			})
+		end
+	end
+
+	s.udisks_mount = udisks_mount({
 		screen = s,
 		stylesheet = 'svg { color: ' .. theme.fg_normal .. '; }',
 		buttons = gears.table.join(
 			awful.button({ }, 1, function(dev)
-				udisks_mount.mount(dev, function(path) print("mounted", path); end)
+				udisks_mount.mount(dev, function(path, dev, err)
+					on_mount(path, err)
+				end)
 			end),
 			awful.button({ }, 3, function(dev)
-				udisks_mount.unmount(dev, function(path) print("unmounted", path); end)
+				local menu = {}
+				local open_label = "Open"
+				if not dev['Mounted'] then
+					open_label = "Mount"
+				end
+				table.insert(menu, {open_label, function()
+					udisks_mount.mount(dev, function(path, dev, err)
+						on_mount(path, err)
+					end)
+				end})
+				if dev['Drive']['Ejectable'] then
+					table.insert(menu, {"Eject", function()
+						udisks_mount.unmount_and_eject(dev, function(path, dev, err)
+							on_unmount(path, err)
+						end)
+					end})
+				end
+				if dev['Mounted'] then
+					table.insert(menu, {"Unmount", function()
+						udisks_mount.unmount(dev, function(path, dev, err)
+							on_unmount(path, err)
+						end)
+					end})
+				end
+
+				menu = style_menu(menu, s)
+
+				awful.menu(menu):show()
 			end)
 		)
 	});
@@ -687,7 +751,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		{
 			s.wifi_widget,
 			s.temperature_widget,
-			w,
+			s.udisks_mount,
 			layout = wibox.layout.fixed.horizontal
 		},
 		layout = wibox.layout.align.horizontal
