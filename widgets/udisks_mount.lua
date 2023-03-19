@@ -252,8 +252,17 @@ end
 
 local function default_template()
 	return {
-		id = 'icon_margin_role',
-		widget = wibox.container.margin,
+		id = 'background_role',
+		widget = wibox.container.background,
+		{
+			id = 'icon_margin_role',
+			widget = wibox.container.margin,
+			{
+				id = 'icon_role',
+				widget = wibox.widget.imagebox,
+				stylesheet = 'svg { fill: '..beautiful.fg_normal..' }',
+			},
+		},
 		update_common = function(self, device, index, objects)
 			local icon = self:get_children_by_id('icon_role')[1]
 			if icon ~= nil then
@@ -273,11 +282,6 @@ local function default_template()
 		update_callback = function(self, device, index, objects)
 			self.update_common(self, device, index, objects)
 		end,
-		{
-			id = 'icon_role',
-			widget = wibox.widget.imagebox,
-			stylesheet = 'svg { fill: '..beautiful.fg_normal..' }',
-		}
 	}
 end
 
@@ -285,23 +289,37 @@ local function widget_label(dev, args, tb)
 	local icon_name = dev['Drive']['Media'] or 'storage'
 	local suffix = ''
 	local prefix = 'udisks_'
+	local theme = beautiful.get()
 
 	if dev['Mounted'] then
 		suffix = '_mounted'
 	end
 
-	local final_icon = beautiful[prefix .. 'storage']
-	if beautiful['udisks_' .. icon_name] ~= nil then
-		final_icon = beautiful['udisks_' .. icon_name]
+	local final_icon = theme[prefix .. 'storage']
+	if theme[prefix .. icon_name] ~= nil then
+		final_icon = theme[prefix .. icon_name]
 	end
-	if beautiful['udisks_storage' .. suffix] ~= nil then
-		final_icon = beautiful['udisks_storage' .. suffix]
+	if theme['udisks_storage' .. suffix] ~= nil then
+		final_icon = theme['udisks_storage' .. suffix]
 	end
-	if beautiful['udisks_' .. icon_name .. suffix] ~= nil then
-		final_icon = beautiful['udisks_' .. icon_name .. suffix]
+	if theme[prefix .. icon_name .. suffix] ~= nil then
+		final_icon = theme[prefix .. icon_name .. suffix]
 	end
 
-	return "", nil, nil, final_icon, {}
+	local text = dev['HintName']
+	if not text then
+		text = dev['Drive']['Serial']
+		if dev['IdLabel'] then
+			text = text .. " " .. dev['IdLabel']
+		else
+			text = text .. " " .. dev['IdUUID']
+		end
+	end
+
+	local bg_color = theme[prefix .. 'bg' .. suffix]
+	local bg_image = theme[prefix .. 'image' .. suffix]
+
+	return text, bg_color, bg_image, final_icon, {}
 end
 
 local function widget_update(s, self, buttons, filter, data, style, update_function, args)
