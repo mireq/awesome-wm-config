@@ -1,5 +1,6 @@
 local base = require("wibox.widget.base")
 local beautiful = require("beautiful")
+local awful = require("awful")
 local common = require("awful.widget.common")
 local fixed = require("wibox.layout.fixed")
 local gears = require("gears")
@@ -277,10 +278,14 @@ local function default_template()
 			end
 		end,
 		create_callback = function(self, device, index, objects)
+			local icon = self:get_children_by_id('icon_role')[1]
 			self.update_common(self, device, index, objects)
+			self.tooltip = awful.tooltip({ objects = { self } })
+			self.tooltip:set_text(udisks_mount_widget.get_name(device))
 		end,
 		update_callback = function(self, device, index, objects)
 			self.update_common(self, device, index, objects)
+			self.tooltip:set_text(udisks_mount_widget.get_name(device))
 		end,
 	}
 end
@@ -475,9 +480,9 @@ end
 
 function udisks_mount_widget.get_name(device)
 	local text = device['HintName']
-	if not text then
+	if not text or text == '' then
 		text = device['Drive']['Serial']
-		if device['IdLabel'] then
+		if device['IdLabel'] and device['IdLabel'] ~= '' then
 			text = text .. " " .. device['IdLabel']
 		else
 			text = text .. " " .. device['IdUUID']
