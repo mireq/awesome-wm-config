@@ -16,6 +16,7 @@ local run_shell = require("widgets.run_shell")
 local status_magnitude_widget = require("widgets.status_magnitude_widget")
 local udisks_mount = require("widgets.udisks_mount")
 local utils = require("utils")
+local battery_utils = require("utils.battery")
 local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
 local wibox = require("wibox")
@@ -412,10 +413,16 @@ local function update_widgets()
 		function (widget, args)
 			battery_current = args
 
+			if battery_current.percentage == nil then
+				return ''
+			end
+
 			local text = '<span font="'..(theme.battery_percent_font or theme.sensor_font)..'">'..battery_current.percentage..' %</span>'
 			if battery_current.power_now and battery_current.power_now > 0 then
 				text = text .. ' <span font="'..(theme.battery_current_font or theme.sensor_font)..'" alpha="50%">'..string.format("%.1f", battery_current.power_now)..' W</span>'
 			end
+
+			battery_utils.record(battery_current)
 
 			for s in screen do
 				for _, w in ipairs(s.battery_widget:get_children_by_id('value')) do
