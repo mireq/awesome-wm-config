@@ -70,8 +70,9 @@ theme.notify_border                         = theme.border_focus
 
 theme.tooltip_bg                            = theme.bg_normal
 theme.tooltip_fg                            = theme.fg_normal
-theme.tooltip_border_width                  = 0
+theme.tooltip_border_width                  = 1
 theme.tooltip_font                          = theme.font
+theme.tooltip_border_color                  = theme.border_focus
 
 theme.notification_bg                       = theme.bg_normal
 theme.notification_fg                       = theme.fg_normal

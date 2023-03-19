@@ -862,6 +862,25 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
+	awful.tooltip {
+		objects = {s.battery_widget},
+		timeout = 5,
+		timer_function = function()
+			vicious.force({ battery_widget })
+			local tooltip_text = '<span font="'..theme.font..'" color="'..theme.fg_normal..'">Status: <b><span color="'..theme.fg_accent..'">'..battery_current.status..'</span></b></span>'
+			if battery_current.time and battery_current.time ~= "N/A" then
+				tooltip_text = tooltip_text .. '\n<span font="'..theme.font..'" color="'..theme.fg_normal..'">Remaining time: <b><span color="'..theme.fg_accent..'">'..battery_current.time..'</span></b></span>'
+			end
+			if battery_current.power_now and battery_current.power_now > 0 then
+				tooltip_text = tooltip_text .. '\n<span font="'..theme.font..'" color="'..theme.fg_normal..'">Power: <b><span color="'..theme.fg_accent..'">'..string.format("%.2f", battery_current.power_now)..' W</span></b></span>'
+			end
+			if battery_current.energy_now then
+				tooltip_text = tooltip_text .. '\n<span font="'..theme.font..'" color="'..theme.fg_normal..'">Energy: <b><span color="'..theme.fg_accent..'">'..string.format("%.1f", battery_current.energy_now)..' Wh</span></b></span>'
+			end
+			return tooltip_text
+		end
+	}
+
 	local function on_mount(path, err)
 		if err then
 			naughty.notify({
