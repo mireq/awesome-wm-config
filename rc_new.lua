@@ -390,6 +390,7 @@ local function set_screen_dpi(s, new_dpi)
 		},
 		text_margin_role = {
 			left = dpi(2, s),
+			right = dpi(4, s),
 		},
 		background_border_role = {
 			top = dpi(1, s),
@@ -572,6 +573,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 						},
 						id = 'text_margin_role',
 						left = dpi(2, s),
+						right = dpi(4, s),
 						widget = wibox.container.margin,
 					},
 					layout = wibox.layout.fixed.horizontal,
@@ -663,6 +665,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	})
 	local w = udisks_mount({
 		screen = s,
+		stylesheet = 'svg { color: ' .. theme.fg_normal .. '; }',
 		buttons = gears.table.join(
 			awful.button({ }, 1, function(dev)
 				udisks_mount.mount(dev, function(path) print("mounted", path); end)
