@@ -251,7 +251,7 @@ local function get_screen(s)
 	return s and screen[s]
 end
 
-local function default_template()
+local function default_template(w)
 	return {
 		id = 'background_role',
 		widget = wibox.container.background,
@@ -261,7 +261,6 @@ local function default_template()
 			{
 				id = 'icon_role',
 				widget = wibox.widget.imagebox,
-				stylesheet = 'svg { fill: '..beautiful.fg_normal..' }',
 			},
 		},
 		update_common = function(self, device, index, objects)
@@ -282,6 +281,9 @@ local function default_template()
 			self.update_common(self, device, index, objects)
 			self.tooltip = awful.tooltip({ objects = { self } })
 			self.tooltip:set_text(udisks_mount_widget.get_name(device))
+			if w._private.stylesheet ~= nil and icon ~= nil then
+				icon.stylesheet = w._private.stylesheet
+			end
 		end,
 		update_callback = function(self, device, index, objects)
 			self.update_common(self, device, index, objects)
@@ -328,7 +330,7 @@ local function widget_update(s, self, buttons, filter, data, style, update_funct
 	end
 
 	update_function(self._private.base_layout, buttons, label, data, devices, {
-		widget_template = self._private.widget_template or default_template(),
+		widget_template = self._private.widget_template or default_template(self),
 		create_callback = create_callback,
 	})
 end
@@ -502,6 +504,7 @@ local function new(args)
 	gtable.crush(w, udisks_mount_widget, true)
 	gtable.crush(w._private, {
 		style = args.style or {},
+		stylesheet = args.stylesheet,
 		buttons = args.buttons,
 		update_function = args.update_function,
 		widget_template = args.widget_template,
