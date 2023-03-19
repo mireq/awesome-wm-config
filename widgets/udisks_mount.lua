@@ -307,7 +307,7 @@ end
 local function widget_update(s, self, buttons, filter, data, style, update_function, args)
 	local function label(c, tb) return widget_label(c, style, tb) end
 	local devices = {}
-	for __, device in pairs(data) do
+	for __, device in pairs(device_manager.block_devices) do
 		if self._private.filter(device) then
 			table.insert(devices, device)
 		end
@@ -484,7 +484,7 @@ local function new(args)
 
 	w._private.pending_update = false
 
-	local data = setmetatable(device_manager.block_devices, { __mode = 'k' })
+	local data = setmetatable({}, { __mode = 'k' })
 
 	function w._do_update_now()
 		widget_update(w._private.screen, w, w._private.buttons, w._private.filter, data, args.style, uf, args)
