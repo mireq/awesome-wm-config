@@ -285,13 +285,13 @@ local function default_template()
 	}
 end
 
-local function widget_label(dev, args, tb)
-	local icon_name = dev['Drive']['Media'] or 'storage'
+local function widget_name(device, args, tb)
+	local icon_name = device['Drive']['Media'] or 'storage'
 	local suffix = ''
 	local prefix = 'udisks_'
 	local theme = beautiful.get()
 
-	if dev['Mounted'] then
+	if device['Mounted'] then
 		suffix = '_mounted'
 	end
 
@@ -306,16 +306,7 @@ local function widget_label(dev, args, tb)
 		final_icon = theme[prefix .. icon_name .. suffix]
 	end
 
-	local text = dev['HintName']
-	if not text then
-		text = dev['Drive']['Serial']
-		if dev['IdLabel'] then
-			text = text .. " " .. dev['IdLabel']
-		else
-			text = text .. " " .. dev['IdUUID']
-		end
-	end
-
+	local text = udisks_mount_widget.get_name(device)
 	local bg_color = theme[prefix .. 'bg' .. suffix]
 	local bg_image = theme[prefix .. 'image' .. suffix]
 
@@ -323,7 +314,7 @@ local function widget_label(dev, args, tb)
 end
 
 local function widget_update(s, self, buttons, filter, data, style, update_function, args)
-	local function label(c, tb) return widget_label(c, style, tb) end
+	local function label(c, tb) return widget_name(c, style, tb) end
 	local devices = {}
 	for __, device in pairs(device_manager.block_devices) do
 		if self._private.filter(device) then
@@ -480,6 +471,19 @@ function udisks_mount_widget.unmount_and_eject(device, cb)
 			cb(outer_path, device, err)
 		end)
 	end)
+end
+
+function udisks_mount_widget.get_name(device)
+	local text = device['HintName']
+	if not text then
+		text = device['Drive']['Serial']
+		if device['IdLabel'] then
+			text = text .. " " .. device['IdLabel']
+		else
+			text = text .. " " .. device['IdUUID']
+		end
+	end
+	return text
 end
 
 local function new(args)
