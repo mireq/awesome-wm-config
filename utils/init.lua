@@ -124,7 +124,7 @@ end
 
 
 function M.get_config_dir()
-	return debug.getinfo(1).source:match("@?(.*)/[^/]*/[^/]*")
+	return debug.getinfo(1).source:match("@?(.*/)[^/]*/[^/]*")
 end
 
 
