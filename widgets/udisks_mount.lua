@@ -6,7 +6,6 @@ local fixed = require("wibox.layout.fixed")
 local gears = require("gears")
 local gdebug = require("gears.debug")
 local gtable = require("gears.table")
-local naughty = require("naughty")
 local timer = require("gears.timer")
 local wibox = require("wibox")
 local lgi = require("lgi")
@@ -388,12 +387,7 @@ function udisks_mount_widget.mount(device, cb)
 			function(conn, res)
 				local ret, err = system_bus:call_finish(res)
 				local path = nil
-				if err then
-					naughty.notify({
-						preset = naughty.config.presets.critical,
-						text = tostring(err),
-					})
-				else
+				if not err then
 					path = ret.value[1]
 					device['Mounted'] = path
 				end
@@ -422,12 +416,6 @@ function udisks_mount_widget.unmount(device, cb)
 			nil,
 			function(conn, res)
 				local ret, err = system_bus:call_finish(res)
-				if err then
-					naughty.notify({
-						preset = naughty.config.presets.critical,
-						text = tostring(err),
-					})
-				end
 				if cb ~= nil then
 					cb(path, device, err)
 				end
@@ -455,12 +443,6 @@ function udisks_mount_widget.eject(device, cb)
 			nil,
 			function(conn, res)
 				local ret, err = system_bus:call_finish(res)
-				if err then
-					naughty.notify({
-						preset = naughty.config.presets.critical,
-						text = tostring(err),
-					})
-				end
 				if cb ~= nil then
 					cb(path, device, err)
 				end
