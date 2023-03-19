@@ -116,4 +116,11 @@ function M.format_number(value)
 end
 
 
+-- calculate dpi value as float
+function M.float_dpi(size, s)
+	local ratio = s.dpi / 96
+	return size * ratio
+end
+
+
 return M

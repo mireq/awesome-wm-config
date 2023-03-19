@@ -13,6 +13,7 @@ local popups = require("widgets.popups")
 local run_shell = require("widgets.run_shell")
 local udisks_mount = require("widgets.udisks_mount")
 local status_magnitude_widget = require("widgets.status_magnitude_widget")
+local battery_widget = require("widgets.battery_widget")
 local utils = require("utils")
 local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
@@ -112,14 +113,8 @@ local main_menu = {
 }
 
 
-local function float_dpi(size, s)
-	local ratio = s.dpi / 96
-	return size * ratio
-end
-
-
 local function style_menu(menu, s)
-	local scaling = float_dpi(1, s)
+	local scaling = utils.float_dpi(1, s)
 
 	return gears.table.join(
 		menu,
@@ -407,7 +402,7 @@ gears.timer {
 local function set_screen_dpi(s, new_dpi)
 	s.dpi = new_dpi
 
-	local scaling = float_dpi(1, s)
+	local scaling = utils.float_dpi(1, s)
 	local taglist_size = dpi(6, s)
 	local taglist_margin = dpi(1, s)
 
@@ -474,12 +469,12 @@ local function draw_wibar_background(context, cr, width, height)
 	local gradient_pos = 0.0
 	if beautiful.wibar_border_top ~= nil then
 		gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_border_top
-		gradient_pos = gradient_pos + float_dpi(1.5, s) / height
+		gradient_pos = gradient_pos + utils.float_dpi(1.5, s) / height
 	end
 	if beautiful.wibar_border_top ~= nil or beautiful.wibar_border_bottom ~= nil or beautiful.wibar_bg_bottom ~= nil then
 		gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_bg
 		if beautiful.wibar_bg_bottom ~= nil then
-			gradient_pos = 1 - float_dpi(1.5, s) / height
+			gradient_pos = 1 - utils.float_dpi(1.5, s) / height
 			gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_bg_bottom
 		end
 		gradient_pos = 1
@@ -499,7 +494,7 @@ end
 
 
 screen.connect_signal("request::desktop_decoration", function(s)
-	local scaling = float_dpi(1, s)
+	local scaling = utils.float_dpi(1, s)
 
 	-- main panel
 	s.tool_bar = awful.wibar({
@@ -697,6 +692,9 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		stylesheet = 'svg { color: '..theme.fg_normal..'; }'
 	})
 	s.wifi_widget:set_buttons(wireless_buttons)
+	s.battery_widget = battery_widget({
+		stylesheet = 'svg { color: '..theme.fg_normal..'; }'
+	})
 	popups.netstat(s.wifi_widget, {
 		title_color = "#ffffff",
 		established_color = "#ffff00",
@@ -830,6 +828,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			s.temperature_widget,
 			s.memory_widget,
 			s.cpu_widget,
+			s.battery_widget,
 			s.wifi_widget,
 			s.udisks_mount,
 			layout = wibox.layout.fixed.horizontal
@@ -842,9 +841,9 @@ end)
 
 awful.run_test = function()
 	s = screen.fake_add(20, 20, 500, 400)
-	--for s in screen do
-	--	set_screen_dpi(s, 384)
-	--end
+	for s in screen do
+		set_screen_dpi(s, 384)
+	end
 	gears.timer {
 		timeout   = 0.05,
 		call_now  = false,
@@ -852,9 +851,9 @@ awful.run_test = function()
 		single_shot = true,
 		callback  = function()
 			--set_screen_dpi(s, 384)
-			--for s in screen do
-			--	set_screen_dpi(s, 192)
-			--end
+			for s in screen do
+				set_screen_dpi(s, 192)
+			end
 			s:fake_remove()
 			--utils.show_hotkeys_help()
 			collectgarbage("collect")
