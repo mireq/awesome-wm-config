@@ -295,6 +295,13 @@ awful.rules.rules = {
 
 -- {{{ Widget update
 
+local widget_size = {
+	temperature = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 °C</span>') end,
+	memory = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.mem_font or theme.sensor_font)..'">99 999 MB </span>') end,
+	cpu = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>') end,
+	battery = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.font)..'">100 %</span>') end,
+}
+
 local temperature_gradient = {
 	{50, beautiful.fg_normal},
 	{60, '#d7d087'},
@@ -309,6 +316,20 @@ local cpu_gradient = {
 	{5, beautiful.fg_normal},
 	{20, '#d7d087'},
 	{60, '#d78382'},
+}
+local battery_current = {
+	status = "Unknown",
+	power_now = nil,
+	voltage_now = nil,
+	energy_now = nil,
+	energy_full = nil,
+	energy_full_design = nil,
+	percentage = nil,
+	percentage_exact = nil,
+	wear_percentage = nil,
+	wear_percentage_exact = nil,
+	remaining_seconds = nil,
+	time = "N/A",
 }
 
 local function update_widgets()
@@ -381,6 +402,12 @@ local function update_widgets()
 			end
 		end
 	)
+	vicious.call(
+		vicious_extra.bat,
+		function (widget, args)
+		end,
+		'BAT0'
+	)
 end
 -- }}}
 
@@ -452,13 +479,16 @@ local function set_screen_dpi(s, new_dpi)
 
 	for s in screen do
 		for _, w in ipairs(s.temperature_widget:get_children_by_id('value')) do
-			w:set_forced_width(utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 °C</span>'))
+			w:set_forced_width(widget_size.temperature(s))
 		end
 		for _, w in ipairs(s.memory_widget:get_children_by_id('value')) do
-			w:set_forced_width(utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">99 999 MB </span>'))
+			w:set_forced_width(widget_size.memory(s))
 		end
 		for _, w in ipairs(s.cpu_widget:get_children_by_id('value')) do
-			w:set_forced_width(utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>'))
+			w:set_forced_width(widget_size.cpu(s))
+		end
+		for _, w in ipairs(s.battery_widget:get_children_by_id('value')) do
+			w:set_forced_width(widget_size.battery(s))
 		end
 	end
 end
@@ -692,9 +722,6 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		stylesheet = 'svg { color: '..theme.fg_normal..'; }'
 	})
 	s.wifi_widget:set_buttons(wireless_buttons)
-	s.battery_widget = battery_widget({
-		stylesheet = 'svg { color: '..theme.fg_normal..'; }'
-	})
 	popups.netstat(s.wifi_widget, {
 		title_color = "#ffffff",
 		established_color = "#ffff00",
@@ -712,7 +739,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			id = 'value',
 			text = '',
 			widget = wibox.widget.textbox,
-			forced_width = utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 °C</span>')
+			forced_width = widget_size.temperature(s)
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
@@ -727,7 +754,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			id = 'value',
 			text = '',
 			widget = wibox.widget.textbox,
-			forced_width = utils.calculate_text_width(s, '<span font="'..(theme.mem_font or theme.sensor_font)..'">99 999 MB </span>')
+			forced_width = utils.calculate_text_width(s, widget_size.memory(s))
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
@@ -742,7 +769,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			id = 'value',
 			text = '',
 			widget = wibox.widget.textbox,
-			forced_width = utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>')
+			forced_width = utils.calculate_text_width(s, widget_size.cpu(s))
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
@@ -751,6 +778,22 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		user_color = "#00ff00",
 		root_color = "#ffff00",
 		terminal = "urxvt"
+	})
+	s.battery_widget = wibox.widget({
+		{
+			id = 'icon',
+			options = {
+				stylesheet = 'svg { color: '..theme.fg_normal..'; }',
+			},
+			widget = battery_widget
+		},
+		{
+			id = 'value',
+			text = '',
+			widget = wibox.widget.textbox,
+			forced_width = widget_size.battery(s)
+		},
+		layout = wibox.layout.fixed.horizontal
 	})
 	local function on_mount(path, err)
 		if err then
@@ -814,7 +857,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 				awful.menu(menu):show()
 			end)
 		)
-	});
+	})
 
 	s.tool_bar:setup({
 		{
