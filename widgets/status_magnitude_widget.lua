@@ -35,6 +35,7 @@ function status_magnitude_widget:set_children(children)
 end
 
 function status_magnitude_widget:get_options()
+	return self._private.options
 end
 
 function status_magnitude_widget:set_options(options)
