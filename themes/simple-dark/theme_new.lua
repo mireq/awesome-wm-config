@@ -18,11 +18,11 @@ theme.fg_accent                             = "#ffffff"
 theme.fg_normal                             = "#cccdcf"
 theme.fg_secondary                          = "#88898c"
 theme.fg_focus                              = "#ffffff"
-theme.fg_urgent                             = "#CC9393"
+theme.fg_urgent                             = "#ffffff"
 theme.bg_normal                             = "#222528"
 theme.bg_focus                              = "#186dfe"
 --theme.bg_urgent                             = "#1A1A1A"
-theme.bg_urgent                             = "#D78382"
+theme.bg_urgent                             = "#d43535"
 theme.bg_systray                            = theme.wibar_bg
 
 theme.process_font                          = "Ubuntu Mono 8"

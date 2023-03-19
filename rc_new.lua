@@ -1,6 +1,7 @@
 pcall(require, "luarocks.loader")
 
 local awful = require("awful")
+local battery_widget = require("widgets.battery_widget")
 local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
 local cyclefocus = require('cyclefocus')
@@ -9,11 +10,11 @@ local dpi_watcher = require("widgets.dpi_watcher")
 local gdebug = require("gears.debug")
 local gears = require("gears")
 local hotkeys_popup = require("awful.hotkeys_popup")
+local naughty = require("naughty")
 local popups = require("widgets.popups")
 local run_shell = require("widgets.run_shell")
-local udisks_mount = require("widgets.udisks_mount")
 local status_magnitude_widget = require("widgets.status_magnitude_widget")
-local battery_widget = require("widgets.battery_widget")
+local udisks_mount = require("widgets.udisks_mount")
 local utils = require("utils")
 local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
@@ -111,6 +112,9 @@ local main_menu = {
 		submenu_icon = beautiful.menu_submenu_icon
 	}
 }
+
+naughty.config.presets.critical.bg = theme.bg_urgent
+naughty.config.presets.critical.fg = theme.fg_urgent
 
 
 local function style_menu(menu, s)
@@ -299,7 +303,8 @@ local widget_size = {
 	temperature = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 °C</span>') end,
 	memory = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.mem_font or theme.sensor_font)..'">99 999 MB </span>') end,
 	cpu = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>') end,
-	battery = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.font)..'">100 %</span>') end,
+	battery = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.sensor_font)..'">100 %</span>') end,
+	battery_extended = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.sensor_font)..'">100 %</span> <span font="'..(theme.battery_current_font or theme.sensor_font)..'">99.9 W</span>') end,
 }
 
 local temperature_gradient = {
@@ -405,6 +410,64 @@ local function update_widgets()
 	vicious.call(
 		vicious_extra.bat,
 		function (widget, args)
+			battery_current = args
+
+			local text = '<span font="'..(theme.battery_percent_font or theme.sensor_font)..'">'..battery_current.percentage..' %</span>'
+			if battery_current.power_now and battery_current.power_now > 0 then
+				text = text .. ' <span font="'..(theme.battery_current_font or theme.sensor_font)..'" alpha="50%">'..string.format("%.1f", battery_current.power_now)..' W</span>'
+			end
+
+			for s in screen do
+				for _, w in ipairs(s.battery_widget:get_children_by_id('value')) do
+					if battery_current.power_now and battery_current.power_now > 0 then
+						w:set_forced_width(widget_size.battery_extended(s))
+					else
+						w:set_forced_width(widget_size.battery(s))
+					end
+					w:set_markup(text)
+				end
+				for _, w in ipairs(s.battery_widget:get_children_by_id('icon')) do
+					w:set_value(battery_current.percentage_exact / 100)
+					if battery_current.status == "Charging" then
+						w:set_bar_color("#63b5f6")
+						w:set_options({
+							stylesheet = 'svg { color: '..theme.fg_normal..'; }'
+						})
+					elseif battery_current.status == "Discharging" then
+						if battery_current.percentage_exact < 30 then
+							w:set_bar_color("#e33a35")
+							w:set_options({
+								stylesheet = 'svg { color: #d78382; }'
+							})
+						else
+							w:set_bar_color("#4cb050")
+							w:set_options({
+								stylesheet = 'svg { color: '..theme.fg_normal..'; }'
+							})
+						end
+						if battery_current.percentage_exact < 5 then
+							naughty.notify({
+								text = battery_current.percentage .. '%',
+								title = "Battery empty!",
+								position = "top_right",
+								timeout = 1,
+								preset = naughty.config.presets.critical,
+								screen = 1,
+								ontop = true,
+							})
+						elseif battery_current.percentage_exact < 10 then
+							naughty.notify({
+								text = battery_current.percentage .. '%',
+								title = "Battery low",
+								position = "top_right",
+								timeout = 1,
+								screen = 1,
+								ontop = true,
+							})
+						end
+					end
+				end
+			end
 		end,
 		'BAT0'
 	)
@@ -488,7 +551,11 @@ local function set_screen_dpi(s, new_dpi)
 			w:set_forced_width(widget_size.cpu(s))
 		end
 		for _, w in ipairs(s.battery_widget:get_children_by_id('value')) do
-			w:set_forced_width(widget_size.battery(s))
+			if battery_current.power_now and battery_current.power_now > 0 then
+				w:set_forced_width(widget_size.battery_extended(s))
+			else
+				w:set_forced_width(widget_size.battery(s))
+			end
 		end
 	end
 end
