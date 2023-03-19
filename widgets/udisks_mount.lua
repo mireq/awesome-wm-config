@@ -59,8 +59,10 @@ local function update_list(old, new, cb_create, cb_remove, cb_change)
 	for _, path in ipairs(to_check) do
 		if object_changed(old[path], new[path]) then
 			local instance = old[path]
-			old[path] = new[path]
-			cb_change(path, new[path], instance)
+			local old_instance = {}
+			gtable.crush(old_instance, old[path], true)
+			gtable.crush(old[path], new[path], true)
+			cb_change(path, new[path], old_instance)
 		end
 	end
 end
