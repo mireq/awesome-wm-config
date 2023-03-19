@@ -95,7 +95,7 @@ function status_magnitude_widget:set_options(options)
 	self:update_contents()
 end
 
-function status_magnitude_widget:update_contents(special)
+function status_magnitude_widget:update_contents()
 	if self._private.special == nil then
 		for name, w in pairs(self._private.widgets_special) do
 			w:set_visible(false)
