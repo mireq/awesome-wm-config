@@ -310,6 +310,11 @@ local memory_gradient = {
 	{0.6, '#d7d087'},
 	{0.8, '#d78382'},
 }
+local cpu_gradient = {
+	{5, beautiful.fg_normal},
+	{20, '#d7d087'},
+	{60, '#d78382'},
+}
 
 local function update_widgets()
 	vicious.call(
@@ -340,7 +345,7 @@ local function update_widgets()
 				for _, w in ipairs(s.temperature_widget:get_children_by_id('icon')) do
 					w.stylesheet = 'svg { fill: '..color..'; }'
 				end
-				for _, w in ipairs(s.temperature_widget:get_children_by_id('temperature')) do
+				for _, w in ipairs(s.temperature_widget:get_children_by_id('value')) do
 					w:set_markup('<span font="'..(theme.temp_font or theme.sensor_font)..'">' .. temp .. ' °C</span>')
 				end
 			end
@@ -359,8 +364,24 @@ local function update_widgets()
 				for _, w in ipairs(s.memory_widget:get_children_by_id('icon')) do
 					w.stylesheet = 'svg { fill: '..color..'; }'
 				end
-				for _, w in ipairs(s.memory_widget:get_children_by_id('memory')) do
-					w:set_markup('<span font="'..(theme.temp_font or theme.sensor_font)..'">' .. utils.format_number(used) .. ' MB</span>')
+				for _, w in ipairs(s.memory_widget:get_children_by_id('value')) do
+					w:set_markup('<span font="'..(theme.mem_font or theme.sensor_font)..'">' .. utils.format_number(used) .. ' MB</span>')
+				end
+			end
+		end
+	)
+
+	vicious.call(
+		vicious.widgets.cpu,
+		function (widget, args)
+			local value = args[1]
+			local color = utils.calculate_gradient_color(value, cpu_gradient)
+			for s in screen do
+				for _, w in ipairs(s.cpu_widget:get_children_by_id('icon')) do
+					w.stylesheet = 'svg { fill: '..color..'; }'
+				end
+				for _, w in ipairs(s.cpu_widget:get_children_by_id('value')) do
+					w:set_markup('<span font="'..(theme.cpu_font or theme.sensor_font)..'">' .. value .. ' %</span>')
 				end
 			end
 		end
@@ -435,11 +456,14 @@ local function set_screen_dpi(s, new_dpi)
 	s.tasklist:set_base_layout(s.tasklist_args.layout)
 
 	for s in screen do
-		for _, w in ipairs(s.temperature_widget:get_children_by_id('temperature')) do
+		for _, w in ipairs(s.temperature_widget:get_children_by_id('value')) do
 			w:set_forced_width(utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 °C</span>'))
 		end
-		for _, w in ipairs(s.memory_widget:get_children_by_id('memory')) do
+		for _, w in ipairs(s.memory_widget:get_children_by_id('value')) do
 			w:set_forced_width(utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">99 999 MB </span>'))
+		end
+		for _, w in ipairs(s.cpu_widget:get_children_by_id('value')) do
+			w:set_forced_width(utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>'))
 		end
 	end
 end
@@ -687,7 +711,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			widget = wibox.widget.imagebox
 		},
 		{
-			id = 'temperature',
+			id = 'value',
 			text = '',
 			widget = wibox.widget.textbox,
 			forced_width = utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 °C</span>')
@@ -702,12 +726,33 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			widget = wibox.widget.imagebox
 		},
 		{
-			id = 'memory',
+			id = 'value',
 			text = '',
 			widget = wibox.widget.textbox,
-			forced_width = utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">99 999 MB </span>')
+			forced_width = utils.calculate_text_width(s, '<span font="'..(theme.mem_font or theme.sensor_font)..'">99 999 MB </span>')
 		},
 		layout = wibox.layout.fixed.horizontal
+	})
+	s.cpu_widget = wibox.widget({
+		{
+			id = 'icon',
+			image = beautiful.widget_cpu,
+			stylesheet = 'svg { fill: '..theme.fg_normal..'; }',
+			widget = wibox.widget.imagebox
+		},
+		{
+			id = 'value',
+			text = '',
+			widget = wibox.widget.textbox,
+			forced_width = utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>')
+		},
+		layout = wibox.layout.fixed.horizontal
+	})
+	popups.htop(s.cpu_widget, {
+		title_color = "#ffffff",
+		user_color = "#00ff00",
+		root_color = "#ffff00",
+		terminal = "urxvt"
 	})
 	local function on_mount(path, err)
 		if err then
@@ -782,9 +827,10 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		},
 		s.tasklist,
 		{
-			s.wifi_widget,
 			s.temperature_widget,
 			s.memory_widget,
+			s.cpu_widget,
+			s.wifi_widget,
 			s.udisks_mount,
 			layout = wibox.layout.fixed.horizontal
 		},

@@ -28,6 +28,7 @@ theme.bg_systray                            = theme.wibar_bg
 theme.process_font                          = "Ubuntu Mono 8"
 theme.widget_temp                           = themes_dir .. "/icons/temp.svg"
 theme.widget_mem                            = themes_dir .. "/icons/mem.svg"
+theme.widget_cpu                            = themes_dir .. "/icons/cpu.svg"
 theme.widget_wireless                       = themes_dir .. "/icons/net_wireless_"
 
 theme.launch                                = themes_dir .. "/icons/launch.svg"
