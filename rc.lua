@@ -367,7 +367,7 @@ if battery_history_file ~= nil then
 end
 local proc_stat = io.open('/proc/stat', 'r')
 local battery_icon = wibox.widget.imagebox(beautiful.widget_battery)
-battery_icon.stylesheet = 'svg { fill: '..theme.fg_normal..'; }'
+battery_icon.stylesheet = 'svg { color: '..theme.fg_normal..'; }'
 local battery_widget = wibox.widget.textbox()
 local function battery_icon_update(s)
 	if s.battery_bar then
