@@ -41,14 +41,6 @@ local launch_tv = "mpv --demuxer=lavf --demuxer-lavf-format=mpegts --vf=vavpp:de
 local modkey = "Mod4"
 local altkey = "Mod1"
 
-local terminal = "urxvtc"
-local editor = os.getenv("EDITOR")
-local gui_editor = "kwrite"
-local browser = "firefox-bin"
-local tasks = terminal .. " -e htop"
-local filemanager = "konqueror"
-local launch_tv = "mpv --demuxer=lavf --demuxer-lavf-format=mpegts --vf=vavpp:deint=auto:interlaced-only=yes --demuxer-lavf-o-add=fflags=+nobuffer --demuxer-lavf-probe-info=nostreams --demuxer-lavf-analyzeduration=0 --force-window=immediate http://192.168.1.111:8001/"
-
 beautiful.init(active_theme .. "/theme_new.lua")
 
 -- {{{ Menu
@@ -313,6 +305,11 @@ local temperature_gradient = {
 	{60, '#d7d087'},
 	{80, '#d78382'},
 }
+local memory_gradient = {
+	{0.4, beautiful.fg_normal},
+	{0.6, '#d7d087'},
+	{0.8, '#d78382'},
+}
 
 local function update_widgets()
 	vicious.call(
@@ -349,6 +346,24 @@ local function update_widgets()
 			end
 		end,
 		{"thermal_zone0", "sys"}
+	)
+
+	vicious.call(
+		vicious.widgets.mem,
+		function (widget, args)
+			local used = args[2]
+			local total = args[3]
+			local percentage = used / total
+			local color = utils.calculate_gradient_color(percentage, memory_gradient)
+			for s in screen do
+				for _, w in ipairs(s.memory_widget:get_children_by_id('icon')) do
+					w.stylesheet = 'svg { fill: '..color..'; }'
+				end
+				for _, w in ipairs(s.memory_widget:get_children_by_id('memory')) do
+					w:set_markup('<span font="'..(theme.temp_font or theme.sensor_font)..'">' .. utils.format_number(used) .. ' MB</span>')
+				end
+			end
+		end
 	)
 end
 -- }}}
@@ -422,6 +437,9 @@ local function set_screen_dpi(s, new_dpi)
 	for s in screen do
 		for _, w in ipairs(s.temperature_widget:get_children_by_id('temperature')) do
 			w:set_forced_width(utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 °C</span>'))
+		end
+		for _, w in ipairs(s.memory_widget:get_children_by_id('memory')) do
+			w:set_forced_width(utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">99 999 MB </span>'))
 		end
 	end
 end
@@ -676,6 +694,21 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
+	s.memory_widget = wibox.widget({
+		{
+			id = 'icon',
+			image = beautiful.widget_mem,
+			stylesheet = 'svg { fill: '..theme.fg_normal..'; }',
+			widget = wibox.widget.imagebox
+		},
+		{
+			id = 'memory',
+			text = '',
+			widget = wibox.widget.textbox,
+			forced_width = utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">99 999 MB </span>')
+		},
+		layout = wibox.layout.fixed.horizontal
+	})
 	local function on_mount(path, err)
 		if err then
 			naughty.notify({
@@ -751,6 +784,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		{
 			s.wifi_widget,
 			s.temperature_widget,
+			s.memory_widget,
 			s.udisks_mount,
 			layout = wibox.layout.fixed.horizontal
 		},
