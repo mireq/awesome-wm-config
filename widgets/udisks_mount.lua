@@ -527,4 +527,7 @@ function udisks_mount_widget.mt:__call(...)
 end
 
 
+udisks_mount_widget.device_manager = device_manager
+
+
 return setmetatable(udisks_mount_widget, udisks_mount_widget.mt)
