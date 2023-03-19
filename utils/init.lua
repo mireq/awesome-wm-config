@@ -14,7 +14,7 @@ local wibox = require("wibox")
 local text_width_calculator_widget = wibox.widget.textbox()
 
 
-M.update_widget_template_attributes = function(widget_template, attributes)
+function M.update_widget_template_attributes(widget_template, attributes)
 	for widget_id, attrs in pairs(attributes) do
 		if widget_template.id == widget_id then
 			for attr, val in pairs(attrs) do
@@ -31,7 +31,7 @@ M.update_widget_template_attributes = function(widget_template, attributes)
 end
 
 
-M.show_hotkeys_help = function()
+function M.show_hotkeys_help()
 	local s = awful.screen.focused()
 	beautiful.hotkeys_border_width = dpi(1, s)
 	beautiful.hotkeys_group_margin = dpi(6, s)
@@ -39,7 +39,7 @@ M.show_hotkeys_help = function()
 end
 
 
-M.render_svg = function(path, scaling)
+function M.render_svg(path, scaling)
 	local svg = Rsvg.Handle.new_from_file(path)
 	local dim = svg:get_dimensions()
 	local img = cairo.ImageSurface(cairo.Format.ARGB32, dim.width * scaling, dim.height * scaling)
@@ -50,13 +50,13 @@ M.render_svg = function(path, scaling)
 end
 
 
-M.calculate_text_width = function(s, text)
+function M.calculate_text_width(s, text)
 	text_width_calculator_widget:set_markup(text)
 	return select(1, text_width_calculator_widget:get_preferred_size(s))
 end
 
 
-M.mix_color = function(c1, c2, value)
+function M.mix_color(c1, c2, value)
 	if value <= 0 then
 		return c1
 	end
@@ -77,7 +77,7 @@ M.mix_color = function(c1, c2, value)
 end
 
 
-M.set_color_alpha = function(c, alpha)
+function M.set_color_alpha(c, alpha)
 	local r, g, b, a = gears.color.parse_color(c)
 	a = a * alpha
 	return string.format(
@@ -90,7 +90,7 @@ M.set_color_alpha = function(c, alpha)
 end
 
 
-M.calculate_gradient_color = function(value, gradient)
+function M.calculate_gradient_color(value, gradient)
 	local previous = gradient[1]
 	local ratio = 0
 	local color = previous[2]
@@ -106,6 +106,13 @@ M.calculate_gradient_color = function(value, gradient)
 		previous = step
 	end
 	return color
+end
+
+
+function M.format_number(value)
+	local i, j, minus, int, fraction = tostring(value):find('([-]?)(%d+)([.]?%d*)')
+	int = int:reverse():gsub('(%d%d%d)', '%1 ')
+	return minus .. int:reverse():gsub('^,', '') .. fraction
 end
 
 
