@@ -17,6 +17,7 @@ local status_magnitude_widget = require("widgets.status_magnitude_widget")
 local udisks_mount = require("widgets.udisks_mount")
 local utils = require("utils")
 local battery_utils = require("utils.battery")
+local volume_utils = require("utils.volume")
 local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
 local wibox = require("wibox")
@@ -337,6 +338,10 @@ local battery_current = {
 	remaining_seconds = nil,
 	time = "N/A",
 }
+
+volume_utils:connect_signal('master_sink_changed', function(_, args)
+	vicious_extra.volume.set_volume(args.volume, args.mute)
+end)
 
 local function update_widgets()
 	vicious.call(
