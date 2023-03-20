@@ -1,7 +1,6 @@
 local M = {}
 
 local gears = require("gears")
-local gdebug = require("gears.debug")
 local beautiful = require("beautiful")
 local hotkeys_popup = require("awful.hotkeys_popup")
 local awful = require("awful")
@@ -125,6 +124,36 @@ end
 
 function M.get_config_dir()
 	return debug.getinfo(1).source:match("@?(.*/)[^/]*/[^/]*")
+end
+
+
+function M.debounce(fn, delay, trigger_first)
+	local arguments = nil
+	local running = false
+	local function closure(...)
+		if arguments == nil and not running and first_trigger then
+			fn(...)
+		end
+		if running then
+			arguments = {...}
+			return
+		end
+		running = true
+		gears.timer {
+			timeout = delay,
+			call_now = false,
+			autostart = true,
+			single_shot = true,
+			callback = function()
+				if arguments ~= nil then
+					fn(unpack(arguments))
+				end
+				running = false
+			end
+		}
+	end
+
+	return closure
 end
 
 
