@@ -339,6 +339,15 @@ local battery_current = {
 	time = "N/A",
 }
 
+local on_sink_volume_changed = utils.debounce(function(volume, mute)
+	print("sink volume", volume, mute)
+end, 0.02, true)
+
+volume_utils:connect_signal('master_sink_changed', function(_, args)
+	print("fire")
+	on_sink_volume_changed(args.volume, args.mute)
+end)
+
 
 local function update_widgets()
 	vicious.call(
