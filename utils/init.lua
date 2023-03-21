@@ -149,6 +149,7 @@ function M.debounce(fn, delay, trigger_first)
 					fn(unpack(arguments))
 				end
 				running = false
+				arguments = nil
 			end
 		}
 	end
