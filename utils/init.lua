@@ -131,7 +131,7 @@ function M.debounce(fn, delay, trigger_first)
 	local arguments = nil
 	local running = false
 	local function closure(...)
-		if arguments == nil and not running and first_trigger then
+		if arguments == nil and not running and trigger_first then
 			fn(...)
 		end
 		if running then
