@@ -82,8 +82,10 @@ awesome.connect_signal("exit", function()
 			volume_monitor_ctl:close()
 			volume_monitor_ctl = nil
 		end
-		awesome.kill(volume_monitor_pid, awesome.unix_signal.SIGTERM)
-		volume_monitor_pid = nil
+		if volume_monitor_pid ~= nil then
+			awesome.kill(volume_monitor_pid, awesome.unix_signal.SIGTERM)
+			volume_monitor_pid = nil
+		end
 	end
 end)
 
