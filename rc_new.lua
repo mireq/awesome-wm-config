@@ -339,9 +339,6 @@ local battery_current = {
 	time = "N/A",
 }
 
-volume_utils:connect_signal('master_sink_changed', function(_, args)
-	vicious_extra.volume.set_volume(args.volume, args.mute)
-end)
 
 local function update_widgets()
 	vicious.call(
@@ -529,7 +526,7 @@ local function set_screen_dpi(s, new_dpi)
 	s.tasklist_args.layout.max_widget_size = dpi(240, s)
 	s.tasklist_args.layout.spacing = dpi(0, s)
 	utils.update_widget_template_attributes(s.tasklist_args.widget_template, {
-		icon_margin_role = {
+		icon_margins_role = {
 			top = dpi(1, s),
 			bottom = dpi(1, s),
 			left = dpi(2, s),
@@ -719,7 +716,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 							id = 'client_icon_role',
 							widget = awful.widget.clienticon,
 						},
-						id = 'icon_margin_role',
+						id = 'icon_margins_role',
 						top = dpi(1, s),
 						bottom = dpi(1, s),
 						left = dpi(2, s),
@@ -762,7 +759,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			create_callback = function(self, c, index, objects)
 				self.client = c
 				if c.icon == nil then
-					local widgets = self:get_children_by_id('icon_margin_role')
+					local widgets = self:get_children_by_id('icon_margins_role')
 					for _, w in ipairs(widgets) do
 						w:set_left(0)
 					end
@@ -773,7 +770,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 				self.update_common(self, c, index, objects)
 			end,
 			dpi_callback = function(w)
-				local widgets = w:get_children_by_id('icon_margin_role')
+				local widgets = w:get_children_by_id('icon_margins_role')
 				local c = w.client
 				for _, w in ipairs(widgets) do
 					w:set_top(dpi(1, s))
