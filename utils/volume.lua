@@ -43,6 +43,7 @@ local function with_line_callback_stdin(cmd, callbacks)
 end
 
 local volume_monitor_ctl = nil
+local volume_monitor_pid = nil
 
 local function volume_monitor_write(cmd)
 	if volume_monitor_ctl ~= nil then
@@ -51,32 +52,39 @@ local function volume_monitor_write(cmd)
 	end
 end
 
-local volume_monitor_pid = with_line_callback_stdin('stdbuf -oL ' .. utils.get_config_dir() .. 'pulsectrl', {
-	stdout = function(line)
-		local found, __, mute_flag, volume = string.find(line, "^volume sink\t[*](.)\t([0-9.]+)\t.*$")
-		if found ~= nil then
-			local volume_value = tonumber(volume);
-			local volume_mute
-			if mute_flag == "M" then
-				volume_mute = true
-			else
-				volume_mute = false
+local function on_volume_line(line)
+	local found, __, mute_flag, volume = string.find(line, "^volume sink\t[*](.)\t([0-9.]+)\t.*$")
+	if found ~= nil then
+		local volume_value = tonumber(volume);
+		local volume_mute
+		if mute_flag == "M" then
+			volume_mute = true
+		else
+			volume_mute = false
+		end
+
+		M:emit_signal('master_sink_changed', { volume = volume_value, mute = volume_mute })
+	end
+end
+
+function M.start_monitor()
+	M.stop_monitor()
+	volume_monitor_pid = with_line_callback_stdin('stdbuf -oL ' .. utils.get_config_dir() .. 'pulsectrl', {
+		stdout = function(line)
+			on_volume_line(line)
+		end,
+		exit = function()
+			volume_monitor_pid = nil;
+		end,
+		stdin = function(stdin, pid)
+			if stdin ~= nil then
+				volume_monitor_ctl = stdin
 			end
+		end,
+	})
+end
 
-			M:emit_signal('master_sink_changed', { volume = volume_value, mute = volume_mute })
-		end
-	end,
-	exit = function()
-		volume_monitor_pid = nil;
-	end,
-	stdin = function(stdin, pid)
-		if stdin ~= nil then
-			volume_monitor_ctl = stdin
-		end
-	end,
-})
-
-awesome.connect_signal("exit", function()
+function M.stop_monitor()
 	if volume_monitor_pid then
 		if volume_monitor_ctl ~= nil then
 			volume_monitor_ctl:close()
@@ -87,7 +95,7 @@ awesome.connect_signal("exit", function()
 			volume_monitor_pid = nil
 		end
 	end
-end)
+end
 
 function M.sink_change(val)
 	volume_monitor_write('sink change ' .. tostring(val))
@@ -104,5 +112,9 @@ end
 function M.source_mute_toggle()
 	volume_monitor_write('source mute_toggle')
 end
+
+awesome.connect_signal("exit", function()
+	M.stop_monitor()
+end)
 
 return M
