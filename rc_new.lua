@@ -305,6 +305,7 @@ local widget_size = {
 	temperature = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 °C</span>') end,
 	memory = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.mem_font or theme.sensor_font)..'">99 999 MB </span>') end,
 	cpu = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>') end,
+	volume = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>') end,
 	battery = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.sensor_font)..'">100 %</span>') end,
 	battery_extended = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.sensor_font)..'">100 %</span> <span font="'..(theme.battery_current_font or theme.sensor_font)..'">99.9 W</span>') end,
 }
@@ -338,13 +339,34 @@ local battery_current = {
 	remaining_seconds = nil,
 	time = "N/A",
 }
+local volume_current = {
+	sink_volume = 0,
+	sink_mute = true,
+}
 
-local on_sink_volume_changed = utils.debounce(function(volume, mute)
-	print("sink volume", volume, mute)
+local update_volume = utils.debounce(function()
+	for s in screen do
+		for _, w in ipairs(s.volume_widget:get_children_by_id('value')) do
+			w:set_markup('<span font="'..(theme.cpu_font or theme.sensor_font)..'">' .. math.floor(volume_current.sink_volume * 100) .. ' %</span>')
+		end
+		for _, w in ipairs(s.volume_widget:get_children_by_id('icon')) do
+			w:set_value(volume_current.sink_volume)
+			if volume_current.sink_mute then
+				w:set_special("no")
+			else
+				w:set_special(nil)
+			end
+		end
+	end
 end, 0.02, true)
 
+local function on_sink_volume_changed(volume, mute)
+	volume_current.sink_volume = volume
+	volume_current.sink_mute = mute
+	update_volume()
+end
+
 volume_utils:connect_signal('master_sink_changed', function(_, args)
-	print("fire")
 	on_sink_volume_changed(args.volume, args.mute)
 end)
 
@@ -489,6 +511,7 @@ local function update_widgets()
 		end,
 		'BAT0'
 	)
+	update_volume()
 end
 -- }}}
 
@@ -574,6 +597,9 @@ local function set_screen_dpi(s, new_dpi)
 			else
 				w:set_forced_width(widget_size.battery(s))
 			end
+		end
+		for _, w in ipairs(s.volume_widget:get_children_by_id('value')) do
+			w:set_forced_width(widget_size.volume(s))
 		end
 	end
 end
@@ -802,7 +828,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	s.lua_prompt = awful.widget.prompt()
 	s.wifi_widget = status_magnitude_widget({
 		icon = beautiful.widget_wireless,
-		count = 4,
+		count = beautiful.widget_wireless_count,
 		special = {'no'},
 		stylesheet = 'svg { color: '..theme.fg_normal..'; }'
 	})
@@ -899,6 +925,27 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		end
 	}
 
+	s.volume_widget = wibox.widget({
+		{
+			id = 'icon',
+			options = {
+				icon = beautiful.widget_volume,
+				count = beautiful.widget_volume_count,
+				special = {'no'},
+				stylesheet = 'svg { color: '..theme.fg_normal..'; }',
+			},
+			special = 'no',
+			widget = status_magnitude_widget
+		},
+		{
+			id = 'value',
+			text = '',
+			widget = wibox.widget.textbox,
+			forced_width = utils.calculate_text_width(s, widget_size.cpu(s))
+		},
+		layout = wibox.layout.fixed.horizontal
+	})
+
 	local function on_mount(path, err)
 		if err then
 			naughty.notify({
@@ -976,6 +1023,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			s.memory_widget,
 			s.cpu_widget,
 			s.battery_widget,
+			s.volume_widget,
 			s.wifi_widget,
 			s.udisks_mount,
 			layout = wibox.layout.fixed.horizontal
@@ -985,6 +1033,8 @@ screen.connect_signal("request::desktop_decoration", function(s)
 
 	update_widgets()
 end)
+
+volume_utils.start_monitor()
 
 awful.run_test = function()
 	s = screen.fake_add(20, 20, 500, 400)
