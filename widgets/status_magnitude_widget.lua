@@ -136,6 +136,9 @@ local function new(options)
 
 	ret._private.value = 0
 	ret._private.special = nil
+	ret._private.widgets = {}
+	ret._private.widgets_value = {}
+	ret._private.widgets_special = {}
 
 	if options ~= nil then
 		ret:set_options(options)
