@@ -26,3 +26,4 @@ if [ -f $RUNTIME_DIR/alacritty.dpi ]; then
 	font_size=$(expr 8 \* $dpi / $start_dpi)
 	sed -i "s/size:.*$/size: $font_size.0/g" $RUNTIME_DIR/alacritty.yml
 fi
+wine reg add "HKEY_CURRENT_USER\Control Panel\Desktop" /v LogPixels /t REG_DWORD /d `printf '0x%x' $dpi` /f
