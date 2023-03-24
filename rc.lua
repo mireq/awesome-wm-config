@@ -383,14 +383,14 @@ local function battery_icon_update(s)
 		s.battery_bar:set_left(left)
 		if battery_current.status == "Charging" then
 			s.battery_bar_fill:set_bg("#63b5f6")
-			battery_icon.stylesheet = 'svg { fill: '..theme.fg_normal..'; }'
+			battery_icon.stylesheet = 'svg { color: '..theme.fg_normal..'; }'
 		elseif battery_current.status == "Discharging" then
 			if battery_current.percentage_exact < 30 then
 				s.battery_bar_fill:set_bg("#e33a35")
 				battery_icon.stylesheet = 'svg { fill: #d78382; }'
 			else
 				s.battery_bar_fill:set_bg("#4cb050")
-				battery_icon.stylesheet = 'svg { fill: '..theme.fg_normal..'; }'
+				battery_icon.stylesheet = 'svg { color: '..theme.fg_normal..'; }'
 			end
 			if battery_current.percentage_exact < 5 then
 				naughty.notify({
