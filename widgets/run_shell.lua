@@ -53,7 +53,8 @@ function widget.new()
 				shape_border_width = 1,
 				forced_width = input_width,
 				forced_height = input_height,
-				widget = wibox.container.background
+				widget = wibox.container.background,
+				id = 'background'
 			},
 			valign = 'center',
 			layout = wibox.container.place
@@ -64,23 +65,29 @@ function widget.new()
 
 	function widget_instance:launch()
 		local s = awful.screen.focused()
+
+		local input_width = s.geometry.width - dpi(100, s)
+		local input_height = dpi(30, s)
+		input_width = math.min(dpi(800, s), input_width)
+
 		if not self._cached_wiboxes[s] then
 			self._cached_wiboxes[s] = {}
 		end
 		if not self._cached_wiboxes[s][1] then
 			self._cached_wiboxes[s][1] = self:_create_wibox()
 		end
-		self._cached_wiboxes[s][1]:get_children_by_id('margin')[1]:set_left(dpi(8, s))
+
+		local margin = self._cached_wiboxes[s][1]:get_children_by_id('margin')[1]
+		margin:set_left(dpi(8, s))
+		local background = self._cached_wiboxes[s][1]:get_children_by_id('background')[1]
+		background.forced_width = input_width
+		background.forced_height = input_height
 		local w = self._cached_wiboxes[s][1]
 
 		if capi.awesome.composite_manager_running then
 			w.width = s.geometry.width
 			w.height = s.geometry.height
 		else
-			local input_width = s.geometry.width - dpi(100, s)
-			local input_height = dpi(30, s)
-			input_width = math.min(dpi(800, s), input_width)
-
 			w.width = input_width
 			w.height = input_height
 		end
