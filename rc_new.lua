@@ -385,9 +385,9 @@ client.connect_signal("request::titlebars", function(c)
 			close = awful.titlebar.widget.closebutton(c),
 			maximized = awful.titlebar.widget.maximizedbutton(c),
 			minimize = awful.titlebar.widget.minimizebutton(c),
-			--ontop = awful.titlebar.widget.ontopbutton(c)
-			--sticky = awful.titlebar.widget.stickybutton(c),
-			--floating = awful.titlebar.widget.floatingbutton(c),
+			ontop = awful.titlebar.widget.ontopbutton(c),
+			sticky = awful.titlebar.widget.stickybutton(c),
+			floating = awful.titlebar.widget.floatingbutton(c),
 		}
 		for _, btn in pairs(window_buttons) do
 			btn.stylesheet = 'svg { color: '..theme.fg_normal..'; }'
@@ -404,6 +404,9 @@ client.connect_signal("request::titlebars", function(c)
 						widget = wibox.container.margin,
 						buttons = buttons,
 					},
+					window_buttons.floating,
+					window_buttons.sticky,
+					window_buttons.ontop,
 					layout = wibox.layout.fixed.horizontal
 				},
 				top = dpi(1 - size_adjust, s),
