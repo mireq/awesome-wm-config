@@ -289,6 +289,28 @@ local clientkeys = gears.table.join(
 )
 -- }}}
 
+
+-- Update border size for new client
+
+client.connect_signal("request::manage", function(c)
+	if c.border_width then
+		local size = dpi(beautiful.border_width, c.screen)
+		if size == 0 then
+			size = 1
+		end
+		c.border_width = size
+	end
+
+	if not awesome.startup then
+		if not c.size_hints.user_position and not c.size_hints.program_position then
+			awful.placement.centered(c, nil)
+			awful.placement.no_overlap(c)
+		end
+		awful.placement.no_offscreen(c)
+	end
+end)
+
+
 -- {{{ Rules
 client.connect_signal("request::default_mousebindings", function()
 	awful.mouse.append_client_mousebindings({
@@ -326,7 +348,6 @@ ruled.client.connect_signal("request::rules", function()
 			raise = true,
 			keys = clientkeys,
 			screen = awful.screen.preferred,
-			placement = awful.placement.no_overlap+awful.placement.no_offscreen
 		}
 	}
 	ruled.client.append_rule {
@@ -338,19 +359,6 @@ ruled.client.connect_signal("request::rules", function()
 	}
 end)
 -- }}}
-
-
--- Update border size for new client
-
-client.connect_signal("request::manage", function(c)
-	if c.border_width then
-		local size = dpi(beautiful.border_width, c.screen)
-		if size == 0 then
-			size = 1
-		end
-		c.border_width = size
-	end
-end)
 
 -- Add a titlebar if titlebars are enabled
 
