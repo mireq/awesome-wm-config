@@ -1,3 +1,5 @@
+-- awesome_mode: api-level=4:screen=on
+
 pcall(require, "luarocks.loader")
 
 local awful = require("awful")
@@ -360,7 +362,7 @@ end)
 -- {{{ Widget update
 
 local widget_size = {
-	temperature = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 °C</span>') end,
+	temperature = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 &#176;C</span>') end,
 	memory = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.mem_font or theme.sensor_font)..'">99 999 MB </span>') end,
 	cpu = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>') end,
 	volume = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>') end,
@@ -459,7 +461,7 @@ local function update_widgets()
 					w.stylesheet = 'svg { fill: '..color..'; }'
 				end
 				for _, w in ipairs(s.temperature_widget:get_children_by_id('value')) do
-					w:set_markup('<span font="'..(theme.temp_font or theme.sensor_font)..'">' .. temp .. ' °C</span>')
+					w:set_markup('<span font="'..(theme.temp_font or theme.sensor_font)..'">' .. temp .. ' &#176;C</span>')
 				end
 			end
 		end,
