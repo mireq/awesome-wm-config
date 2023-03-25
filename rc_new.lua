@@ -469,6 +469,7 @@ local widget_size = {
 	volume = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>') end,
 	battery = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.sensor_font)..'">100 %</span>') end,
 	battery_extended = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.sensor_font)..'">100 %</span> <span font="'..(theme.battery_current_font or theme.sensor_font)..'">99.9 W</span>') end,
+	clock = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.clock_font or theme.sensor_font)..'">MM  00.10  00:00</span>') end,
 }
 
 local temperature_gradient = {
@@ -1182,6 +1183,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			end)
 		)
 	})
+	s.clock_widget = wibox.widget.textclock('<span font="'..(theme.clock_font or theme.sensor_font)..'">%a  %d.%m  %H:%M</span>')
 
 	s.tool_bar:setup({
 		{
@@ -1193,12 +1195,21 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		s.tasklist,
 		{
 			s.temperature_widget,
+			{ text = ' ', widget = wibox.widget.textbox },
 			s.memory_widget,
+			{ text = ' ', widget = wibox.widget.textbox },
 			s.cpu_widget,
+			{ text = ' ', widget = wibox.widget.textbox },
 			s.battery_widget,
+			{ text = ' ', widget = wibox.widget.textbox },
 			s.volume_widget,
+			{ text = ' ', widget = wibox.widget.textbox },
 			s.wifi_widget,
+			{ text = ' ', widget = wibox.widget.textbox },
 			s.udisks_mount,
+			{ text = ' ', widget = wibox.widget.textbox },
+			s.clock_widget,
+			{ text = ' ', widget = wibox.widget.textbox },
 			layout = wibox.layout.fixed.horizontal
 		},
 		layout = wibox.layout.align.horizontal
