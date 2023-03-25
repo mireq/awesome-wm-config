@@ -392,6 +392,7 @@ client.connect_signal("request::titlebars", function(c)
 	for _, btn in pairs(window_buttons) do
 		btn.stylesheet = 'svg { color: '..theme.fg_normal..'; }'
 	end
+	window_buttons.close.stylesheet = 'svg { color: #f2b0b0; }'
 
 	if beautiful.titlebar_position == "top" or beautiful.titlebar_position == "bottom" then
 		if beautiful.titlebar_position == 'bottom' then
