@@ -290,6 +290,32 @@ local clientkeys = gears.table.join(
 -- }}}
 
 -- {{{ Rules
+client.connect_signal("request::default_mousebindings", function()
+	awful.mouse.append_client_mousebindings({
+		awful.button({ }, 1, function (c)
+			c:activate { context = "mouse_click" }
+		end),
+		awful.button({ altkey }, 1, function (c)
+			if c.fullscreen or c.maximized then
+				c.fullscreen = false
+				c.maximized = false
+				c.width = c.screen.geometry.width
+				c.height = c.screen.geometry.height
+			end
+			c:activate { context = "mouse_click", action = "mouse_move" }
+		end),
+		awful.button({ altkey }, 3, function (c)
+			if c.fullscreen or c.maximized then
+				c.fullscreen = false
+				c.maximized = false
+				c.width = c.screen.geometry.width
+				c.height = c.screen.geometry.height
+			end
+			c:activate { context = "mouse_click", action = "mouse_resize"}
+		end),
+	})
+end)
+
 ruled.client.connect_signal("request::rules", function()
 	ruled.client.append_rule {
 		id = "global",
@@ -299,7 +325,6 @@ ruled.client.connect_signal("request::rules", function()
 			focus = awful.client.focus.filter,
 			raise = true,
 			keys = clientkeys,
-			buttons = clientbuttons,
 			screen = awful.screen.preferred,
 			placement = awful.placement.no_overlap+awful.placement.no_offscreen
 		}
