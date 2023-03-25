@@ -1261,3 +1261,6 @@ awful.run_test = function()
 end
 awful.run_test()
 
+
+awful.mouse.snap.edge_enabled = false
+awful.mouse.snap.client_enabled = true
