@@ -382,23 +382,35 @@ client.connect_signal("request::titlebars", function(c)
 
 	if beautiful.titlebar_position == "top" or beautiful.titlebar_position == "bottom" then
 		local window_buttons = {
-			close = awful.titlebar.widget.closebutton(c)
+			close = awful.titlebar.widget.closebutton(c),
+			maximized = awful.titlebar.widget.maximizedbutton(c),
+			minimize = awful.titlebar.widget.minimizebutton(c),
+			--ontop = awful.titlebar.widget.ontopbutton(c)
+			--sticky = awful.titlebar.widget.stickybutton(c),
+			--floating = awful.titlebar.widget.floatingbutton(c),
 		}
-		window_buttons.close.stylesheet = 'svg { color: '..theme.fg_normal..'; }'
+		for _, btn in pairs(window_buttons) do
+			btn.stylesheet = 'svg { color: '..theme.fg_normal..'; }'
+		end
 		layout = {
 			{ -- Left
-				buttons = buttons,
-				layout = wibox.layout.fixed.horizontal
+				{
+					{ -- Icon
+						awful.titlebar.widget.iconwidget(c),
+						top = dpi(1 - size_adjust, s),
+						bottom = dpi(1, s),
+						left = dpi(2, s),
+						right = dpi(1, s),
+						widget = wibox.container.margin,
+						buttons = buttons,
+					},
+					layout = wibox.layout.fixed.horizontal
+				},
+				top = dpi(1 - size_adjust, s),
+				bottom = dpi(1, s),
+				widget = wibox.container.margin,
 			},
 			{ -- Middle
-				{ -- Icon
-					awful.titlebar.widget.iconwidget(c),
-					top = dpi(1 - size_adjust, s),
-					bottom = dpi(1, s),
-					left = dpi(2, s),
-					right = dpi(1, s),
-					widget = wibox.container.margin,
-				},
 				{ -- Title
 					halign = "center",
 					widget = awful.titlebar.widget.titlewidget(c)
@@ -408,10 +420,15 @@ client.connect_signal("request::titlebars", function(c)
 				layout = wibox.layout.fixed.horizontal
 			},
 			{ -- Right
-				--awful.titlebar.widget.minimizebutton(c),
-				--awful.titlebar.widget.maximizedbutton(c),
-				window_buttons.close,
-				layout = wibox.layout.fixed.horizontal()
+				{
+					window_buttons.minimize,
+					window_buttons.maximized,
+					window_buttons.close,
+					layout = wibox.layout.fixed.horizontal()
+				},
+				top = dpi(1 - size_adjust, s),
+				bottom = dpi(1, s),
+				widget = wibox.container.margin,
 			},
 			layout = wibox.layout.align.horizontal
 		}
@@ -1204,7 +1221,7 @@ awful.run_test = function()
 		callback  = function()
 			--set_screen_dpi(s, 384)
 			for s in screen do
-				set_screen_dpi(s, 192)
+				set_screen_dpi(s, 96)
 			end
 			--s:fake_remove()
 			--utils.show_hotkeys_help()
