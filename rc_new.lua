@@ -120,6 +120,13 @@ local main_menu = {
 
 naughty.config.presets.critical.bg = theme.bg_urgent
 naughty.config.presets.critical.fg = theme.fg_urgent
+naughty.connect_signal("request::display_error", function(message, startup)
+	naughty.notification {
+		urgency = "critical",
+		title = "Error occurred" .. (startup and " during startup" or ""),
+		message = message
+	}
+end)
 
 
 local function style_menu(menu, s)
@@ -375,6 +382,24 @@ end)
 client.connect_signal("mouse::enter", function(c)
 	c:activate({ context = "mouse_enter", raise = false })
 end)
+
+-- {{{ Notifications
+
+ruled.notification.connect_signal('request::rules', function()
+	ruled.notification.append_rule {
+		rule = { },
+		properties = {
+			screen = awful.screen.preferred,
+			implicit_timeout = 5,
+		}
+	}
+end)
+
+naughty.connect_signal("request::display", function(n)
+	naughty.layout.box { notification = n }
+end)
+
+-- }}}
 
 -- {{{ Widget update
 
