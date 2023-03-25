@@ -7,6 +7,7 @@
 #include <mutex>
 #include <signal.h>
 #include <string>
+#include <sys/prctl.h>
 #include <thread>
 #include <unistd.h>
 
@@ -131,6 +132,7 @@ bool PulseControl::initialize()
 		return false;
 	}
 	signal(SIGPIPE, SIG_IGN);
+	prctl(PR_SET_PDEATHSIG, SIGINT);
 
 	/* Initialize context */
 	_context = pa_context_new(_mainloop_api, "PulseAudio control");
