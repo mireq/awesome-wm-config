@@ -310,6 +310,15 @@ client.connect_signal("request::manage", function(c)
 	end
 end)
 
+local function unmaximize_before_move(c)
+	if c.fullscreen or c.maximized then
+		c.fullscreen = false
+		c.maximized = false
+		c.width = c.screen.geometry.width
+		c.height = c.screen.geometry.height
+	end
+end
+
 
 -- {{{ Rules
 client.connect_signal("request::default_mousebindings", function()
@@ -318,21 +327,11 @@ client.connect_signal("request::default_mousebindings", function()
 			c:activate { context = "mouse_click" }
 		end),
 		awful.button({ altkey }, 1, function (c)
-			if c.fullscreen or c.maximized then
-				c.fullscreen = false
-				c.maximized = false
-				c.width = c.screen.geometry.width
-				c.height = c.screen.geometry.height
-			end
+			unmaximize_before_move(c)
 			c:activate { context = "mouse_click", action = "mouse_move" }
 		end),
 		awful.button({ altkey }, 3, function (c)
-			if c.fullscreen or c.maximized then
-				c.fullscreen = false
-				c.maximized = false
-				c.width = c.screen.geometry.width
-				c.height = c.screen.geometry.height
-			end
+			unmaximize_before_move(c)
 			c:activate { context = "mouse_click", action = "mouse_resize"}
 		end),
 	})
@@ -368,9 +367,11 @@ client.connect_signal("request::titlebars", function(c)
 
 	local buttons = {
 		awful.button({ }, 1, function()
-			c:activate { context = "titlebar", action = "mouse_move"  }
+			unmaximize_before_move(c)
+			c:activate { context = "titlebar", action = "mouse_move" }
 		end),
 		awful.button({ }, 3, function()
+			unmaximize_before_move(c)
 			c:activate { context = "titlebar", action = "mouse_resize"}
 		end),
 	}
