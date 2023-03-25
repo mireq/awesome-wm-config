@@ -381,20 +381,21 @@ client.connect_signal("request::titlebars", function(c)
 		size_adjust = 1
 	end
 
+	local window_buttons = {
+		close = awful.titlebar.widget.closebutton(c),
+		maximized = awful.titlebar.widget.maximizedbutton(c),
+		minimize = awful.titlebar.widget.minimizebutton(c),
+		ontop = awful.titlebar.widget.ontopbutton(c),
+		sticky = awful.titlebar.widget.stickybutton(c),
+		floating = awful.titlebar.widget.floatingbutton(c),
+	}
+	for _, btn in pairs(window_buttons) do
+		btn.stylesheet = 'svg { color: '..theme.fg_normal..'; }'
+	end
+
 	if beautiful.titlebar_position == "top" or beautiful.titlebar_position == "bottom" then
 		if beautiful.titlebar_position == 'bottom' then
 			size_adjust = -size_adjust
-		end
-		local window_buttons = {
-			close = awful.titlebar.widget.closebutton(c),
-			maximized = awful.titlebar.widget.maximizedbutton(c),
-			minimize = awful.titlebar.widget.minimizebutton(c),
-			ontop = awful.titlebar.widget.ontopbutton(c),
-			sticky = awful.titlebar.widget.stickybutton(c),
-			floating = awful.titlebar.widget.floatingbutton(c),
-		}
-		for _, btn in pairs(window_buttons) do
-			btn.stylesheet = 'svg { color: '..theme.fg_normal..'; }'
 		end
 		layout = {
 			{ -- Left
@@ -440,6 +441,65 @@ client.connect_signal("request::titlebars", function(c)
 			layout = wibox.layout.align.horizontal
 		}
 	end
+	if beautiful.titlebar_position == "left" or beautiful.titlebar_position == "right" then
+		local rotate = "east"
+		local right_size_adjust = 0
+		local left_size_adjust = size_adjust
+		if beautiful.titlebar_position == "right" then
+			rotate = "west"
+			right_size_adjust = size_adjust
+			left_size_adjust = 0
+		end
+
+		layout = {
+			{ -- Top
+				{
+					window_buttons.close,
+					window_buttons.maximized,
+					window_buttons.minimize,
+					layout = wibox.layout.fixed.vertical
+				},
+				right = dpi(1 - right_size_adjust, s),
+				left = dpi(1 - left_size_adjust, s),
+				top = dpi(1, s),
+				widget = wibox.container.margin,
+			},
+			{ -- Middle
+				{
+					{ -- Title
+						halign = "center",
+						widget = awful.titlebar.widget.titlewidget(c)
+					},
+					direction = rotate,
+					widget = wibox.container.rotate
+				},
+				buttons = buttons,
+				fill_space = true,
+				layout = wibox.layout.fixed.vertical
+			},
+			{ -- Bottom
+				{
+					{ -- Icon
+						awful.titlebar.widget.iconwidget(c),
+						bottom = dpi(2, s),
+						top = dpi(1, s),
+						widget = wibox.container.margin,
+						buttons = buttons,
+					},
+					{ { text = ' ', widget = wibox.widget.textbox }, direction = rotate, widget = wibox.container.rotate },
+					window_buttons.ontop,
+					window_buttons.sticky,
+					window_buttons.floating,
+					layout = wibox.layout.fixed.vertical
+				},
+				right = dpi(1 - right_size_adjust, s),
+				left = dpi(1 - left_size_adjust, s),
+				bottom = dpi(1, s),
+				widget = wibox.container.margin,
+			},
+			layout = wibox.layout.align.vertical
+		}
+	end
 
 	local titlebar = awful.titlebar(c, {position = beautiful.titlebar_position, size = dpi(18 - size_adjust, c.screen)})
 	titlebar:set_widget(layout)
@@ -447,6 +507,17 @@ end)
 
 client.connect_signal("mouse::enter", function(c)
 	c:activate({ context = "mouse_enter", raise = false })
+end)
+
+client.connect_signal("request::geometry", function(c)
+	local titlebars = {}
+	if c._private and c._private.titlebars then
+		titlebars = c._private.titlebars
+	end
+	for _, titlebar in pairs(titlebars) do
+		titlebar.drawable:emit_signal("widget::redraw_needed")
+		titlebar.drawable:emit_signal("widget::layout_changed")
+	end
 end)
 
 -- {{{ Notifications

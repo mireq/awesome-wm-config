@@ -158,6 +158,6 @@ theme.udisks_umounted_opacity               = 0.5
 
 theme.cyclefocus_margin                     = 0
 
-theme.titlebar_position                     = 'top'
+theme.titlebar_position                     = 'right'
 
 return theme
