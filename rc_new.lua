@@ -287,7 +287,7 @@ awful.rules.rules = {
 	{
 		rule = { },
 		properties = {
-			--border_width = beautiful.border_width,
+			border_width = beautiful.border_width,
 			border_color = beautiful.border_normal,
 			focus = awful.client.focus.filter,
 			raise = true,
@@ -324,6 +324,11 @@ client.connect_signal("request::titlebars", function(c)
 		end),
 	}
 
+	local size_adjust = 0
+	if c.border_width ~= 0 then
+		size_adjust = 1
+	end
+
 	if beautiful.titlebar_position == "top" or beautiful.titlebar_position == "bottom" then
 		layout = {
 			{ -- Left
@@ -333,7 +338,7 @@ client.connect_signal("request::titlebars", function(c)
 			{ -- Middle
 				{ -- Icon
 					awful.titlebar.widget.iconwidget(c),
-					top = dpi(1, s),
+					top = dpi(1 - size_adjust, s),
 					bottom = dpi(1, s),
 					left = dpi(2, s),
 					right = dpi(1, s),
@@ -351,7 +356,7 @@ client.connect_signal("request::titlebars", function(c)
 		}
 	end
 
-	local titlebar = awful.titlebar(c, {position = beautiful.titlebar_position, size = dpi(18, c.screen)})
+	local titlebar = awful.titlebar(c, {position = beautiful.titlebar_position, size = dpi(18 - size_adjust, c.screen)})
 	titlebar:set_widget(layout)
 end)
 
@@ -362,7 +367,7 @@ end)
 -- {{{ Widget update
 
 local widget_size = {
-	temperature = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 &#176;C</span>') end,
+	temperature = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.temp_font or theme.sensor_font)..'">100 °C</span>') end,
 	memory = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.mem_font or theme.sensor_font)..'">99 999 MB </span>') end,
 	cpu = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>') end,
 	volume = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.cpu_font or theme.sensor_font)..'">100 %</span>') end,
@@ -461,7 +466,7 @@ local function update_widgets()
 					w.stylesheet = 'svg { fill: '..color..'; }'
 				end
 				for _, w in ipairs(s.temperature_widget:get_children_by_id('value')) do
-					w:set_markup('<span font="'..(theme.temp_font or theme.sensor_font)..'">' .. temp .. ' &#176;C</span>')
+					w:set_markup('<span font="'..(theme.temp_font or theme.sensor_font)..'">' .. temp .. ' °C</span>')
 				end
 			end
 		end,
@@ -661,6 +666,10 @@ local function set_screen_dpi(s, new_dpi)
 		for _, w in ipairs(s.volume_widget:get_children_by_id('value')) do
 			w:set_forced_width(widget_size.volume(s))
 		end
+	end
+
+	for _, c in ipairs(s.clients) do
+		c:emit_signal("request::titlebars")
 	end
 end
 
@@ -1097,7 +1106,7 @@ end)
 volume_utils.start_monitor()
 
 awful.run_test = function()
-	s = screen.fake_add(20, 20, 500, 400)
+	--s = screen.fake_add(20, 20, 500, 400)
 	for s in screen do
 		set_screen_dpi(s, 384)
 	end
@@ -1111,7 +1120,7 @@ awful.run_test = function()
 			for s in screen do
 				set_screen_dpi(s, 192)
 			end
-			s:fake_remove()
+			--s:fake_remove()
 			--utils.show_hotkeys_help()
 			collectgarbage("collect")
 		end
