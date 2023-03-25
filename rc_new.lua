@@ -295,8 +295,63 @@ awful.rules.rules = {
 			placement = awful.placement.no_overlap+awful.placement.no_offscreen
 		}
 	},
+
+	-- Add titlebars to normal clients and dialogs
+	{
+		rule_any = {
+			type = { "normal", "dialog" }
+		},
+		properties = { titlebars_enabled = true }
+	},
 }
 -- }}}
+
+
+-- Add a titlebar if titlebars_enabled is set to true in the rules.
+
+client.connect_signal("request::titlebars", function(c)
+	local s = c.screen
+	local layout
+
+	local buttons = {
+		awful.button({ }, 1, function()
+			c:activate { context = "titlebar", action = "mouse_move"  }
+		end),
+		awful.button({ }, 3, function()
+			c:activate { context = "titlebar", action = "mouse_resize"}
+		end),
+	}
+
+	if beautiful.titlebar_position == "top" or beautiful.titlebar_position == "bottom" then
+		layout = {
+			{ -- Left
+				buttons = buttons,
+				layout = wibox.layout.fixed.horizontal
+			},
+			{ -- Middle
+				{ -- Icon
+					awful.titlebar.widget.iconwidget(c),
+					top = dpi(1, s),
+					bottom = dpi(1, s),
+					left = dpi(2, s),
+					right = dpi(1, s),
+					widget = wibox.container.margin,
+				},
+				{ -- Title
+					halign = "center",
+					widget = awful.titlebar.widget.titlewidget(c)
+				},
+				buttons = buttons,
+				fill_space = true,
+				layout = wibox.layout.fixed.horizontal
+			},
+			layout = wibox.layout.align.horizontal
+		}
+	end
+
+	local titlebar = awful.titlebar(c, {position = beautiful.titlebar_position, size = dpi(18, c.screen)})
+	titlebar:set_widget(layout)
+end)
 
 
 -- {{{ Widget update
