@@ -525,6 +525,7 @@ local update_volume = utils.debounce(function()
 	end
 end, 0.02, true)
 
+
 local function on_sink_volume_changed(volume, mute)
 	volume_current.sink_volume = volume
 	volume_current.sink_mute = mute
@@ -681,6 +682,26 @@ end
 -- }}}
 
 
+
+local battery_tooltip_common = {
+	timeout = 5,
+	timer_function = function()
+		vicious.force({ battery_widget })
+		local tooltip_text = '<span font="'..theme.font..'" color="'..theme.fg_normal..'">Status: <b><span color="'..theme.fg_accent..'">'..battery_current.status..'</span></b></span>'
+		if battery_current.time and battery_current.time ~= "N/A" then
+			tooltip_text = tooltip_text .. '\n<span font="'..theme.font..'" color="'..theme.fg_normal..'">Remaining time: <b><span color="'..theme.fg_accent..'">'..battery_current.time..'</span></b></span>'
+		end
+		if battery_current.power_now and battery_current.power_now > 0 then
+			tooltip_text = tooltip_text .. '\n<span font="'..theme.font..'" color="'..theme.fg_normal..'">Power: <b><span color="'..theme.fg_accent..'">'..string.format("%.2f", battery_current.power_now)..' W</span></b></span>'
+		end
+		if battery_current.energy_now then
+			tooltip_text = tooltip_text .. '\n<span font="'..theme.font..'" color="'..theme.fg_normal..'">Energy: <b><span color="'..theme.fg_accent..'">'..string.format("%.1f", battery_current.energy_now)..' Wh</span></b></span>'
+		end
+		return tooltip_text
+	end
+}
+
+
 gears.timer {
 	timeout   = 10,
 	call_now  = false,
@@ -691,10 +712,6 @@ gears.timer {
 -- }}}
 
 
---screen.connect_signal("list", function()
---	print("list signal")
---end)
---
 local function set_screen_dpi(s, new_dpi)
 	s.dpi = new_dpi
 
@@ -1041,7 +1058,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			id = 'value',
 			text = '',
 			widget = wibox.widget.textbox,
-			forced_width = utils.calculate_text_width(s, widget_size.memory(s))
+			forced_width = widget_size.memory(s)
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
@@ -1056,7 +1073,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			id = 'value',
 			text = '',
 			widget = wibox.widget.textbox,
-			forced_width = utils.calculate_text_width(s, widget_size.cpu(s))
+			forced_width = widget_size.cpu(s)
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
@@ -1082,24 +1099,8 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
-	awful.tooltip {
-		objects = {s.battery_widget},
-		timeout = 5,
-		timer_function = function()
-			vicious.force({ battery_widget })
-			local tooltip_text = '<span font="'..theme.font..'" color="'..theme.fg_normal..'">Status: <b><span color="'..theme.fg_accent..'">'..battery_current.status..'</span></b></span>'
-			if battery_current.time and battery_current.time ~= "N/A" then
-				tooltip_text = tooltip_text .. '\n<span font="'..theme.font..'" color="'..theme.fg_normal..'">Remaining time: <b><span color="'..theme.fg_accent..'">'..battery_current.time..'</span></b></span>'
-			end
-			if battery_current.power_now and battery_current.power_now > 0 then
-				tooltip_text = tooltip_text .. '\n<span font="'..theme.font..'" color="'..theme.fg_normal..'">Power: <b><span color="'..theme.fg_accent..'">'..string.format("%.2f", battery_current.power_now)..' W</span></b></span>'
-			end
-			if battery_current.energy_now then
-				tooltip_text = tooltip_text .. '\n<span font="'..theme.font..'" color="'..theme.fg_normal..'">Energy: <b><span color="'..theme.fg_accent..'">'..string.format("%.1f", battery_current.energy_now)..' Wh</span></b></span>'
-			end
-			return tooltip_text
-		end
-	}
+	s.battery_tooltip = awful.tooltip(battery_tooltip_common)
+	s.battery_tooltip:add_to_object(s.battery_widget)
 
 	s.volume_widget = wibox.widget({
 		{
@@ -1117,7 +1118,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			id = 'value',
 			text = '',
 			widget = wibox.widget.textbox,
-			forced_width = utils.calculate_text_width(s, widget_size.cpu(s))
+			forced_width = widget_size.volume(s)
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
@@ -1225,7 +1226,7 @@ awful.run_test = function()
 		callback  = function()
 			--set_screen_dpi(s, 384)
 			for s in screen do
-				set_screen_dpi(s, 96)
+				set_screen_dpi(s, 192)
 			end
 			--s:fake_remove()
 			--utils.show_hotkeys_help()
