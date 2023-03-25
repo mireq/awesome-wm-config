@@ -296,7 +296,6 @@ ruled.client.connect_signal("request::rules", function()
 		rule = { },
 		properties = {
 			border_width = beautiful.border_width,
-			border_color = beautiful.border_normal,
 			focus = awful.client.focus.filter,
 			raise = true,
 			keys = clientkeys,
@@ -318,7 +317,7 @@ end)
 
 -- Update border size for new client
 
-client.connect_signal("manage", function (c)
+client.connect_signal("request::manage", function(c)
 	if c.border_width then
 		local size = dpi(beautiful.border_width, c.screen)
 		if size == 0 then

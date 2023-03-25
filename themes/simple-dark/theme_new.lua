@@ -9,6 +9,8 @@ theme.sensor_font                           = "UbuntuCondensed 8"
 theme.border_width                          = 1
 theme.border_normal                         = "#2b2e32"
 theme.border_focus                          = "#7f7f7f"
+theme.border_color_normal                   = "#2b2e32"
+theme.border_color_focus                    = "#7f7f7f"
 
 theme.wibar_bg                              = "#2b2e32f8"
 theme.wibar_bg_bottom                       = "#282a2ef8"
