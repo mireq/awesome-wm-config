@@ -3,6 +3,7 @@
 pcall(require, "luarocks.loader")
 
 local awful = require("awful")
+local battery_utils = require("utils.battery")
 local battery_widget = require("widgets.battery_widget")
 local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
@@ -14,14 +15,14 @@ local gears = require("gears")
 local hotkeys_popup = require("awful.hotkeys_popup")
 local naughty = require("naughty")
 local popups = require("widgets.popups")
+local ruled = require("ruled")
 local run_shell = require("widgets.run_shell")
 local status_magnitude_widget = require("widgets.status_magnitude_widget")
 local udisks_mount = require("widgets.udisks_mount")
 local utils = require("utils")
-local battery_utils = require("utils.battery")
-local volume_utils = require("utils.volume")
 local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
+local volume_utils = require("utils.volume")
 local wibox = require("wibox")
 local capi = {
 	drawin = drawin,
@@ -282,9 +283,9 @@ local clientkeys = gears.table.join(
 -- }}}
 
 -- {{{ Rules
-awful.rules.rules = {
-	-- All clients will match this rule.
-	{
+ruled.client.connect_signal("request::rules", function()
+	ruled.client.append_rule {
+		id = "global",
 		rule = { },
 		properties = {
 			border_width = beautiful.border_width,
@@ -296,16 +297,15 @@ awful.rules.rules = {
 			screen = awful.screen.preferred,
 			placement = awful.placement.no_overlap+awful.placement.no_offscreen
 		}
-	},
-
-	-- Add titlebars to normal clients and dialogs
-	{
+	}
+	ruled.client.append_rule {
+		id = "dialog",
 		rule_any = {
 			type = { "normal", "dialog" }
 		},
 		properties = { titlebars_enabled = true }
-	},
-}
+	}
+end)
 -- }}}
 
 
