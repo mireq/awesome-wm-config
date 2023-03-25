@@ -458,10 +458,6 @@ ruled.notification.connect_signal('request::rules', function()
 	}
 end)
 
-naughty.connect_signal("request::display", function(n)
-	naughty.layout.box { notification = n }
-end)
-
 -- }}}
 
 -- {{{ Widget update
@@ -1212,6 +1208,17 @@ screen.connect_signal("request::desktop_decoration", function(s)
 end)
 
 volume_utils.start_monitor()
+
+
+local collect_garbage = utils.debounce(function()
+	collectgarbage("collect")
+end, 0.5, false)
+
+
+screen.connect_signal("list", function()
+	collect_garbage()
+end)
+
 
 awful.run_test = function()
 	--s = screen.fake_add(20, 20, 500, 400)
