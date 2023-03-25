@@ -11,6 +11,12 @@ theme.border_normal                         = "#2b2e32"
 theme.border_focus                          = "#7f7f7f"
 theme.border_color_normal                   = "#2b2e32"
 theme.border_color_focus                    = "#7f7f7f"
+theme.border_color_active                   = "#4069a7"
+theme.border_color_urgent                   = "#d43535"
+
+theme.titlebar_bg_focus                     = "#31507f"
+theme.titlebar_bg_normal                    = "#2b2e32"
+theme.titlebar_bg_urgent                    = "#d43535"
 
 theme.wibar_bg                              = "#2b2e32f8"
 theme.wibar_bg_bottom                       = "#282a2ef8"
