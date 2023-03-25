@@ -309,7 +309,19 @@ awful.rules.rules = {
 -- }}}
 
 
--- Add a titlebar if titlebars_enabled is set to true in the rules.
+-- Update border size for new client
+
+client.connect_signal("manage", function (c)
+	if c.border_width then
+		local size = dpi(beautiful.border_width, c.screen)
+		if size == 0 then
+			size = 1
+		end
+		c.border_width = size
+	end
+end)
+
+-- Add a titlebar if titlebars are enabled
 
 client.connect_signal("request::titlebars", function(c)
 	local s = c.screen
@@ -668,7 +680,14 @@ local function set_screen_dpi(s, new_dpi)
 		end
 	end
 
+	local border_size = dpi(beautiful.border_width, s)
+	if border_size == 0 then
+		border_size = 1
+	end
 	for _, c in ipairs(s.clients) do
+		if c.border_width then
+			c.border_width = border_size
+		end
 		c:emit_signal("request::titlebars")
 	end
 end
