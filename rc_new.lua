@@ -353,6 +353,9 @@ client.connect_signal("request::titlebars", function(c)
 	titlebar:set_widget(layout)
 end)
 
+client.connect_signal("mouse::enter", function(c)
+	c:activate({ context = "mouse_enter", raise = false })
+end)
 
 -- {{{ Widget update
 
