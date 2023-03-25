@@ -381,6 +381,10 @@ client.connect_signal("request::titlebars", function(c)
 	end
 
 	if beautiful.titlebar_position == "top" or beautiful.titlebar_position == "bottom" then
+		local window_buttons = {
+			close = awful.titlebar.widget.closebutton(c)
+		}
+		window_buttons.close.stylesheet = 'svg { color: '..theme.fg_normal..'; }'
 		layout = {
 			{ -- Left
 				buttons = buttons,
@@ -402,6 +406,12 @@ client.connect_signal("request::titlebars", function(c)
 				buttons = buttons,
 				fill_space = true,
 				layout = wibox.layout.fixed.horizontal
+			},
+			{ -- Right
+				--awful.titlebar.widget.minimizebutton(c),
+				--awful.titlebar.widget.maximizedbutton(c),
+				window_buttons.close,
+				layout = wibox.layout.fixed.horizontal()
 			},
 			layout = wibox.layout.align.horizontal
 		}
