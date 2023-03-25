@@ -382,6 +382,9 @@ client.connect_signal("request::titlebars", function(c)
 	end
 
 	if beautiful.titlebar_position == "top" or beautiful.titlebar_position == "bottom" then
+		if beautiful.titlebar_position == 'bottom' then
+			size_adjust = -size_adjust
+		end
 		local window_buttons = {
 			close = awful.titlebar.widget.closebutton(c),
 			maximized = awful.titlebar.widget.maximizedbutton(c),
@@ -398,13 +401,12 @@ client.connect_signal("request::titlebars", function(c)
 				{
 					{ -- Icon
 						awful.titlebar.widget.iconwidget(c),
-						top = dpi(1 - size_adjust, s),
-						bottom = dpi(1, s),
 						left = dpi(2, s),
 						right = dpi(1, s),
 						widget = wibox.container.margin,
 						buttons = buttons,
 					},
+					{ text = ' ', widget = wibox.widget.textbox },
 					window_buttons.floating,
 					window_buttons.sticky,
 					window_buttons.ontop,
@@ -428,6 +430,7 @@ client.connect_signal("request::titlebars", function(c)
 					window_buttons.minimize,
 					window_buttons.maximized,
 					window_buttons.close,
+					{ text = ' ', widget = wibox.widget.textbox },
 					layout = wibox.layout.fixed.horizontal()
 				},
 				top = dpi(1 - size_adjust, s),
