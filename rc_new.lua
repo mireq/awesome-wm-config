@@ -754,6 +754,50 @@ end
 -- }}}
 
 
+local function attach_calendar(s)
+	local clock = s.clock_widget.children[1]
+
+	local month_calendar = awful.widget.calendar_popup.month {
+		week_numbers = true,
+		style_month = {
+			border_width = dpi(1, s),
+			border_color = theme.border_normal,
+			bg_color = theme.bg_normal,
+		},
+		style_header = {
+			border_width = 0,
+			fg_color = theme.fg_accent,
+			padding = dpi(5, s),
+		},
+		style_weeknumber = {
+			border_width = 0,
+			fg_color = theme.fg_secondary,
+			bg_color = '#00000000',
+		},
+		style_weekday = {
+			border_width = 0,
+			fg_color = theme.fg_secondary,
+			padding = dpi(5, s),
+			bg_color = '#00000000',
+		},
+		style_normal = {
+			border_width = 0,
+			fg_color = theme.fg_normal,
+			padding = dpi(5, s),
+			bg_color = '#00000000',
+		},
+		style_focus = {
+			border_width = dpi(1),
+			fg_color = theme.fg_normal,
+			padding = dpi(5, s),
+			border_color = theme.border_focus,
+			bg_color = theme.wibar_bg,
+		}
+	}
+	month_calendar:attach(clock, "tr")
+end
+
+
 
 local battery_tooltip_common = {
 	timeout = 5,
@@ -834,27 +878,31 @@ local function set_screen_dpi(s, new_dpi)
 
 	s.taglist:set_base_layout(s.taglist_args.layout)
 	s.tasklist:set_base_layout(s.tasklist_args.layout)
+	if #s.clock_widget.children > 0 then
+		s.clock_widget:remove(1)
+		local clock = wibox.widget.textclock('<span font="'..(theme.clock_font or theme.sensor_font)..'">%a  %d.%m  %H:%M</span>')
+		s.clock_widget:add(clock)
+		attach_calendar(s)
+	end
 
-	for s in screen do
-		for _, w in ipairs(s.temperature_widget:get_children_by_id('value')) do
-			w:set_forced_width(widget_size.temperature(s))
+	for _, w in ipairs(s.temperature_widget:get_children_by_id('value')) do
+		w:set_forced_width(widget_size.temperature(s))
+	end
+	for _, w in ipairs(s.memory_widget:get_children_by_id('value')) do
+		w:set_forced_width(widget_size.memory(s))
+	end
+	for _, w in ipairs(s.cpu_widget:get_children_by_id('value')) do
+		w:set_forced_width(widget_size.cpu(s))
+	end
+	for _, w in ipairs(s.battery_widget:get_children_by_id('value')) do
+		if battery_current.power_now and battery_current.power_now > 0 then
+			w:set_forced_width(widget_size.battery_extended(s))
+		else
+			w:set_forced_width(widget_size.battery(s))
 		end
-		for _, w in ipairs(s.memory_widget:get_children_by_id('value')) do
-			w:set_forced_width(widget_size.memory(s))
-		end
-		for _, w in ipairs(s.cpu_widget:get_children_by_id('value')) do
-			w:set_forced_width(widget_size.cpu(s))
-		end
-		for _, w in ipairs(s.battery_widget:get_children_by_id('value')) do
-			if battery_current.power_now and battery_current.power_now > 0 then
-				w:set_forced_width(widget_size.battery_extended(s))
-			else
-				w:set_forced_width(widget_size.battery(s))
-			end
-		end
-		for _, w in ipairs(s.volume_widget:get_children_by_id('value')) do
-			w:set_forced_width(widget_size.volume(s))
-		end
+	end
+	for _, w in ipairs(s.volume_widget:get_children_by_id('value')) do
+		w:set_forced_width(widget_size.volume(s))
 	end
 
 	local border_size = dpi(beautiful.border_width, s)
@@ -1258,7 +1306,12 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			end)
 		)
 	})
-	s.clock_widget = wibox.widget.textclock('<span font="'..(theme.clock_font or theme.sensor_font)..'">%a  %d.%m  %H:%M</span>')
+	s.clock_widget = wibox.widget({
+		wibox.widget.textclock('<span font="'..(theme.clock_font or theme.sensor_font)..'">%a  %d.%m  %H:%M</span>'),
+		forced_width = widget_size.clock(s),
+		layout = wibox.layout.fixed.horizontal
+	})
+	attach_calendar(s)
 
 	s.tool_bar:setup({
 		{
