@@ -89,16 +89,16 @@ theme.bg_urgent                             = "#d43535"
 theme.bg_systray                            = theme.wibar_bg
 
 theme.process_font                          = "Ubuntu Mono 8"
-theme.widget_temp                           = themes_dir .. "/icons/temp.svg"
+theme.widget_temp                           = themes_dir .. "/icons/temp_small.svg"
 theme.widget_mem                            = themes_dir .. "/icons/mem.svg"
 theme.widget_cpu                            = themes_dir .. "/icons/cpu.svg"
 theme.widget_wireless                       = themes_dir .. "/icons/net_wireless_"
 theme.widget_wireless_count                 = 4
 theme.widget_volume                         = themes_dir .. "/icons/volume_"
 theme.widget_volume_count                   = 3
-theme.widget_battery_full_bar               = {5, 9, 14, 7} -- top, right, bottom, left
-theme.widget_battery_empty_bar              = {14, 9, 14, 7} -- top, right, bottom, left
-theme.widget_battery                        = themes_dir .. "/icons/battery.svg"
+theme.widget_battery_full_bar               = {7, 7, 13, 5} -- top, right, bottom, left
+theme.widget_battery_empty_bar              = {13, 7, 13, 5} -- top, right, bottom, left
+theme.widget_battery                        = themes_dir .. "/icons/battery_new.svg"
 
 theme.launch                                = themes_dir .. "/icons/launch.svg"
 
