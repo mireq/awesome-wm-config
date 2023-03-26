@@ -2,7 +2,7 @@ theme = {}
 
 themes_dir = os.getenv("HOME") .. "/.config/awesome/themes/simple-dark"
 
-theme.wallpaper                             = themes_dir .. "/wall_tmb.jpg"
+theme.wallpaper                             = themes_dir .. "/wall.jpg"
 
 theme.font                                  = "Ubuntu 9"
 theme.sensor_font                           = "UbuntuCondensed 9"
