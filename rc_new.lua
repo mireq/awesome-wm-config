@@ -466,6 +466,77 @@ awful.keyboard.append_global_keybindings({
 })
 
 
+-- Number key bindings
+awful.keyboard.append_global_keybindings({
+	awful.key {
+		modifiers = { modkey },
+		keygroup = "numrow",
+		description = "Only view tag",
+		group = "Tag",
+		on_press = function (index)
+			local screen = awful.screen.focused()
+			local tag = screen.tags[index]
+			if tag then
+				tag:view_only()
+			end
+		end,
+	},
+	awful.key {
+		modifiers = { modkey, "Control" },
+		keygroup = "numrow",
+		description = "Toggle tag",
+		group = "Tag",
+		on_press = function (index)
+			local screen = awful.screen.focused()
+			local tag = screen.tags[index]
+			if tag then
+				awful.tag.viewtoggle(tag)
+			end
+		end,
+	},
+	awful.key {
+		modifiers = { modkey, "Shift" },
+		keygroup = "numrow",
+		description = "Move focused client to tag",
+		group = "Tag",
+		on_press = function (index)
+			if client.focus then
+				local tag = client.focus.screen.tags[index]
+				if tag then
+					client.focus:move_to_tag(tag)
+				end
+			end
+		end,
+	},
+	awful.key {
+		modifiers = { modkey, "Control", "Shift" },
+		keygroup = "numrow",
+		description = "Toggle focused client on tag",
+		group = "Tag",
+		on_press = function (index)
+			if client.focus then
+				local tag = client.focus.screen.tags[index]
+				if tag then
+					client.focus:toggle_tag(tag)
+				end
+			end
+		end,
+	},
+	awful.key {
+		modifiers = { modkey },
+		keygroup = "numpad",
+		description = "Select layout directly",
+		group = "Layout",
+		on_press = function (index)
+			local t = awful.screen.focused().selected_tag
+			if t then
+				t.layout = t.layouts[index] or t.layout
+			end
+		end,
+	}
+})
+
+
 
 local clientkeys = gears.table.join(
 	awful.key({ altkey }, "Tab",
@@ -531,7 +602,6 @@ ruled.client.connect_signal("request::rules", function()
 			focus = awful.client.focus.filter,
 			raise = true,
 			keys = clientkeys,
-			buttons = clientbuttons,
 			screen = awful.screen.preferred,
 			placement = awful.placement.no_overlap+awful.placement.no_offscreen
 		}
@@ -546,6 +616,7 @@ ruled.client.connect_signal("request::rules", function()
 		properties = { titlebars_enabled = true }
 	}
 
+	-- Hide titlebars for specific clients
 	ruled.client.append_rule {
 		id = "no-titlebars",
 		rule_any = {
