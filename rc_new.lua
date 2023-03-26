@@ -1023,6 +1023,9 @@ local function draw_wibar_background(context, cr, width, height)
 end
 
 
+local spacer = { text = ' ', widget = wibox.widget.textbox }
+
+
 screen.connect_signal("request::desktop_decoration", function(s)
 	local scaling = utils.float_dpi(1, s)
 
@@ -1413,22 +1416,20 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		s.tasklist,
 		{
 			s.temperature_widget,
-			{ text = ' ', widget = wibox.widget.textbox },
+			spacer,
 			s.memory_widget,
-			{ text = ' ', widget = wibox.widget.textbox },
+			spacer,
 			s.cpu_widget,
-			{ text = ' ', widget = wibox.widget.textbox },
+			spacer,
 			s.battery_widget,
-			{ text = ' ', widget = wibox.widget.textbox },
+			spacer,
 			s.volume_widget,
-			{ text = ' ', widget = wibox.widget.textbox },
 			s.wifi_widget,
-			{ text = ' ', widget = wibox.widget.textbox },
 			s.udisks_mount,
 			s.systray_widget,
-			{ text = ' ', widget = wibox.widget.textbox },
+			spacer,
 			s.clock_widget,
-			{ text = ' ', widget = wibox.widget.textbox },
+			spacer,
 			s.layoutbox_widget,
 			layout = wibox.layout.fixed.horizontal
 		},
