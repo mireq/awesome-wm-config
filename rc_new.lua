@@ -544,6 +544,7 @@ local clientkeys = gears.table.join(
 		function(c)
 			cyclefocus.cycle({
 				modifier = "Alt_L",
+				cycle_filters = { cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
 				centered = true
 			})
 		end,
@@ -553,6 +554,7 @@ local clientkeys = gears.table.join(
 		function(c)
 			cyclefocus.cycle({
 				modifier = "Alt_L",
+				cycle_filters = { cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
 				centered = true
 			})
 		end,
