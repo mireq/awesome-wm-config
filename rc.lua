@@ -1283,6 +1283,7 @@ local function set_screen_dpi(s, new_dpi)
 	local taglist_margin = dpi(1, s)
 
 	s.tool_bar.height = dpi(18, s)
+	s.tool_bar.drawin.cursor = "left_ptr"
 
 	s.taglist_args.style = {
 		squares_sel = utils.render_svg(beautiful.taglist_squares_sel, scaling),
@@ -1880,11 +1881,16 @@ end
 api:register("run_test", run_test)
 
 local function change_dpi(force_dpi)
-	for s in screen do
-		set_screen_dpi(s, force_dpi)
+	local cursor_size = math.floor((force_dpi / 96)+0.5);
+	if cursor_size < 1 then
+		cursor_size = 1
 	end
 	if awesome.set_cursor_size ~= nil then
 		awesome.set_cursor_size(cursor_size*24)
+	end
+	capi.root.cursor("left_ptr");
+	for s in screen do
+		set_screen_dpi(s, force_dpi)
 	end
 end
 beautiful.change_dpi = change_dpi
