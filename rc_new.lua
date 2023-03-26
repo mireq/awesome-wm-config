@@ -539,28 +539,6 @@ awful.keyboard.append_global_keybindings({
 
 
 
-local clientkeys = gears.table.join(
-	awful.key({ altkey }, "Tab",
-		function(c)
-			cyclefocus.cycle({
-				modifier = "Alt_L",
-				cycle_filters = { cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
-				centered = true
-			})
-		end,
-		{description = "Focus next by history", group = "Client"}
-	),
-	awful.key({ altkey, 'Shift' }, "Tab",
-		function(c)
-			cyclefocus.cycle({
-				modifier = "Alt_L",
-				cycle_filters = { cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
-				centered = true
-			})
-		end,
-		{description = "Focus previous by history", group = "Client"}
-	)
-)
 -- }}}
 
 
@@ -577,7 +555,7 @@ local function unmaximize_before_move(c)
 end
 
 
--- {{{ Rules
+-- {{{ Client bindings
 client.connect_signal("request::default_mousebindings", function()
 	awful.mouse.append_client_mousebindings({
 		awful.button({ }, 1, function (c)
@@ -595,6 +573,168 @@ client.connect_signal("request::default_mousebindings", function()
 end)
 
 
+client.connect_signal("request::default_keybindings", function()
+	awful.keyboard.append_client_keybindings({
+		awful.key({ altkey }, "Tab",
+			function(c)
+				cyclefocus.cycle({
+					modifier = "Alt_L",
+					cycle_filters = { cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
+					centered = true
+				})
+			end,
+			{description = "Focus next by history", group = "Client"}
+		),
+		awful.key({ altkey, 'Shift' }, "Tab",
+			function(c)
+				cyclefocus.cycle({
+					modifier = "Alt_L",
+					cycle_filters = { cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
+					centered = true
+				})
+			end,
+			{description = "Focus previous by history", group = "Client"}
+		),
+		awful.key({ modkey }, "f",
+			function (c)
+				c.fullscreen = not c.fullscreen
+				c:raise()
+			end,
+			{description = "Toggle fullscreen", group = "Client"}
+		),
+		awful.key({ modkey, "Shift" }, "c", 
+			function (c)
+				c:kill()
+			end,
+			{description = "Close", group = "Client"}
+		),
+		awful.key({ altkey }, "F4",
+			function (c)
+				c:kill()
+			end,
+			{description = "Close", group = "Client"}
+		),
+		awful.key({ modkey, "Control" }, "space",
+			awful.client.floating.toggle,
+			{description = "Toggle floating", group = "Client"}
+		),
+		awful.key({ modkey, "Control" }, "Return",
+			function (c)
+				c:swap(awful.client.getmaster())
+			end,
+			{description = "Move to master", group = "Client"}
+		),
+		awful.key({ modkey }, "o",
+			function (c)
+				c:move_to_screen()
+			end,
+			{description = "Move to screen", group = "Client"}
+		),
+		awful.key({ modkey }, "t",
+			function (c)
+				c.ontop = not c.ontop
+			end,
+			{description = "toggle keep on top", group = "Client"}
+		),
+		awful.key({ modkey }, "x",
+			function (c)
+				c.sticky = not c.sticky
+			end,
+			{description = "sticky", group = "Client"}
+		),
+		awful.key({ modkey }, "c",
+			function (c)
+				c.focusable = not c.focusable
+			end,
+			{description = "Toggle focusable", group = "Client"}
+		),
+		awful.key({ modkey }, "n",
+			function (c)
+				c.minimized = true
+			end,
+			{description = "Minimize", group = "Client"}
+		),
+		awful.key({ modkey }, "m",
+			function (c)
+				local border_width = c.border_width
+				c.maximized = not c.maximized
+				c.border_width = border_width
+				c:raise()
+			end,
+			{description = "(Un)Maximize", group = "Client"}
+		),
+		awful.key({ modkey, "Control" }, "m",
+			function (c)
+				c.maximized_vertical = not c.maximized_vertical
+				c:raise()
+			end ,
+			{description = "(Un)Maximize vertically", group = "Client"}
+		),
+		awful.key({ modkey, "Shift" }, "m",
+			function (c)
+				c.maximized_horizontal = not c.maximized_horizontal
+				c:raise()
+			end ,
+			{description = "(Un)Maximize horizontally", group = "Client"}
+		),
+		awful.key({ modkey }, "b",
+			function (c)
+				if c.border_width == 0 then
+					c.border_width = 1
+				else
+					c.border_width = 0
+				end
+				c:emit_signal("request::titlebars")
+			end,
+			{description = "Toggle border", group = "Client"}
+		),
+		awful.key({ modkey }, "i",
+			function (c)
+				awful.titlebar.toggle(c, beautiful.titlebar_position);
+			end,
+			{description = "Toggle title", group = "Client"}
+		),
+		awful.key({ modkey, "Shift" }, "t",
+			function (c)
+				if c.transient_to_input == nil then
+					c.ontop = true
+					c.sticky = true
+					c.opacity = .5
+					c.border_width = 0
+				end
+
+				if c.transient_to_input then
+					c.transient_to_input = false
+					c.focusable = true
+					c.shape_input = nil
+				else
+					c.transient_to_input = true
+					c.focusable = false
+					c.shape_input = cairo.ImageSurface(cairo.Format.RGB24, 0, 0)._native
+				end
+			end,
+			{description = "Transient client", group = "Client"}
+		),
+
+-- awful.key({ modkey, "Shift"   }, 'o',
+--     function ()
+--         local allclients = function (c)
+--             return true
+--         end
+--         for c in awful.client.iterate(allclients) do
+--             local ctag = awful.tag.getidx(c:tags()[1])
+--             local cscreen = c.screen + 1
+--             if cscreen > screen.count() then
+--                 cscreen = 1
+--             end
+--             awful.client.movetotag(tags[cscreen][ctag], c)
+--         end
+--     end)
+
+	})
+end)
+
+
 ruled.client.connect_signal("request::rules", function()
 	-- All clients will match this rule.
 	ruled.client.append_rule {
@@ -604,7 +744,6 @@ ruled.client.connect_signal("request::rules", function()
 			border_color = beautiful.border_normal,
 			focus = awful.client.focus.filter,
 			raise = true,
-			keys = clientkeys,
 			screen = awful.screen.preferred,
 			placement = awful.placement.no_overlap+awful.placement.no_offscreen
 		}
