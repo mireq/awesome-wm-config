@@ -172,6 +172,19 @@ tag.connect_signal("request::default_layouts", function()
 end)
 
 
+local function volume_command(mode)
+	if mode == "up" then
+		volume_utils.sink_change(0.01)
+	elseif mode == "down" then
+		volume_utils.sink_change(-0.01)
+	elseif mode == "mute" then
+		volume_utils.sink_mute_toggle()
+	elseif mode == "micmute" then
+		volume_utils.source_mute_toggle()
+	end
+end
+
+
 local layoutbox_common = {}
 layoutbox_common.buttons = gears.table.join(
 	awful.button({ }, 1, function () awful.layout.inc( 1) end),
@@ -188,6 +201,13 @@ taglist_common.buttons = gears.table.join(
 	awful.button({ modkey }, 3, function(t) if client.focus then client.focus:toggle_tag(t) end end),
 	awful.button({ }, 4, function(t) awful.tag.viewprev(t.screen) end),
 	awful.button({ }, 5, function(t) awful.tag.viewnext(t.screen) end)
+)
+
+local volume_common = {}
+volume_common.buttons = gears.table.join(
+	awful.button({ }, 4, function () volume_command("up") end),
+	awful.button({ }, 5, function () volume_command("down") end),
+	awful.button({ }, 1, function () volume_command("mute") end)
 )
 
 
@@ -229,7 +249,7 @@ local function set_wallpaper(s)
 end
 
 gears.timer {
-	timeout   = 0.5,
+	timeout   = 0.2,
 	call_now  = false,
 	autostart = true,
 	single_shot = true,
@@ -1298,6 +1318,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		},
 		layout = wibox.layout.fixed.horizontal
 	})
+	s.volume_widget:set_buttons(volume_common.buttons)
 
 	local function on_mount(path, err)
 		if err then
