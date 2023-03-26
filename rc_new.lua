@@ -13,6 +13,7 @@ local dpi_watcher = require("widgets.dpi_watcher")
 local gdebug = require("gears.debug")
 local gears = require("gears")
 local hotkeys_popup = require("awful.hotkeys_popup")
+local menubar = require("menubar")
 local naughty = require("naughty")
 local popups = require("widgets.popups")
 local ruled = require("ruled")
@@ -284,9 +285,9 @@ root.buttons(gears.table.join(
 
 
 -- {{{ Key bindings
-local globalkeys = gears.table.join(
+awful.keyboard.append_global_keybindings({
 	awful.key(
-		{ modkey }, "h",
+		{ modkey }, "s",
 		utils.show_hotkeys_help,
 		{description = "Show help", group = "Awesome"}
 	),
@@ -330,9 +331,139 @@ local globalkeys = gears.table.join(
 	awful.key({ modkey }, "r",
 		run_shell.launch,
 		{description = "Run shell", group = "Awesome"}
-	)
-)
-root.keys(globalkeys)
+	),
+	awful.key({ modkey }, "w",
+		function () awful.screen.focused().main_menu:show() end,
+		{description = "Show main menu", group = "Awesome"}
+	),
+	awful.key({ modkey, "Shift" }, "j",
+		function()
+			awful.client.focus.byidx(1)
+		end,
+		{description = "Swap with next client", group = "Client"}
+	),
+	awful.key({ modkey, "Shift" }, "k",
+		function()
+			awful.client.focus.byidx(-1)
+		end,
+		{description = "Swap with previous client", group = "Client"}
+	),
+	awful.key({ modkey }, "u",
+		awful.client.urgent.jumpto,
+		{description = "Jump to urgent client", group = "Client"}
+	),
+	awful.key({ modkey, "Control" }, "j",
+		function()
+			awful.screen.focus_relative(1)
+		end,
+		{description = "Focus next screen", group = "Screen"}
+	),
+	awful.key({ modkey, "Control" }, "k",
+		function()
+			awful.screen.focus_relative(-1)
+		end,
+		{description = "Focus previous screen", group = "Screen"}
+	),
+	awful.key({ modkey }, "Return",
+		function()
+			awful.spawn(terminal)
+		end,
+		{description = "Run terminal", group = "Launcher"}
+	),
+	awful.key({ modkey, "Control" }, "F7",
+		function()
+			awful.spawn("/etc/acpi/actions/switchvideo.sh")
+		end,
+		{description = "Switch videou output", group = "Launcher"}
+	),
+	awful.key({ modkey, "Shift" }, "r",
+		awesome.restart,
+		{description = "Restart awesome", group = "Awesome"}
+	),
+	awful.key({ modkey, "Control", "Shift" }, "q",
+		awesome.restart,
+		{description = "Quit awesome", group = "Awesome"}
+	),
+	awful.key({ modkey, "Shift" }, "s",
+		function()
+			awful.spawn("loginctl suspend")
+		end,
+		{description = "Sleep mode", group = "Awesome"}
+	),
+	awful.key({ modkey }, "l",
+		function()
+			awful.tag.incmwfact( 0.05)
+		end,
+		{description = "Increase master width factor", group = "Layout"}
+	),
+	awful.key({ modkey }, "h",
+		function()
+			awful.tag.incmwfact(-0.05)
+		end,
+		{description = "Decrease master width factor", group = "Layout"}
+	),
+	awful.key({ modkey, "Shift" }, "l",
+		function()
+			awful.tag.incnmaster(1, nil, true)
+		end,
+		{description = "Increase the number of master clients", group = "Layout"}
+	),
+	awful.key({ modkey, "Shift" }, "h",
+		function()
+			awful.tag.incnmaster(-1, nil, true)
+		end,
+		{description = "Decrease the number of master clients", group = "Layout"}
+	),
+	awful.key({ modkey, "Control" }, "l",
+		function()
+			awful.tag.incnmaster(1, nil, true)
+		end,
+		{description = "Increase the number of columns", group = "Layout"}
+	),
+	awful.key({ modkey, "Control" }, "h",
+		function()
+			awful.tag.incnmaster(-1, nil, true)
+		end,
+		{description = "Decrease the number of columns", group = "Layout"}
+	),
+	awful.key({ modkey }, "space",
+		function()
+			awful.layout.inc(1)
+		end,
+		{description = "Next layout", group = "Layout"}
+	),
+	awful.key({ modkey, "Shift" }, "space",
+		function()
+			awful.layout.inc(-1)
+		end,
+		{description = "Previous layout", group = "Layout"}
+	),
+	awful.key({ modkey, "Control" }, "n",
+		function ()
+			local c = awful.client.restore()
+			if c then
+				c:activate { raise = true, context = "key.unminimize" }
+			end
+		end,
+		{description = "Restore minimized client", group = "Client"}
+	),
+	awful.key({ modkey }, "p",
+		function()
+			menubar.show()
+		end,
+		{description = "Show menubar", group = "Launcher"}
+	),
+	awful.key({ modkey, altkey, "Shift" }, "r",
+		function ()
+			awful.spawn("/usr/local/bin/record_desktop_toggle")
+		end,
+		{description = "Record desktop", group = "Launcher"}
+	),
+	awful.key({ }, "XF86AudioRaiseVolume", function () volume("up") end),
+	awful.key({ }, "XF86AudioLowerVolume", function () volume("down") end),
+	awful.key({ }, "XF86AudioMute", function () volume("mute") end),
+	awful.key({ }, "XF86AudioMicMute", function () volume("micmute") end)
+})
 
 
 
@@ -680,6 +811,7 @@ volume_utils:connect_signal('master_sink_changed', function(_, args)
 end)
 
 
+vicious.suspend()
 local function update_widgets()
 	vicious.call(
 		vicious_extra.network,
