@@ -11,12 +11,14 @@ theme.temp_font                             = "UbuntuCondensed 8"
 theme.mem_font                              = "UbuntuCondensed 8"
 theme.cpu_font                              = "UbuntuCondensed 8"
 theme.border_width                          = 1
-theme.border_normal                         = "#2b2e32"
-theme.border_focus                          = "#7f7f7f"
+--theme.border_normal                         = "#2b2e32"
+--theme.border_focus                          = "#7f7f7f"
+theme.border_focus                          = "#2b2e32"
 theme.border_color_normal                   = "#2b2e32"
 theme.border_color_focus                    = "#7f7f7f"
---theme.border_color_active                   = "#7F7F7F"
-theme.border_color_active                   = "#2b4064"
+theme.border_color_active                = "#2b4064"
+--theme.border_color_active                   = "#7f7f7f"
+theme.border_color                          = "#ff0000"
 theme.border_color_urgent                   = "#d43535"
 
 -- {{{ Layout
@@ -35,9 +37,9 @@ theme.layout_floating                       = themes_dir .. "/icons/floating.svg
 -- }}}
 
 -- {{{ Titlebar
+theme.titlebar_bg_urgent                    = "#d43535"
 theme.titlebar_bg_focus                     = "#263859"
 theme.titlebar_bg_normal                    = "#2b2e32"
-theme.titlebar_bg_urgent                    = "#d43535"
 --theme.titlebar_bg_focus                     = "#313131D0"
 --theme.titlebar_bg_normal                    = "#1A1A1AD0"
 theme.titlebar_position                     = 'right'
