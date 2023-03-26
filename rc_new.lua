@@ -125,6 +125,7 @@ naughty.config.presets.critical.fg = theme.fg_urgent
 naughty.connect_signal("request::display_error", function(message, startup)
 	naughty.notification {
 		urgency = "critical",
+		preset = naughty.config.presets.critical,
 		title = "Error occurred" .. (startup and " during startup" or ""),
 		message = message
 	}
