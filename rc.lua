@@ -684,7 +684,9 @@ client.connect_signal("request::default_keybindings", function()
 				else
 					c.border_width = 0
 				end
-				c:emit_signal("request::titlebars")
+				if c._private.titlebars and #c._private.titlebars > 0 then
+					c:emit_signal("request::titlebars")
+				end
 			end,
 			{description = "Toggle border", group = "Client"}
 		),
@@ -1355,7 +1357,9 @@ local function set_screen_dpi(s, new_dpi)
 		if c.border_width then
 			c.border_width = border_size
 		end
-		c:emit_signal("request::titlebars")
+		if c._private.titlebars and #c._private.titlebars > 0 then
+			c:emit_signal("request::titlebars")
+		end
 	end
 
 	s.battery_tooltip:remove_from_object(s.battery_widget)
