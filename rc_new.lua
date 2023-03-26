@@ -1337,6 +1337,14 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			end)
 		)
 	})
+
+	s.systray_widget = wibox.widget {
+		wibox.widget.systray(),
+		top = dpi(1, s),
+		bottom = dpi(1, s),
+		widget = wibox.container.margin,
+	}
+
 	s.clock_widget = wibox.widget({
 		wibox.widget.textclock('<span font="'..(theme.clock_font or theme.sensor_font)..'">%a  %d.%m  %H:%M</span>'),
 		forced_width = widget_size.clock(s),
@@ -1371,6 +1379,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			s.wifi_widget,
 			{ text = ' ', widget = wibox.widget.textbox },
 			s.udisks_mount,
+			s.systray_widget,
 			{ text = ' ', widget = wibox.widget.textbox },
 			s.clock_widget,
 			{ text = ' ', widget = wibox.widget.textbox },
