@@ -930,6 +930,7 @@ local function set_screen_dpi(s, new_dpi)
 	for _, w in ipairs(s.volume_widget:get_children_by_id('value')) do
 		w:set_forced_width(widget_size.volume(s))
 	end
+	s.clock_widget:set_forced_width(widget_size.clock(s))
 
 	local border_size = dpi(beautiful.border_width, s)
 	if border_size == 0 then
