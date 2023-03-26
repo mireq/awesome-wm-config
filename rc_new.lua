@@ -218,9 +218,29 @@ local wireless_buttons = gears.table.join(
 	awful.button({ }, 1, function() awful.spawn(wireless_settings) end)
 )
 
-for s in screen do
-	gears.wallpaper.maximized(beautiful.wallpaper, s, false)
+local function set_wallpaper(s)
+	if beautiful.wallpaper then
+		local wallpaper = beautiful.wallpaper
+		if type(wallpaper) == "function" then
+			wallpaper = wallpaper(s)
+		end
+		gears.wallpaper.maximized(wallpaper, s, false)
+	end
 end
+
+gears.timer {
+	timeout   = 0.5,
+	call_now  = false,
+	autostart = true,
+	single_shot = true,
+	callback  = function()
+		for s in screen do
+			set_wallpaper()
+		end
+	end
+}
+
+screen.connect_signal("property::geometry", set_wallpaper)
 
 
 local function setup_screen(s)
@@ -1458,7 +1478,17 @@ local function run_test()
 	--}
 end
 api:register("run_test", run_test)
-api:run_test()
+
+local function change_dpi(force_dpi)
+	for s in screen do
+		set_screen_dpi(dpi)
+	end
+	if awesome.set_cursor_size ~= nil then
+		awesome.set_cursor_size(cursor_size*24)
+	end
+end
+beautiful.change_dpi = change_dpi
+api:register("change_dpi", change_dpi)
 
 
 awful.mouse.snap.edge_enabled = false
