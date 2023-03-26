@@ -574,6 +574,16 @@ client.connect_signal("request::manage", function(c)
 	end
 end)
 
+client.connect_signal("property::fullscreen", function(c)
+	if c.fullscreen then
+		gears.timer.delayed_call(function()
+			if c.valid then
+				c:geometry(c.screen.geometry)
+			end
+		end)
+	end
+end)
+
 -- Add a titlebar if titlebars are enabled
 
 awful.titlebar.enable_tooltip = false
