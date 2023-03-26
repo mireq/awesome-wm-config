@@ -24,6 +24,7 @@ local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
 local volume_utils = require("utils.volume")
 local wibox = require("wibox")
+local api = require("api")
 local capi = {
 	drawin = drawin,
 	root = root,
@@ -1406,7 +1407,7 @@ screen.connect_signal("list", function()
 end)
 
 
-awful.run_test = function()
+local function run_test()
 	--s = screen.fake_add(20, 20, 500, 400)
 	for s in screen do
 		set_screen_dpi(s, 384)
@@ -1453,7 +1454,8 @@ awful.run_test = function()
 	--	end
 	--}
 end
-awful.run_test()
+api:register("run_test", run_test)
+api:run_test()
 
 
 awful.mouse.snap.edge_enabled = false
