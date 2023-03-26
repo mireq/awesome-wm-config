@@ -171,6 +171,7 @@ theme.hotkeys_group_margin                  = 6
 
 theme.udisks_storage                        = themes_dir .. "/icons/storage.svg"
 theme.udisks_thumb                          = themes_dir .. "/icons/thumb.svg"
+theme.udisks_usb                            = themes_dir .. "/icons/thumb.svg"
 theme.udisks_umounted_opacity               = 0.5
 
 theme.cyclefocus_margin                     = 0

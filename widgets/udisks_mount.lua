@@ -297,6 +297,10 @@ local function widget_name(device, args, tb)
 	local prefix = 'udisks_'
 	local theme = beautiful.get()
 
+	if not icon_name or icon_name == '' then
+		icon_name = device['Drive']['ConnectionBus']
+	end
+
 	if device['Mounted'] then
 		suffix = '_mounted'
 	end
