@@ -390,6 +390,8 @@ end)
 
 -- Add a titlebar if titlebars are enabled
 
+awful.titlebar.enable_tooltip = false
+
 client.connect_signal("request::titlebars", function(c)
 	local s = c.screen
 	local layout
