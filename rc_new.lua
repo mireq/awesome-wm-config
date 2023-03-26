@@ -150,6 +150,32 @@ local function get_main_menu(s)
 end
 
 
+tag.connect_signal("request::default_layouts", function()
+	awful.layout.append_default_layouts({
+		awful.layout.suit.floating,
+		awful.layout.suit.tile,
+		awful.layout.suit.tile.left,
+		awful.layout.suit.tile.bottom,
+		awful.layout.suit.tile.top,
+		-- awful.layout.suit.fair,
+		-- awful.layout.suit.fair.horizontal,
+		-- awful.layout.suit.spiral,
+		-- awful.layout.suit.spiral.dwindle,
+		-- awful.layout.suit.max,
+		-- awful.layout.suit.max.fullscreen,
+		-- awful.layout.suit.magnifier,
+		-- awful.layout.suit.corner.nw,
+	})
+end)
+
+
+local layoutbox_common = {}
+layoutbox_common.buttons = gears.table.join(
+	awful.button({ }, 1, function () awful.layout.inc( 1) end),
+	awful.button({ }, 3, function () awful.layout.inc(-1) end),
+	awful.button({ }, 4, function () awful.layout.inc( 1) end),
+	awful.button({ }, 5, function () awful.layout.inc(-1) end)
+)
 
 local taglist_common = {}
 taglist_common.buttons = gears.table.join(
@@ -1317,6 +1343,11 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	})
 	attach_calendar(s)
 
+	s.layoutbox_widget = awful.widget.layoutbox {
+		screen = s,
+		buttons = layoutbox_common.buttons,
+	}
+
 	s.tool_bar:setup({
 		{
 			s.launcher,
@@ -1342,6 +1373,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			{ text = ' ', widget = wibox.widget.textbox },
 			s.clock_widget,
 			{ text = ' ', widget = wibox.widget.textbox },
+			s.layoutbox_widget,
 			layout = wibox.layout.fixed.horizontal
 		},
 		layout = wibox.layout.align.horizontal

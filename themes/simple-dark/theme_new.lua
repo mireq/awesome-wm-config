@@ -14,6 +14,22 @@ theme.border_color_focus                    = "#7f7f7f"
 theme.border_color_active                   = "#2b4064"
 theme.border_color_urgent                   = "#d43535"
 
+-- {{{ Layout
+theme.layout_tile                           = themes_dir .. "/icons/tile.svg"
+theme.layout_tileleft                       = themes_dir .. "/icons/tileleft.svg"
+theme.layout_tilebottom                     = themes_dir .. "/icons/tilebottom.svg"
+theme.layout_tiletop                        = themes_dir .. "/icons/tiletop.svg"
+theme.layout_fairv                          = themes_dir .. "/icons/fairv.svg"
+theme.layout_fairh                          = themes_dir .. "/icons/fairh.svg"
+theme.layout_spiral                         = themes_dir .. "/icons/spiral.svg"
+theme.layout_dwindle                        = themes_dir .. "/icons/dwindle.svg"
+theme.layout_max                            = themes_dir .. "/icons/max.svg"
+theme.layout_fullscreen                     = themes_dir .. "/icons/fullscreen.svg"
+theme.layout_magnifier                      = themes_dir .. "/icons/magnifier.svg"
+theme.layout_floating                       = themes_dir .. "/icons/floating.svg"
+-- }}}
+
+-- {{{ Titlebar
 theme.titlebar_bg_focus                     = "#263859"
 theme.titlebar_bg_normal                    = "#2b2e32"
 theme.titlebar_bg_urgent                    = "#d43535"
@@ -72,6 +88,7 @@ theme.titlebar_floating_button_focus_hover               = themes_dir .. "/icons
 theme.titlebar_floating_button_normal_hover              = themes_dir .. "/icons/titlebar/floating_hover.svg"
 theme.titlebar_floating_button_focus_active_hover        = themes_dir .. "/icons/titlebar/floating_hover.svg"
 theme.titlebar_floating_button_focus_inactive_hover      = themes_dir .. "/icons/titlebar/floating_hover.svg"
+-- }}}
 
 theme.wibar_bg                              = "#2b2e32f8"
 theme.wibar_bg_bottom                       = "#282a2ef8"
