@@ -43,6 +43,7 @@ local gui_editor = "kwrite"
 local browser = "firefox-bin"
 local tasks = terminal .. " -e htop"
 local wireless_settings = "wpa_gui"
+local filemanager = "konqueror"
 local launch_tv = "mpv --demuxer=lavf --demuxer-lavf-format=mpegts --vf=vavpp:deint=auto:interlaced-only=yes --demuxer-lavf-o-add=fflags=+nobuffer --demuxer-lavf-probe-info=nostreams --demuxer-lavf-analyzeduration=0 --force-window=immediate http://192.168.1.111:8001/"
 
 local modkey = "Mod4"
