@@ -1873,7 +1873,7 @@ api:register("run_test", run_test)
 
 local function change_dpi(force_dpi)
 	for s in screen do
-		set_screen_dpi(dpi)
+		set_screen_dpi(s, force_dpi)
 	end
 	if awesome.set_cursor_size ~= nil then
 		awesome.set_cursor_size(cursor_size*24)
