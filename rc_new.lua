@@ -915,6 +915,10 @@ local function set_screen_dpi(s, new_dpi)
 		end
 		c:emit_signal("request::titlebars")
 	end
+
+	s.battery_tooltip:remove_from_object(s.battery_widget)
+	s.battery_tooltip = awful.tooltip(battery_tooltip_common)
+	s.battery_tooltip:add_to_object(s.battery_widget)
 end
 
 local function draw_wibar_background(context, cr, width, height)
