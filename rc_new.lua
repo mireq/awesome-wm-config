@@ -492,23 +492,6 @@ local clientkeys = gears.table.join(
 
 -- Update border size for new client
 
-client.connect_signal("request::manage", function(c)
-	if c.border_width then
-		local size = dpi(beautiful.border_width, c.screen)
-		if size == 0 then
-			size = 1
-		end
-		c.border_width = size
-	end
-
-	if not awesome.startup then
-		if not c.size_hints.user_position and not c.size_hints.program_position then
-			awful.placement.centered(c, nil)
-			awful.placement.no_overlap(c)
-		end
-		awful.placement.no_offscreen(c)
-	end
-end)
 
 local function unmaximize_before_move(c)
 	if c.fullscreen or c.maximized then
@@ -537,18 +520,24 @@ client.connect_signal("request::default_mousebindings", function()
 	})
 end)
 
+
 ruled.client.connect_signal("request::rules", function()
+	-- All clients will match this rule.
 	ruled.client.append_rule {
 		id = "global",
 		rule = { },
 		properties = {
-			border_width = beautiful.border_width,
+			border_color = beautiful.border_normal,
 			focus = awful.client.focus.filter,
 			raise = true,
 			keys = clientkeys,
+			buttons = clientbuttons,
 			screen = awful.screen.preferred,
+			placement = awful.placement.no_overlap+awful.placement.no_offscreen
 		}
 	}
+
+	-- Add titlebars to normal clients and dialogs
 	ruled.client.append_rule {
 		id = "dialog",
 		rule_any = {
@@ -556,8 +545,34 @@ ruled.client.connect_signal("request::rules", function()
 		},
 		properties = { titlebars_enabled = true }
 	}
+
+	ruled.client.append_rule {
+		id = "no-titlebars",
+		rule_any = {
+			class = { "URxvt", "Firefox", "firefox", "Google-chrome", "Wine", "kruler", "Alacritty" }
+		},
+		properties = { titlebars_enabled = false }
+	}
 end)
+
 -- }}}
+--
+
+-- {{{ Signals
+-- Signal function to execute when a new client appears.
+client.connect_signal("request::manage", function(c)
+	if c.border_width then
+		c.border_width = dpi(beautiful.border_width, c.screen)
+	end
+
+	if not awesome.startup then
+		if not c.size_hints.user_position and not c.size_hints.program_position then
+			awful.placement.centered(c, nil)
+			awful.placement.no_overlap(c)
+		end
+		awful.placement.no_offscreen(c)
+	end
+end)
 
 -- Add a titlebar if titlebars are enabled
 
