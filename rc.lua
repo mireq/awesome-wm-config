@@ -572,6 +572,10 @@ client.connect_signal("request::default_mousebindings", function()
 	})
 end)
 
+local function is_focusable(c, source_c)
+	return c.focusable
+end
+
 
 client.connect_signal("request::default_keybindings", function()
 	awful.keyboard.append_client_keybindings({
@@ -579,7 +583,7 @@ client.connect_signal("request::default_keybindings", function()
 			function(c)
 				cyclefocus.cycle({
 					modifier = "Alt_L",
-					cycle_filters = { cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
+					cycle_filters = { is_focusable, cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
 					centered = true
 				})
 			end,
@@ -589,7 +593,7 @@ client.connect_signal("request::default_keybindings", function()
 			function(c)
 				cyclefocus.cycle({
 					modifier = "Alt_L",
-					cycle_filters = { cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
+					cycle_filters = { is_focusable, cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
 					centered = true
 				})
 			end,
