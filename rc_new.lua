@@ -2,6 +2,7 @@
 
 pcall(require, "luarocks.loader")
 
+local api = require("api")
 local awful = require("awful")
 local battery_utils = require("utils.battery")
 local battery_widget = require("widgets.battery_widget")
@@ -25,7 +26,7 @@ local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
 local volume_utils = require("utils.volume")
 local wibox = require("wibox")
-local api = require("api")
+require("awful.autofocus")
 local capi = {
 	drawin = drawin,
 	root = root,
