@@ -684,7 +684,7 @@ client.connect_signal("request::default_keybindings", function()
 		awful.key({ modkey }, "b",
 			function (c)
 				if c.border_width == 0 then
-					c.border_width = 1
+					c.border_width = dpi(beautiful.border_width, c.screen)
 				else
 					c.border_width = 0
 				end
