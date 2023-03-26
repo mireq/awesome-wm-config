@@ -5,12 +5,17 @@ themes_dir = os.getenv("HOME") .. "/.config/awesome/themes/simple-dark"
 theme.wallpaper                             = themes_dir .. "/wall_tmb.jpg"
 
 theme.font                                  = "Ubuntu 9"
-theme.sensor_font                           = "UbuntuCondensed 8"
+theme.sensor_font                           = "UbuntuCondensed 9"
+theme.battery_current_font                  = "UbuntuCondensed 8"
+theme.temp_font                             = "UbuntuCondensed 8"
+theme.mem_font                              = "UbuntuCondensed 8"
+theme.cpu_font                              = "UbuntuCondensed 8"
 theme.border_width                          = 1
 theme.border_normal                         = "#2b2e32"
 theme.border_focus                          = "#7f7f7f"
 theme.border_color_normal                   = "#2b2e32"
 theme.border_color_focus                    = "#7f7f7f"
+--theme.border_color_active                   = "#7F7F7F"
 theme.border_color_active                   = "#2b4064"
 theme.border_color_urgent                   = "#d43535"
 
@@ -33,6 +38,9 @@ theme.layout_floating                       = themes_dir .. "/icons/floating.svg
 theme.titlebar_bg_focus                     = "#263859"
 theme.titlebar_bg_normal                    = "#2b2e32"
 theme.titlebar_bg_urgent                    = "#d43535"
+--theme.titlebar_bg_focus                     = "#313131D0"
+--theme.titlebar_bg_normal                    = "#1A1A1AD0"
+theme.titlebar_position                     = 'right'
 
 theme.titlebar_close_button_focus                        = themes_dir .. "/icons/titlebar/close.svg"
 theme.titlebar_close_button_normal                       = themes_dir .. "/icons/titlebar/close.svg"
@@ -175,7 +183,5 @@ theme.udisks_usb                            = themes_dir .. "/icons/thumb.svg"
 theme.udisks_umounted_opacity               = 0.5
 
 theme.cyclefocus_margin                     = 0
-
-theme.titlebar_position                     = 'right'
 
 return theme
