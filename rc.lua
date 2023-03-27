@@ -688,7 +688,7 @@ client.connect_signal("request::default_keybindings", function()
 				else
 					c.border_width = 0
 				end
-				if c._private.titlebars and #c._private.titlebars > 0 then
+				if c._private.titlebars and (c._private.titlebars.left ~= nil or c._private.titlebars.top ~= nil or c._private.titlebars.right ~= nil or c._private.titlebars.bottom ~= nil) then
 					c:emit_signal("request::titlebars")
 				end
 			end,
@@ -1358,11 +1358,12 @@ local function set_screen_dpi(s, new_dpi)
 	if border_size == 0 then
 		border_size = 1
 	end
-	for _, c in ipairs(s.clients) do
+	--for _, c in ipairs(s.clients) do
+	for _, c in ipairs(client.get()) do
 		if c.border_width then
 			c.border_width = border_size
 		end
-		if c._private.titlebars and #c._private.titlebars > 0 then
+		if c._private.titlebars and (c._private.titlebars.left ~= nil or c._private.titlebars.top ~= nil or c._private.titlebars.right ~= nil or c._private.titlebars.bottom ~= nil) then
 			c:emit_signal("request::titlebars")
 		end
 	end
