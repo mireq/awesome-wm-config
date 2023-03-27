@@ -460,10 +460,10 @@ awful.keyboard.append_global_keybindings({
 		end,
 		{description = "Record desktop", group = "Launcher"}
 	),
-	awful.key({ }, "XF86AudioRaiseVolume", function () volume("up") end),
-	awful.key({ }, "XF86AudioLowerVolume", function () volume("down") end),
-	awful.key({ }, "XF86AudioMute", function () volume("mute") end),
-	awful.key({ }, "XF86AudioMicMute", function () volume("micmute") end)
+	awful.key({ }, "XF86AudioRaiseVolume", function () volume_command("up") end),
+	awful.key({ }, "XF86AudioLowerVolume", function () volume_command("down") end),
+	awful.key({ }, "XF86AudioMute", function () volume_command("mute") end),
+	awful.key({ }, "XF86AudioMicMute", function () volume_command("micmute") end)
 })
 
 
