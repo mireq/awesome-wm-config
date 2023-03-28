@@ -250,19 +250,7 @@ local function set_wallpaper(s)
 	end
 end
 
-gears.timer {
-	timeout   = 0.2,
-	call_now  = false,
-	autostart = true,
-	single_shot = true,
-	callback  = function()
-		for s in screen do
-			set_wallpaper()
-		end
-	end
-}
-
-screen.connect_signal("property::geometry", set_wallpaper)
+screen.connect_signal("request::wallpaper", set_wallpaper)
 
 
 local function setup_screen(s)
