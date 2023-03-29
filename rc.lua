@@ -1178,6 +1178,8 @@ local function update_widgets()
 								ontop = true,
 							})
 						end
+					else
+						w:set_bar_color(beautiful.fg_normal)
 					end
 				end
 			end
