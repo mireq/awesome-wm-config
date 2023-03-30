@@ -1369,12 +1369,12 @@ local function draw_wibar_background(context, cr, width, height)
 	local gradient_pos = 0.0
 	if beautiful.wibar_border_top ~= nil then
 		gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_border_top
-		gradient_pos = gradient_pos + utils.float_dpi(1.5, s) / height
+		gradient_pos = gradient_pos + utils.float_dpi(1, s) / height
 	end
 	if beautiful.wibar_border_top ~= nil or beautiful.wibar_border_bottom ~= nil or beautiful.wibar_bg_bottom ~= nil then
 		gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_bg
 		if beautiful.wibar_bg_bottom ~= nil then
-			gradient_pos = 1 - utils.float_dpi(1.5, s) / height
+			gradient_pos = 1 - utils.float_dpi(1, s) / height
 			gradient_stops = gradient_stops .. ':' .. tostring(gradient_pos) .. ',' .. beautiful.wibar_bg_bottom
 		end
 		gradient_pos = 1
