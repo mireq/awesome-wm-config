@@ -565,6 +565,17 @@ local function is_focusable(c, source_c)
 end
 
 
+local function has_titlebar(c)
+	for __, pos in ipairs({'left', 'right', 'top', 'bottom'}) do
+		local __, size = c['titlebar_' .. pos](c)
+		if size > 0 then
+			return true
+		end
+	end
+	return false
+end
+
+
 client.connect_signal("request::default_keybindings", function()
 	awful.keyboard.append_client_keybindings({
 		awful.key({ altkey }, "Tab",
@@ -675,9 +686,6 @@ client.connect_signal("request::default_keybindings", function()
 					c.border_width = dpi(beautiful.border_width, c.screen)
 				else
 					c.border_width = 0
-				end
-				if c._private.titlebars and (c._private.titlebars.left ~= nil or c._private.titlebars.top ~= nil or c._private.titlebars.right ~= nil or c._private.titlebars.bottom ~= nil) then
-					c:emit_signal("request::titlebars")
 				end
 			end,
 			{description = "Toggle border", group = "Client"}
@@ -1341,7 +1349,7 @@ local function set_screen_dpi(s, new_dpi)
 		if c.border_width then
 			c.border_width = border_size
 		end
-		if c._private.titlebars and (c._private.titlebars.left ~= nil or c._private.titlebars.top ~= nil or c._private.titlebars.right ~= nil or c._private.titlebars.bottom ~= nil) then
+		if has_titlebar(c) then
 			c:emit_signal("request::titlebars")
 		end
 	end
