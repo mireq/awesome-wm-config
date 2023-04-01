@@ -1114,12 +1114,17 @@ local function update_widgets()
 
 			for s in screen do
 				for _, w in ipairs(s.battery_widget:get_children_by_id('value')) do
-					if battery_current.power_now and battery_current.power_now > 0 then
-						w:set_forced_width(widget_size.battery_extended(s))
+					if battery_current.status == "Charging" or battery_current.status == "Discharging" then
+						if battery_current.power_now and battery_current.power_now > 0 then
+							w:set_forced_width(widget_size.battery_extended(s))
+						else
+							w:set_forced_width(widget_size.battery(s))
+						end
+						w:set_markup(text)
 					else
-						w:set_forced_width(widget_size.battery(s))
+						w:set_forced_width(nil)
+						w:set_markup(' ')
 					end
-					w:set_markup(text)
 				end
 				for _, w in ipairs(s.battery_widget:get_children_by_id('icon')) do
 					w:set_value(battery_current.percentage_exact / 100)
@@ -1788,9 +1793,8 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			spacer,
 			s.cpu_widget,
 			spacer,
-			s.battery_widget,
-			spacer,
 			s.volume_widget,
+			s.battery_widget,
 			s.wifi_widget,
 			s.udisks_mount,
 			s.systray_widget,
