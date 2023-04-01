@@ -257,6 +257,10 @@ local function setup_screen(s)
 	awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
 end
 
+local system_suspend = utils.debounce(function()
+	awful.spawn("loginctl suspend")
+end, 0.1, false)
+
 awful.screen.connect_for_each_screen(setup_screen)
 
 -- {{{ Mouse bindings
@@ -374,9 +378,7 @@ awful.keyboard.append_global_keybindings({
 		{description = "Quit awesome", group = "Awesome"}
 	),
 	awful.key({ modkey, "Shift" }, "s",
-		function()
-			awful.spawn("loginctl suspend")
-		end,
+		system_suspend,
 		{description = "Sleep mode", group = "Awesome"}
 	),
 	awful.key({ modkey }, "l",
