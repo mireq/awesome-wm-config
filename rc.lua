@@ -1,5 +1,4 @@
 -- awesome_mode: api-level=4:screen=on
-
 pcall(require, "luarocks.loader")
 
 local api = require("api")
@@ -47,7 +46,6 @@ local browser = "firefox-bin"
 local tasks = terminal .. " -e htop"
 local wireless_settings = "wpa_gui"
 local filemanager = "konqueror"
-local launch_tv = "mpv --demuxer=lavf --demuxer-lavf-format=mpegts --vf=vavpp:deint=auto:interlaced-only=yes --demuxer-lavf-o-add=fflags=+nobuffer --demuxer-lavf-probe-info=nostreams --demuxer-lavf-analyzeduration=0 --force-window=immediate http://192.168.1.111:8001/"
 
 local modkey = "Mod4"
 local altkey = "Mod1"
@@ -55,66 +53,50 @@ local altkey = "Mod1"
 beautiful.init(active_theme .. "/theme_new.lua")
 
 -- {{{ Menu
-local menu_accessories = {
-	{ "archives", "ark" },
-	{ "terminal emulator", terminal },
-	{ "file manager", "konqueror" },
-	{ "editor", gui_editor },
-}
-local menu_internet = {
-	{ "browser", browser },
-}
-local menu_games = {
-	{ "PSX", "pcsxr" },
-	{ "Super NES", "zsnes" },
-}
-local menu_graphics = {
-	{ "gimp" , "gimp" },
-	{ "inkscape", "inkscape" },
-	{ "darktable" , "darktable" }
-}
-local menu_office = {
-	{ "writer" , "lowriter" },
-	{ "impress" , "loimpress" },
-}
-local menu_system = {
-	{ "htop" , terminal .. " -e htop " },
-	--{ "htop", 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=18" -depth 32 -background "rgba:0000/0000/0000/2000" -e htop'},
-	{ "hotkeys", function() return false, utils.show_hotkeys_help end},
-	{ "quit", function() awesome.quit() end},
-	{ "reboot", "loginctl reboot"},
-	{ "poweroff", "loginctl poweroff"},
-	{ "suspend", "loginctl suspend"}
-}
-local menu_tv = {
-	{ "Jednotka" , launch_tv .. "1:0:1:3B78:C8D:3:EB0000:0:0:0:" },
-	{ "Dvojka" , launch_tv .. "1:0:1:3B79:C8D:3:EB0000:0:0:0:" },
-	{ "RTVS SPORT HD" , launch_tv .. "1:0:1:3B7B:C8D:3:EB0000:0:0:0:" },
-	{ "CT 24" , launch_tv .. "1:0:1:1F43:CA1:3:EB0000:0:0:0:" },
-	{ "TA3" , launch_tv .. "1:0:1:1328:CA2:3:EB0000:0:0:0:" },
-	{ "HBO" , launch_tv .. "1:0:1:307:C94:3:EB0000:0:0:0:" },
-}
-local menu_demo = {
-	{ "Demo" , 'mpv /home/mirec/video.mkv' },
-	{ "Eletctic whiskey" , 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=16" -depth 32 -background "rgba:0000/0000/0000/8000" -e /home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/7lX3Rj-electric-whiskey.json --resolution 1200x800 --fps 60 --tile-size 600x400' },
-	{ "Ether" , 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=16" -depth 32 -background "rgba:0000/0000/0000/8000" -e /home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/MsjSW3-ether.json --resolution 840x520 --fps 60 --tile-size 420x260' },
-	{ "Rounded vornoi borders" , 'urxvt -font "xft:DejaVu\\ Sans\\ Mono for Powerline:style=normal:pixelsize=16" -depth 32 -background "rgba:0000/0000/0000/8000" -e /home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/ll3GRM-rounded-vornoi-borders.json --resolution 960x400 --fps 60 --tile-size 480x200' },
-	{ "Seascape" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/Ms2SD1-seascape.json --resolution 640x360 --fps 30 --tile-size 320x180' },
-	{ "Voxel flythrough" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/MdGXWG-voxel-flythrough.json --resolution 720x400 --tile-size 180x200 --fps 30' },
-	{ "Hex voxel scene" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/4dsBz4-hex-voxel-scene.json --resolution 480x260 --tile-size 240x130 --fps 30' },
-	{ "Fractal land" , '/home/mirec/Documents/Praca/python/shadertoy/code/shadertoy.py render /home/mirec/Documents/Praca/python/shadertoy/demo/XsBXWt-fractal-land/XsBXWt-fractal-land.json --resolution 640x360 --fps 30 --tile-size 320x180' }
-}
-local main_menu = {
-	items = {
+
+local loaded, menu_items = pcall(require, "menu_items")
+if not loaded then
+	menu_items = nil
+end
+
+if menu_items == nil then
+	local menu_accessories = {
+		{ "archives", "ark" },
+		{ "terminal emulator", terminal },
+		{ "file manager", "konqueror" },
+		{ "editor", gui_editor },
+	}
+	local menu_internet = {
+		{ "browser", browser },
+	}
+	local menu_graphics = {
+		{ "gimp" , "gimp" },
+		{ "inkscape", "inkscape" },
+		{ "darktable" , "darktable" }
+	}
+	local menu_office = {
+		{ "writer" , "lowriter" },
+		{ "impress" , "loimpress" },
+	}
+	local menu_system = {
+		{ "htop" , terminal .. " -e htop " },
+		{ "hotkeys", function() return false, utils.show_hotkeys_help end},
+		{ "quit", function() awesome.quit() end},
+		{ "reboot", "loginctl reboot"},
+		{ "poweroff", "loginctl poweroff"},
+		{ "suspend", "loginctl suspend"}
+	}
+	menu_items = {
 		{ "accessories" , menu_accessories },
 		{ "graphics" , menu_graphics },
 		{ "internet" , menu_internet },
-		{ "games" , menu_games },
 		{ "office" , menu_office },
 		{ "system" , menu_system },
-		{ "tv" , menu_tv },
-		{ "demo" , menu_demo },
-	},
+	}
+end
+
+local main_menu = {
+	items = menu_items,
 	theme = {
 		height = beautiful.menu_height,
 		width = beautiful.menu_width,
