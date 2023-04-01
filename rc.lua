@@ -1738,9 +1738,14 @@ screen.connect_signal("request::desktop_decoration", function(s)
 					end})
 				end
 
-				menu = style_menu(menu, s)
-
-				awful.menu(menu):show()
+				if dev.menu ~= nil then
+					dev.menu:hide()
+					dev.menu = nil
+				else
+					menu = style_menu(menu, s)
+					dev.menu = awful.menu(menu)
+					dev.menu:show()
+				end
 			end)
 		)
 	})
