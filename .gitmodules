@@ -10,3 +10,6 @@
 [submodule "cyclefocus"]
 	path = cyclefocus
 	url = https://github.com/mireq/awesome-cyclefocus.git
+[submodule "awesome-udisks2-mount"]
+	path = awesome-udisks2-mount
+	url = https://github.com/mireq/awesome-udisks2-mount.git

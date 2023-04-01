@@ -43,7 +43,7 @@ theme.wibar_border_top                      = "#565c64c0"
 theme.fg_accent                             = "#ffffff"
 theme.fg_normal                             = "#cccdcf"
 theme.fg_secondary                          = "#88898c"
-theme.fg_inactive                           = "#949496"
+theme.fg_inactive                           = "#88898c"
 theme.fg_focus                              = "#ffffff"
 theme.fg_urgent                             = "#ffffff"
 theme.bg_normal                             = "#222528"
@@ -119,7 +119,8 @@ theme.hotkeys_group_margin                  = 6
 theme.udisks_storage                        = themes_dir .. "/icons/storage.svg"
 theme.udisks_thumb                          = themes_dir .. "/icons/thumb.svg"
 theme.udisks_usb                            = themes_dir .. "/icons/thumb.svg"
-theme.udisks_umounted_opacity               = 0.5
+theme.udisks_opacity                        = 0.5
+theme.udisks_opacity_mounted                = 1.0
 
 -- {{{ Titlebar
 theme.titlebar_bg_urgent                    = "#d43535"

@@ -20,7 +20,7 @@ local popups = require("widgets.popups")
 local ruled = require("ruled")
 local run_shell = require("widgets.run_shell")
 local status_magnitude_widget = require("widgets.status_magnitude_widget")
-local udisks_mount = require("widgets.udisks_mount")
+local udisks_mount = require("awesome-udisks2-mount.udisks")
 local utils = require("utils")
 local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
@@ -1704,6 +1704,10 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		stylesheet = 'svg { color: ' .. theme.fg_normal .. '; }',
 		buttons = gears.table.join(
 			awful.button({ }, 1, function(dev)
+				if dev.menu ~= nil then
+					dev.menu:hide()
+					dev.menu = nil
+				end
 				udisks_mount.mount(dev, function(path, dev, err)
 					on_mount(path, err)
 				end)
@@ -1715,12 +1719,15 @@ screen.connect_signal("request::desktop_decoration", function(s)
 					open_label = "Mount"
 				end
 				table.insert(menu, {open_label, function()
+					dev.menu = nil
 					udisks_mount.mount(dev, function(path, dev, err)
+						dev.menu = nil
 						on_mount(path, err)
 					end)
 				end})
 				if dev['Drive']['Ejectable'] then
 					table.insert(menu, {"Eject", function()
+						dev.menu = nil
 						udisks_mount.unmount_and_eject(dev, function(path, dev, err)
 							on_unmount(path, err)
 						end)
@@ -1728,6 +1735,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 				end
 				if dev['Mounted'] then
 					table.insert(menu, {"Unmount", function()
+						dev.menu = nil
 						udisks_mount.unmount(dev, function(path, dev, err)
 							on_unmount(path, err)
 						end)
@@ -1799,6 +1807,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 end)
 
 volume_utils.start_monitor()
+udisks_mount.start_monitor()
 
 
 local collect_garbage = utils.debounce(function()
