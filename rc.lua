@@ -884,7 +884,7 @@ client.connect_signal("request::titlebars", function(c)
 				},
 				left = dpi(1, s),
 				right = dpi(1, s),
-				top = dpi(1, s),
+				top = dpi(2, s),
 				widget = wibox.container.margin,
 			},
 			{ -- Middle
