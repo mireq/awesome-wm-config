@@ -810,11 +810,6 @@ client.connect_signal("request::titlebars", function(c)
 		end),
 	}
 
-	local size_adjust = 0
-	if c.border_width ~= 0 then
-		size_adjust = 1
-	end
-
 	local window_buttons = {
 		close = awful.titlebar.widget.closebutton(c),
 		maximized = awful.titlebar.widget.maximizedbutton(c),
@@ -829,9 +824,6 @@ client.connect_signal("request::titlebars", function(c)
 	window_buttons.close.stylesheet = 'svg { color: #f2b0b0; }'
 
 	if beautiful.titlebar_position == "top" or beautiful.titlebar_position == "bottom" then
-		if beautiful.titlebar_position == 'bottom' then
-			size_adjust = -size_adjust
-		end
 		layout = {
 			{ -- Left
 				{
@@ -848,7 +840,7 @@ client.connect_signal("request::titlebars", function(c)
 					window_buttons.ontop,
 					layout = wibox.layout.fixed.horizontal
 				},
-				top = dpi(1 - size_adjust, s),
+				top = dpi(1, s),
 				bottom = dpi(1, s),
 				widget = wibox.container.margin,
 			},
@@ -869,7 +861,7 @@ client.connect_signal("request::titlebars", function(c)
 					{ text = ' ', widget = wibox.widget.textbox },
 					layout = wibox.layout.fixed.horizontal()
 				},
-				top = dpi(1 - size_adjust, s),
+				top = dpi(1, s),
 				bottom = dpi(1, s),
 				widget = wibox.container.margin,
 			},
@@ -878,12 +870,8 @@ client.connect_signal("request::titlebars", function(c)
 	end
 	if beautiful.titlebar_position == "left" or beautiful.titlebar_position == "right" then
 		local rotate = "east"
-		local right_size_adjust = 0
-		local left_size_adjust = size_adjust
 		if beautiful.titlebar_position == "right" then
 			rotate = "west"
-			right_size_adjust = size_adjust
-			left_size_adjust = 0
 		end
 
 		layout = {
@@ -894,8 +882,8 @@ client.connect_signal("request::titlebars", function(c)
 					window_buttons.minimize,
 					layout = wibox.layout.fixed.vertical
 				},
-				right = dpi(1 - right_size_adjust, s),
-				left = dpi(1 - left_size_adjust, s),
+				left = dpi(1, s),
+				right = dpi(1, s),
 				top = dpi(1, s),
 				widget = wibox.container.margin,
 			},
@@ -927,8 +915,8 @@ client.connect_signal("request::titlebars", function(c)
 					window_buttons.floating,
 					layout = wibox.layout.fixed.vertical
 				},
-				right = dpi(1 - right_size_adjust, s),
-				left = dpi(1 - left_size_adjust, s),
+				left = dpi(1, s),
+				right = dpi(1, s),
 				bottom = dpi(1, s),
 				widget = wibox.container.margin,
 			},
@@ -936,7 +924,7 @@ client.connect_signal("request::titlebars", function(c)
 		}
 	end
 
-	local titlebar = awful.titlebar(c, {position = beautiful.titlebar_position, size = dpi(18 - size_adjust, c.screen)})
+	local titlebar = awful.titlebar(c, {position = beautiful.titlebar_position, size = dpi(18, c.screen)})
 	titlebar:set_widget(layout)
 end)
 
