@@ -253,15 +253,9 @@ end
 screen.connect_signal("request::wallpaper", set_wallpaper)
 
 
-local function setup_screen(s)
-	awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
-end
-
 local system_suspend = utils.debounce(function()
 	awful.spawn("loginctl suspend")
 end, 0.1, false)
-
-awful.screen.connect_for_each_screen(setup_screen)
 
 -- {{{ Mouse bindings
 root.buttons(gears.table.join(
@@ -1387,6 +1381,8 @@ local spacer = { text = ' ', widget = wibox.widget.textbox }
 screen.connect_signal("request::desktop_decoration", function(s)
 	local scaling = utils.float_dpi(1, s)
 
+	awful.tag({ "1", "2", "3", "4", "5", "6", "7", "8", "9" }, s, awful.layout.layouts[1])
+
 	-- main panel
 	s.tool_bar = awful.wibar({
 		position = "top",
@@ -1815,22 +1811,62 @@ screen.connect_signal("list", function()
 end)
 
 
-local function run_test()
-	--s = screen.fake_add(20, 20, 500, 400)
-	for s in screen do
-		set_screen_dpi(s, 384)
+tag.connect_signal("request::screen", function(t)
+	local new_tag
+
+	-- find suitable tag on primary screen
+	if screen.primary ~= t.screen then
+		new_tag = awful.tag.find_by_name(screen.primary, t.name)
 	end
+
+	-- if primary screen is disconnecting, search another
+	if new_tag == nil then
+		for s in screen do
+			if s ~= t.screen then
+				new_tag = awful.tag.find_by_name(s, t.name)
+				if new_tag ~= nil then
+					break
+				end
+			end
+		end
+	end
+
+	-- get current clients
+	local clients = t:clients() or {}
+
+	-- delete old tag and move clients to new
+	t:delete(new_tag or awful.tag.find_fallback(), true)
+
+	-- don't place clients offscreen
+	gears.timer.delayed_call(function()
+		for _, c in pairs(clients) do
+			awful.placement.no_offscreen(c)
+		end
+	end)
+end)
+
+
+local function run_test()
+	primary = screen[1]
+	s = screen.fake_add(20, 20, 500, 400)
+	for __, c in ipairs(primary.clients) do
+		c:move_to_screen(s)
+		c:move_to_tag(s.tags[2])
+	end
+	--for s in screen do
+	--	set_screen_dpi(s, 384)
+	--end
 	gears.timer {
-		timeout   = 0.05,
+		timeout   = 0.5,
 		call_now  = false,
 		autostart = true,
 		single_shot = true,
 		callback  = function()
 			--set_screen_dpi(s, 384)
-			for s in screen do
-				set_screen_dpi(s, 192)
-			end
-			--s:fake_remove()
+			--for s in screen do
+			--	set_screen_dpi(s, 192)
+			--end
+			s:fake_remove()
 			--utils.show_hotkeys_help()
 			collectgarbage("collect")
 		end
