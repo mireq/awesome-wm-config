@@ -940,16 +940,6 @@ client.connect_signal("mouse::enter", function(c)
 	c:activate({ context = "mouse_enter", raise = false })
 end)
 
-client.connect_signal("request::geometry", function(c)
-	local titlebars = {}
-	if c._private and c._private.titlebars then
-		titlebars = c._private.titlebars
-	end
-	for _, titlebar in pairs(titlebars) do
-		titlebar.drawable:emit_signal("widget::redraw_needed")
-		titlebar.drawable:emit_signal("widget::layout_changed")
-	end
-end)
 
 -- {{{ Notifications
 
