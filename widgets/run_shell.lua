@@ -40,21 +40,30 @@ function widget.new()
 		w:setup {
 			{
 				{
-					{
-						run_shell,
-						layout = wibox.container.margin,
-						id = 'margin',
-					},
-					id = 'left',
-					layout = wibox.layout.fixed.horizontal
+					markup = '<span font="Ubuntu 22">Run shell command\n\n</span>',
+					widget = wibox.widget.textbox,
+					halign = 'center',
+					id = 'title'
 				},
-				bg = beautiful.wibar_bg,
-				shape_border_color = beautiful.fg_focus,
-				shape_border_width = 1,
-				forced_width = input_width,
-				forced_height = input_height,
-				widget = wibox.container.background,
-				id = 'background'
+				{
+					{
+						{
+							run_shell,
+							layout = wibox.container.margin,
+							id = 'margin',
+						},
+						id = 'left',
+						layout = wibox.layout.fixed.horizontal
+					},
+					bg = beautiful.wibar_bg,
+					shape_border_color = beautiful.fg_focus,
+					shape_border_width = 1,
+					forced_width = input_width,
+					forced_height = input_height,
+					widget = wibox.container.background,
+					id = 'background'
+				},
+				layout = wibox.layout.fixed.vertical
 			},
 			valign = 'center',
 			layout = wibox.container.place
@@ -83,13 +92,16 @@ function widget.new()
 		background.forced_width = input_width
 		background.forced_height = input_height
 		local w = self._cached_wiboxes[s][1]
+		local title = self._cached_wiboxes[s][1]:get_children_by_id('title')[1]
 
 		if capi.awesome.composite_manager_running then
 			w.width = s.geometry.width
 			w.height = s.geometry.height
+			title.visible = true
 		else
 			w.width = input_width
 			w.height = input_height
+			title.visible = false
 		end
 
 		w.visible = true
