@@ -13,3 +13,6 @@
 [submodule "awesome-udisks2-mount"]
 	path = awesome-udisks2-mount
 	url = https://github.com/mireq/awesome-udisks2-mount.git
+[submodule "software-cursor"]
+	path = software-cursor
+	url = https://github.com/mireq/software-cursor
