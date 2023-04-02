@@ -71,3 +71,13 @@ More informations in `separate repository <https://github.com/mireq/awesome-udis
 
 .. image:: https://raw.github.com/wiki/mireq/awesome-udisks2-mount/automount.gif?v=2023-04-01
    :alt: Mount
+
+Battery logging
+---------------
+
+To log battery history, just create empty `~/.battery_history` file. History
+will be automatically collected on charging / discharging state. To display
+history call `~/.config/awesome/tools/battery_history`
+
+.. image:: https://raw.github.com/wiki/mireq/awesome-wm-config/battery.png?v=2023-04-02
+   :alt: Battery history
