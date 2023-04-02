@@ -1,5 +1,5 @@
 .PHONY: all
-	
+
 
 all: tools/pulsectrl tools/softwarecursor-x11
 
