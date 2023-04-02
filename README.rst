@@ -81,3 +81,17 @@ history call `~/.config/awesome/tools/battery_history`
 
 .. image:: https://raw.github.com/wiki/mireq/awesome-wm-config/battery.png?v=2023-04-02
    :alt: Battery history
+
+Screen recording
+----------------
+
+This repository includes screen recording scripts with near zero CPU usage. To
+enable recording, first add permissions to ffmpeg::
+
+    setcap cap_sys_admin+ep `which ffmpeg`
+
+Now it's possible to start recording using shortcut Mod + Alt + Shift + r (same
+shortcut to stop). Video will be available in /dev/shm/video.mkv
+
+To record cursor, composite manager should be started. Cursor is recorded using
+`software-cursor application <https://github.com/mireq/software-cursor>`_.
