@@ -50,7 +50,7 @@ local filemanager = "konqueror"
 local modkey = "Mod4"
 local altkey = "Mod1"
 
-beautiful.init(active_theme .. "/theme_new.lua")
+beautiful.init(active_theme .. "/theme.lua")
 
 -- {{{ Menu
 
@@ -1852,7 +1852,7 @@ local function run_test()
 	--	set_screen_dpi(s, 384)
 	--end
 	gears.timer {
-		timeout   = 0.5,
+		timeout   = 0.1,
 		call_now  = false,
 		autostart = true,
 		single_shot = true,
