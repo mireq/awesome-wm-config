@@ -1,0 +1,30 @@
+#!/bin/bash
+softwarecursor-x11 -s 96 -r 48 &
+#ffmpeg \
+#	-framerate 60 \
+#	-f kmsgrab \
+#	-i - \
+#	-vf 'hwmap=derive_device=vaapi,scale_vaapi=format=nv12' \
+#	-c:v h264_vaapi \
+#	-y \
+#	/dev/shm/video.mp4 &
+#ffmpeg \
+#	-framerate 60 \
+#	-f kmsgrab \
+#	-i - \
+#	-vf 'hwmap=derive_device=vaapi,hwdownload,format=bgr0' \
+#	-c:v h264 \
+#	-preset veryfast \
+#	-y \
+#	/dev/shm/video.mkv &
+ffmpeg \
+	-framerate 60 \
+	-f kmsgrab \
+	-i - \
+	-vf 'hwmap=derive_device=vaapi,scale_vaapi=format=nv12' \
+	-c:v hevc_vaapi \
+	-qp 18 \
+	-y \
+	/dev/shm/video.mkv &
+echo $! > /tmp/record_desktop.pid
+#fg

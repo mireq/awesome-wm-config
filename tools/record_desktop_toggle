@@ -1,0 +1,13 @@
+#!/bin/bash
+SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
+export PATH=$SCRIPT_DIR:$PATH
+
+if [ -f /tmp/record_desktop.pid ]
+then
+	record_desktop_stop
+	notify-send "Recording finished" -t 700
+else
+	notify-send "Stating recording" -t 700
+	sleep 1
+	record_desktop
+fi

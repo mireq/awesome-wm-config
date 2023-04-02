@@ -417,7 +417,10 @@ awful.keyboard.append_global_keybindings({
 	),
 	awful.key({ modkey, altkey, "Shift" }, "r",
 		function ()
-			awful.spawn("/usr/local/bin/record_desktop_toggle")
+			local result = awful.spawn("lol")
+			if type(result) == 'string' then
+				awful.spawn(utils.get_config_dir() .. "tools/record_desktop_toggle")
+			end
 		end,
 		{description = "Record desktop", group = "Launcher"}
 	),
