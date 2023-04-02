@@ -57,5 +57,17 @@ sent to running process. If someone changes volume, change is automatically
 applied to awesome without polling. No extra interrupts, no extra CPU usage, no
 extra power needed.
 
+More informations in `separate repository <https://github.com/mireq/pulsectrl>`_.
+
 .. image:: https://raw.github.com/wiki/mireq/pulsectrl/volume.gif?v=2023-04-02
    :alt: Volume widget
+
+Udisk2 mount
+------------
+
+This configuration includes native highly customizable udisks2 mount widget.
+
+More informations in `separate repository <https://github.com/mireq/awesome-udisks2-mount>`_.
+
+.. image:: https://raw.github.com/wiki/mireq/awesome-udisks2-mount/automount.gif?v=2023-04-01
+   :alt: Mount
