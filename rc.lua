@@ -16,6 +16,7 @@ local hotkeys_popup = require("awful.hotkeys_popup")
 local menubar = require("menubar")
 local naughty = require("naughty")
 local popups = require("widgets.popups")
+local layoutbox = require("widgets.layoutbox")
 local ruled = require("ruled")
 local run_shell = require("widgets.run_shell")
 local status_magnitude_widget = require("widgets.status_magnitude_widget")
@@ -1755,7 +1756,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	})
 	attach_calendar(s)
 
-	s.layoutbox_widget = awful.widget.layoutbox {
+	s.layoutbox_widget = layoutbox {
 		screen = s,
 		buttons = layoutbox_common.buttons,
 	}
