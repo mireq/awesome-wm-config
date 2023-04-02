@@ -1016,6 +1016,7 @@ local function update_widgets()
 			local network_current = args
 			local link_quality = args.link_quality
 			if link_quality ~= 0 then
+				-- 75% link quality show full bar
 				link_quality = link_quality * 1.2 + 0.1
 			end
 			for s in screen do
