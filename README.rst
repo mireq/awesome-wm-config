@@ -45,3 +45,17 @@ Best values for dpi are 96-multipliers. Here is low DPI screenshot:
 
 .. image:: https://raw.github.com/wiki/mireq/awesome-wm-config/desktop_96_dpi.png?v=2023-04-02
    :alt: AwesomeWM desktop with 96 DPI
+
+Bidirectional volume control using pulseaudio API
+-------------------------------------------------
+
+This configuration uses own pulseaudio commandline tool to change volume. It is
+useable with pulseaudio or pipewire audio server.
+
+Awesome starts control application on background and volume changed are directly
+sent to running process. If someone changes volume, change is automatically
+applied to awesome without polling. No extra interrupts, no extra CPU usage, no
+extra power needed.
+
+.. image:: https://raw.github.com/wiki/mireq/pulsectrl/volume.gif?v=2023-04-02
+   :alt: Volume widget
