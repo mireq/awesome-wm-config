@@ -1,29 +1,26 @@
 -- awesome_mode: api-level=4:screen=on
 pcall(require, "luarocks.loader")
 
+
 local api = require("api")
 local awful = require("awful")
-local battery_widget = require("widgets.battery_widget")
 local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
 local cyclefocus = require('cyclefocus')
 local dpi = beautiful.xresources.apply_dpi
-local dpi_watcher = require("widgets.dpi_watcher")
 local gdebug = require("gears.debug")
 local gears = require("gears")
 local hotkeys_popup = require("awful.hotkeys_popup")
 local menubar = require("menubar")
 local naughty = require("naughty")
 local popups = require("widgets.popups")
-local layoutbox = require("widgets.layoutbox")
 local ruled = require("ruled")
-local run_shell = require("widgets.run_shell")
-local status_magnitude_widget = require("widgets.status_magnitude_widget")
 local udisks_mount = require("awesome-udisks2-mount.udisks")
 local utils = require("utils")
 local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
 local wibox = require("wibox")
+local widgets = require("widgets")
 require("awful.autofocus")
 local capi = {
 	drawin = drawin,
@@ -113,7 +110,6 @@ naughty.connect_signal("request::display_error", function(message, startup)
 		message = message
 	}
 end)
-
 
 local function style_menu(menu, s)
 	local scaling = utils.float_dpi(1, s)
@@ -297,7 +293,7 @@ awful.keyboard.append_global_keybindings({
 		{description = "Lua prompt", group = "Awesome"}
 	),
 	awful.key({ modkey }, "r",
-		run_shell.launch,
+		widgets.run_shell.launch,
 		{description = "Run shell", group = "Awesome"}
 	),
 	awful.key({ modkey }, "w",
@@ -1206,7 +1202,7 @@ end
 local battery_tooltip_common = {
 	timeout = 5,
 	timer_function = function()
-		vicious.force({ battery_widget })
+		vicious.force({ widgets.battery_widget })
 		local tooltip_text = '<span font="'..theme.font..'" color="'..theme.fg_normal..'">Status: <b><span color="'..theme.fg_accent..'">'..battery_current.status..'</span></b></span>'
 		if battery_current.time and battery_current.time ~= "N/A" then
 			tooltip_text = tooltip_text .. '\n<span font="'..theme.font..'" color="'..theme.fg_normal..'">Remaining time: <b><span color="'..theme.fg_accent..'">'..battery_current.time..'</span></b></span>'
@@ -1398,7 +1394,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		},
 		widget_template = {
 			id = "container_role",
-			widget = dpi_watcher,
+			widget = widgets.dpi_watcher,
 			forced_width = dpi(6, s),
 			forced_height = dpi(6, s),
 			{
@@ -1547,12 +1543,12 @@ screen.connect_signal("request::desktop_decoration", function(s)
 					w:set_forced_height(dpi(1, s))
 				end
 			end,
-			widget = dpi_watcher,
+			widget = widgets.dpi_watcher,
 		},
 	}
 	s.tasklist = awful.widget.tasklist(s.tasklist_args)
 	s.lua_prompt = awful.widget.prompt()
-	s.wifi_widget = status_magnitude_widget({
+	s.wifi_widget = widgets.status_magnitude_widget({
 		icon = beautiful.widget_wireless,
 		count = beautiful.widget_wireless_count,
 		special = {'no'},
@@ -1622,7 +1618,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			options = {
 				stylesheet = 'svg { color: '..theme.fg_normal..'; }',
 			},
-			widget = battery_widget
+			widget = widgets.battery_widget
 		},
 		{
 			id = 'value',
@@ -1645,7 +1641,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 				stylesheet = 'svg { color: '..theme.fg_normal..'; }',
 			},
 			special = 'no',
-			widget = status_magnitude_widget
+			widget = widgets.status_magnitude_widget
 		},
 		{
 			id = 'value',
@@ -1748,7 +1744,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	})
 	attach_calendar(s)
 
-	s.layoutbox_widget = layoutbox {
+	s.layoutbox_widget = widgets.layoutbox {
 		screen = s,
 		buttons = layoutbox_common.buttons,
 	}

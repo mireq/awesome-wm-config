@@ -3,7 +3,7 @@ local beautiful = require("beautiful")
 local fixed = require("wibox.layout.fixed")
 local gears = require("gears")
 local gtable = require("gears.table")
-local utils = require("utils")
+local utils = require("utils.utility")
 local wibox = require("wibox")
 local dpi = beautiful.xresources.apply_dpi
 
