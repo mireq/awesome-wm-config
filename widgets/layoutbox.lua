@@ -38,6 +38,10 @@ local function update(w, screen)
 	if theme_image ~= nil then
 		success = w.imagebox:set_image(beautiful[image_name])
 	end
+	if success then
+		local stylesheet = beautiful["layout_" .. name .. '_stylesheet'] or beautiful["layout_stylesheet"] or ''
+		w.imagebox.stylesheet = stylesheet
+	end
 	w.textbox.text = success and "" or name
 end
 

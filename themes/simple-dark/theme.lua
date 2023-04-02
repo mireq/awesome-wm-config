@@ -21,21 +21,6 @@ theme.border_color_active                   = "#7f7f7f"
 theme.border_color                          = "#ff0000"
 theme.border_color_urgent                   = "#d43535"
 
--- {{{ Layout
-theme.layout_tile                           = themes_dir .. "/icons/tile.svg"
-theme.layout_tileleft                       = themes_dir .. "/icons/tileleft.svg"
-theme.layout_tilebottom                     = themes_dir .. "/icons/tilebottom.svg"
-theme.layout_tiletop                        = themes_dir .. "/icons/tiletop.svg"
-theme.layout_fairv                          = themes_dir .. "/icons/fairv.svg"
-theme.layout_fairh                          = themes_dir .. "/icons/fairh.svg"
-theme.layout_spiral                         = themes_dir .. "/icons/spiral.svg"
-theme.layout_dwindle                        = themes_dir .. "/icons/dwindle.svg"
-theme.layout_max                            = themes_dir .. "/icons/max.svg"
-theme.layout_fullscreen                     = themes_dir .. "/icons/fullscreen.svg"
-theme.layout_magnifier                      = themes_dir .. "/icons/magnifier.svg"
-theme.layout_floating                       = themes_dir .. "/icons/floating.svg"
--- }}}
-
 theme.wibar_bg                              = "#2b2e32f8"
 theme.wibar_bg_bottom                       = "#282a2ef8"
 theme.wibar_border_bottom                   = "#212326f8"
@@ -51,6 +36,23 @@ theme.bg_focus                              = "#186dfe"
 --theme.bg_urgent                             = "#1A1A1A"
 theme.bg_urgent                             = "#d43535"
 theme.bg_systray                            = theme.wibar_bg
+
+
+-- {{{ Layout
+theme.layout_stylesheet                     = 'svg { color: ' .. theme.fg_normal .. '; }'
+theme.layout_tile                           = themes_dir .. "/icons/tile.svg"
+theme.layout_tileleft                       = themes_dir .. "/icons/tileleft.svg"
+theme.layout_tilebottom                     = themes_dir .. "/icons/tilebottom.svg"
+theme.layout_tiletop                        = themes_dir .. "/icons/tiletop.svg"
+theme.layout_fairv                          = themes_dir .. "/icons/fairv.svg"
+theme.layout_fairh                          = themes_dir .. "/icons/fairh.svg"
+theme.layout_spiral                         = themes_dir .. "/icons/spiral.svg"
+theme.layout_dwindle                        = themes_dir .. "/icons/dwindle.svg"
+theme.layout_max                            = themes_dir .. "/icons/max.svg"
+theme.layout_fullscreen                     = themes_dir .. "/icons/fullscreen.svg"
+theme.layout_magnifier                      = themes_dir .. "/icons/magnifier.svg"
+theme.layout_floating                       = themes_dir .. "/icons/floating.svg"
+-- }}}
 
 theme.process_font                          = "Ubuntu Mono 8"
 theme.widget_temp                           = themes_dir .. "/icons/temp_small.svg"
