@@ -20,7 +20,7 @@ killall -q xdg-desktop-portal
 killall -q xdg-document-portal
 find /dev/pts -user mirec -exec bash -c "echo -ne \"\e]710;xft:DejaVu\ Sans\ Mono\ for\ Powerline:style=normal:pixelsize=${urxvt_font_size},xft:Noto\ Color\ Emoji:stye=normal:pixelsize=${urxvt_font_size},xft:DejaVuSansMono\ Nerd\ Font:pixelsize=${urxvt_font_size}\a\" > {}" \;
 #echo 'awesome.restart()' | awesome-client
-echo "local beautiful=require('beautiful'); beautiful.change_dpi($dpi)"|awesome-client
+echo "require('api').change_dpi($dpi)"|awesome-client
 if [ -f $RUNTIME_DIR/alacritty.dpi ]; then
 	start_dpi=`cat $RUNTIME_DIR/alacritty.dpi`
 	font_size=$(expr 8 \* $dpi / $start_dpi)

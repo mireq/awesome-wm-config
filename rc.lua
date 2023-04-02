@@ -1897,7 +1897,6 @@ local function change_dpi(force_dpi)
 		set_screen_dpi(s, force_dpi)
 	end
 end
-beautiful.change_dpi = change_dpi
 api:register("change_dpi", change_dpi)
 
 
