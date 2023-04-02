@@ -95,3 +95,17 @@ shortcut to stop). Video will be available in /dev/shm/video.mkv
 
 To record cursor, composite manager should be started. Cursor is recorded using
 `software-cursor application <https://github.com/mireq/software-cursor>`_.
+
+Alt + Tab window switching
+--------------------------
+
+with slightly modified `cyclefocus script <https://github.com/blueyed/awesome-cyclefocus>`_.
+
+.. image:: https://raw.github.com/wiki/mireq/awesome-wm-config/alt_tab.png?v=2023-04-02
+   :alt: Alt + Tab
+
+Run command
+-----------
+
+.. image:: https://raw.github.com/wiki/mireq/awesome-wm-config/run_command.png?v=2023-04-02
+   :alt: Run command
