@@ -1,5 +1,6 @@
 .PHONY: all
 
+all: pulsectrl tools/softwarecursor-x11
 
 
 pulsectrl: pulsectrl.cpp Makefile
