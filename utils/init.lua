@@ -38,12 +38,15 @@ function M.show_hotkeys_help()
 end
 
 
-function M.render_svg(path, scaling)
+function M.render_svg(path, scaling, stylesheet)
 	local svg = Rsvg.Handle.new_from_file(path)
 	local dim = svg:get_dimensions()
 	local img = cairo.ImageSurface(cairo.Format.ARGB32, dim.width * scaling, dim.height * scaling)
 	local cr = cairo.Context(img)
 	cr:scale(scaling, scaling)
+	if stylesheet ~= nil then
+		svg:set_stylesheet(stylesheet)
+	end
 	svg:render_cairo(cr)
 	return img
 end
