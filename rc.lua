@@ -3,7 +3,6 @@ pcall(require, "luarocks.loader")
 
 local api = require("api")
 local awful = require("awful")
-local battery_utils = require("utils.battery")
 local battery_widget = require("widgets.battery_widget")
 local beautiful = require("beautiful")
 local cairo = require("lgi").cairo
@@ -24,7 +23,6 @@ local udisks_mount = require("awesome-udisks2-mount.udisks")
 local utils = require("utils")
 local vicious = require("vicious")
 local vicious_extra = require("vicious_extra")
-local volume_utils = require("utils.volume")
 local wibox = require("wibox")
 require("awful.autofocus")
 local capi = {
@@ -159,13 +157,13 @@ end)
 
 local function volume_command(mode)
 	if mode == "up" then
-		volume_utils.sink_change(0.01)
+		utils.volume.sink_change(0.01)
 	elseif mode == "down" then
-		volume_utils.sink_change(-0.01)
+		utils.volume.sink_change(-0.01)
 	elseif mode == "mute" then
-		volume_utils.sink_mute_toggle()
+		utils.volume.sink_mute_toggle()
 	elseif mode == "micmute" then
-		volume_utils.source_mute_toggle()
+		utils.volume.source_mute_toggle()
 	end
 end
 
@@ -508,8 +506,6 @@ awful.keyboard.append_global_keybindings({
 
 -- }}}
 
-
--- Update border size for new client
 
 
 local function unmaximize_before_move(c)
@@ -1003,7 +999,7 @@ local function on_sink_volume_changed(volume, mute)
 	update_volume()
 end
 
-volume_utils:connect_signal('master_sink_changed', function(_, args)
+utils.volume:connect_signal('master_sink_changed', function(_, args)
 	on_sink_volume_changed(args.volume, args.mute)
 end)
 
@@ -1094,7 +1090,7 @@ local function update_widgets()
 				text = text .. ' <span font="'..(theme.battery_current_font or theme.sensor_font)..'" alpha="50%">'..string.format("%.1f", battery_current.power_now)..' W</span>'
 			end
 
-			battery_utils.record(battery_current)
+			utils.battery.record(battery_current)
 
 			for s in screen do
 				for _, w in ipairs(s.battery_widget:get_children_by_id('value')) do
@@ -1789,7 +1785,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	update_widgets()
 end)
 
-volume_utils.start_monitor()
+utils.volume.start_monitor()
 udisks_mount.start_monitor()
 
 
