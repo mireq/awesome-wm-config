@@ -14,7 +14,8 @@ theme.mem_font                              = "UbuntuCondensed 8"
 theme.cpu_font                              = "UbuntuCondensed 8"
 theme.process_font                          = "Ubuntu Mono 8"
 theme.tasklist_font_focus                   = "Ubuntu Bold 9"
-theme.hotkeys_description_font              = "Ubuntu Mono 8"
+theme.hotkeys_font                          = "Ubuntu Mono Bold 10"
+theme.hotkeys_description_font              = "Ubuntu 9"
 -- }}}
 
 
@@ -147,7 +148,6 @@ theme.hotkeys_bg                            = theme.bg_normal
 theme.hotkeys_border_color                  = theme.border_focus
 theme.hotkeys_fg                            = theme.fg_normal
 theme.hotkeys_modifiers_fg                  = theme.fg_secondary
-theme.hotkeys_font                          = "Ubuntu Mono Bold 8"
 theme.hotkeys_group_margin                  = 6
 -- }}}
 
