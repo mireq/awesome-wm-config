@@ -21,3 +21,27 @@ Keyboard shortcuts
 
 .. image:: https://raw.github.com/wiki/mireq/awesome-wm-config/keys.png?v=2023-04-02
    :alt: Keyboard shortcuts
+
+================
+Special features
+================
+
+DPI change support
+------------------
+
+This config supports DPI change on fly using API call::
+
+    echo "require('api').change_dpi(192)"|awesome-client
+
+There is example bash script `available in this repostory <https://github.com/mireq/awesome-wm-config/blob/master/tools/set_dpi>`_.
+
+Video demonstration:
+
+.. image:: https://img.youtube.com/vi/GZSCcyE-hAE/maxresdefault.jpg
+    :alt: Awesome WM - change DPI on fly
+    :target: https://www.youtube.com/watch?v=GZSCcyE-hAE
+
+Best values for dpi are 96-multipliers. Here is low DPI screenshot:
+
+.. image:: https://raw.github.com/wiki/mireq/awesome-wm-config/desktop_96_dpi.png?v=2023-04-02
+   :alt: AwesomeWM desktop with 96 DPI
