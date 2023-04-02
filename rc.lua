@@ -1282,8 +1282,6 @@ local function set_screen_dpi(s, new_dpi)
 	s.main_menu:hide()
 	s.main_menu = awful.menu(get_main_menu(s))
 
-	s.launcher:set_image(utils.render_svg(theme.launch, scaling))
-
 	s.taglist:set_base_layout(s.taglist_args.layout)
 	s.tasklist:set_base_layout(s.tasklist_args.layout)
 	if #s.clock_widget.children > 0 then
@@ -1381,11 +1379,8 @@ screen.connect_signal("request::desktop_decoration", function(s)
 
 	s.main_menu = awful.menu(get_main_menu(s))
 
-	s.launcher = awful.widget.launcher({
-		image = beautiful.launch,
-		menu = s.main_menu
-	})
-	s.launcher:set_image(utils.render_svg(theme.launch, scaling))
+	s.launcher = wibox.widget.imagebox(beautiful.launch)
+	s.launcher.stylesheet = 'svg { color: '..theme.fg_normal..'; }'
 	s.launcher:set_buttons(gears.table.join(
 		awful.button({ }, 1, function() s.main_menu:toggle() end)
 	))

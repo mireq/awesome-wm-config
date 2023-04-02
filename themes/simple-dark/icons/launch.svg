@@ -1,4 +1,4 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <svg width="18" height="18" version="1.1" viewBox="0 0 18 18" xmlns="http://www.w3.org/2000/svg">
- <path d="m9 11.333 4-3.9997-1.3333-1.3333-2.6667 2.6665-2.6667-2.6665-1.3334 1.3333z" fill="#cccdcf" fill-rule="evenodd" stroke-width=".49997"/>
+ <path d="m9 11.333 4-3.9997-1.3333-1.3333-2.6667 2.6665-2.6667-2.6665-1.3334 1.3333z" fill="currentColor" fill-rule="evenodd" stroke-width=".5"/>
 </svg>
