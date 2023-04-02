@@ -5,6 +5,7 @@ import signal
 import subprocess
 import sys
 import time
+import prctl
 from multiprocessing import Queue
 from pathlib import Path
 import struct
@@ -12,11 +13,17 @@ import struct
 
 BASE_DIR = Path(__file__).parent
 DISPLAY = ':1'
-RESOLUTION = [800, 600]
-DPI = 96
+#RESOLUTION = [3200, 1800]
+RESOLUTION = [1920, 1080]
+#RESOLUTION = [640, 400]
+DPI = 192
 
 
 pid_queue = Queue(maxsize=1)
+
+
+def kill_children():
+	prctl.set_pdeathsig(signal.SIGTERM)
 
 
 def test_monitor_reconnects():
@@ -26,19 +33,33 @@ def test_monitor_reconnects():
 	#subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
 	time.sleep(0.1)
 
+	subprocess.Popen(['xrdb', '-merge', '/home/mirec/.Xdefaults'])
+
+	time.sleep(0.1)
+
 	search_dir = []
 	awesome_binary = 'awesome'
 	if 'AWESOME_BINARY' in os.environ:
 		awesome_binary = os.environ['AWESOME_BINARY']
 		search_dir = ['-s', Path(awesome_binary).parent / 'lib']
 
-	proc = subprocess.Popen(['memusage' ,'-t', '--png=mem.png', awesome_binary, '-c', BASE_DIR / 'rc_new.lua'] + search_dir)
-	#proc = subprocess.Popen([awesome_binary, '-c', BASE_DIR / 'rc_new.lua'] + search_dir)
+	proc = subprocess.Popen(['memusage', '-t', '--png=mem.png', awesome_binary, '-c', BASE_DIR / 'rc.lua'] + search_dir, stderr=subprocess.DEVNULL)
+	#proc = subprocess.Popen([awesome_binary, '-c', BASE_DIR / 'rc.lua'] + search_dir, preexec_fn=kill_children)
 	time.sleep(0.3)
+	subprocess.Popen(['urxvt', '-geometry', '10x10+100+200'])
+	subprocess.Popen(['urxvt', '-geometry', '10x10+100+200'])
+	#subprocess.Popen(['picom'])
+	#subprocess.Popen(['dolphin', '--geometry', '100x100+150+150'])
+	subprocess.Popen(['mpv', '--force-window', '--idle', '--force-window-position', '--geometry=300x300+100+250', '-vo', 'x11'])
 
-	for __ in range(10):
-		subprocess.Popen(['awesome-client', 'require("awful").run_test()'])
-		time.sleep(0.35)
+	time.sleep(0.1)
+
+	#subprocess.Popen(['awesome-client', 'require("api").run_test()'])
+	#subprocess.Popen(['awesome-client', 'require("api").run_test()'])
+	for __ in range(1000):
+		subprocess.Popen(['awesome-client', 'require("api").run_test()'])
+		subprocess.Popen(['notify-send', 'ok'])
+		time.sleep(0.02)
 
 	time.sleep(0.1)
 
@@ -52,7 +73,7 @@ def test_monitor_reconnects():
 	##	subprocess.Popen(['xrandr', '--setmonitor', 'LEFT', f'{half_width}/0x{RESOLUTION[1]}/0+0+0', 'none'])
 	#time.sleep(0.5)
 
-	subprocess.Popen(['awesome-client', 'awesome.quit()'])
+	#subprocess.Popen(['awesome-client', 'awesome.quit()'])
 
 	proc.wait(timeout=600)
 
