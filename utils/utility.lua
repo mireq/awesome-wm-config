@@ -162,4 +162,9 @@ function M.debounce(fn, delay, trigger_first)
 	return closure
 end
 
+function M.file_exists(filename)
+	local f = io.open(filename, 'f')
+	return f ~= nil and io.close(f)
+end
+
 return M
