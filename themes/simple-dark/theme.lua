@@ -62,7 +62,7 @@ theme.widget_volume                         = themes_dir .. "/icons/volume_"
 theme.widget_volume_count                   = 3
 theme.widget_battery_full_bar               = {7, 7, 13, 5} -- top, right, bottom, left
 theme.widget_battery_empty_bar              = {13, 7, 13, 5} -- top, right, bottom, left
-theme.widget_battery                        = themes_dir .. "/icons/battery_new.svg"
+theme.widget_battery                        = themes_dir .. "/icons/battery.svg"
 
 theme.launch                                = themes_dir .. "/icons/launch.svg"
 
