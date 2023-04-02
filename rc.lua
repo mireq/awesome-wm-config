@@ -1247,8 +1247,8 @@ local function set_screen_dpi(s, new_dpi)
 	s.tool_bar.drawin.cursor = "left_ptr"
 
 	s.taglist_args.style = {
-		squares_sel = utils.render_svg(beautiful.taglist_squares_sel, scaling),
-		squares_unsel = utils.render_svg(beautiful.taglist_squares_unsel, scaling),
+		squares_sel = utils.render_svg(beautiful.taglist_squares_sel, scaling, 'svg { color: '..theme.fg_normal..'; }'),
+		squares_unsel = utils.render_svg(beautiful.taglist_squares_unsel, scaling, 'svg { color: '..theme.fg_normal..'; }'),
 	}
 	utils.update_widget_template_attributes(s.taglist_args.widget_template, {
 		container_role = {
@@ -1391,8 +1391,8 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		filter = awful.widget.taglist.filter.all,
 		buttons = gears.table.join(taglist_common.buttons),
 		style = {
-			squares_sel = utils.render_svg(beautiful.taglist_squares_sel, scaling),
-			squares_unsel = utils.render_svg(beautiful.taglist_squares_unsel, scaling),
+			squares_sel = utils.render_svg(beautiful.taglist_squares_sel, scaling, 'svg { color: '..theme.fg_normal..'; }'),
+			squares_unsel = utils.render_svg(beautiful.taglist_squares_unsel, scaling, 'svg { color: '..theme.fg_normal..'; }'),
 		},
 		layout = {
 			spacing = 0,
