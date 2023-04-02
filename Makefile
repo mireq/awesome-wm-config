@@ -1,9 +1,10 @@
 .PHONY: all
+	
 
-all: pulsectrl tools/softwarecursor-x11
+all: tools/pulsectrl tools/softwarecursor-x11
 
 
-pulsectrl: pulsectrl.cpp Makefile
+tools/pulsectrl: pulsectrl.cpp Makefile
 	$(CXX) -Wall -Wextra -std=c++11 $(shell pkg-config libpulse --cflags --libs) $< -o $@
 	strip $@
 

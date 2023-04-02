@@ -16,3 +16,6 @@
 [submodule "software-cursor"]
 	path = software-cursor
 	url = https://github.com/mireq/software-cursor
+[submodule "pulsectrl"]
+	path = pulsectrl
+	url = https://github.com/mireq/pulsectrl

@@ -1,6 +1,6 @@
 themes/*/wall*.jpg
 themes/*/wall*.png
-/pulsectrl
 /mem.png
 /menu_items.lua
+/tools/pulsectrl
 /tools/softwarecursor-x11

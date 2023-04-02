@@ -69,7 +69,7 @@ end
 
 function M.start_monitor()
 	M.stop_monitor()
-	volume_monitor_pid = with_line_callback_stdin('stdbuf -oL ' .. utils.get_config_dir() .. 'pulsectrl', {
+	volume_monitor_pid = with_line_callback_stdin('stdbuf -oL ' .. utils.get_config_dir() .. 'tools/pulsectrl', {
 		stdout = function(line)
 			on_volume_line(line)
 		end,
