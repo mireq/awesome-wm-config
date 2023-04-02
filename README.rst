@@ -57,6 +57,9 @@ sent to running process. If someone changes volume, change is automatically
 applied to awesome without polling. No extra interrupts, no extra CPU usage, no
 extra power needed.
 
+Master source / sink is automatically updated, if you connect headphones for
+example, this widget will automatically change volume on new master.
+
 More informations in `separate repository <https://github.com/mireq/pulsectrl>`_.
 
 .. image:: https://raw.github.com/wiki/mireq/pulsectrl/volume.gif?v=2023-04-02
