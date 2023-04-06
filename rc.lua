@@ -939,6 +939,7 @@ local widget_size = {
 	battery = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.sensor_font)..'">100 %</span>') end,
 	battery_extended = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.battery_percent_font or theme.sensor_font)..'">100 %</span> <span font="'..(theme.battery_current_font or theme.sensor_font)..'">99.9 W</span>') end,
 	clock = function(s) return utils.calculate_text_width(s, '<span font="'..(theme.clock_font or theme.sensor_font)..'">MM  00.10  00:00</span>') end,
+	empty = function(s) return utils.calculate_text_width(s, ' ') end,
 }
 
 local temperature_gradient = {
@@ -1101,8 +1102,8 @@ local function update_widgets()
 						end
 						w:set_markup(text)
 					else
-						w:set_forced_width(nil)
-						w:set_markup(' ')
+						w:set_forced_width(widget_size.empty(s))
+						w:set_markup('')
 					end
 				end
 				for _, w in ipairs(s.battery_widget:get_children_by_id('icon')) do
