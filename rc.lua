@@ -1828,7 +1828,9 @@ tag.connect_signal("request::screen", function(t)
 	-- don't place clients offscreen
 	gears.timer.delayed_call(function()
 		for _, c in pairs(clients) do
-			awful.placement.no_offscreen(c)
+			if c.valid then
+				awful.placement.no_offscreen(c)
+			end
 		end
 	end)
 end)
