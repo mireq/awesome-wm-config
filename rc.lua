@@ -1298,10 +1298,14 @@ local function set_screen_dpi(s, new_dpi)
 		w:set_forced_width(widget_size.cpu(s))
 	end
 	for _, w in ipairs(s.battery_widget:get_children_by_id('value')) do
-		if battery_current.power_now and battery_current.power_now > 0 then
-			w:set_forced_width(widget_size.battery_extended(s))
+		if battery_current.status == "Charging" or battery_current.status == "Discharging" then
+			if battery_current.power_now and battery_current.power_now > 0 then
+				w:set_forced_width(widget_size.battery_extended(s))
+			else
+				w:set_forced_width(widget_size.battery(s))
+			end
 		else
-			w:set_forced_width(widget_size.battery(s))
+			w:set_forced_width(widget_size.empty(s))
 		end
 	end
 	for _, w in ipairs(s.volume_widget:get_children_by_id('value')) do
