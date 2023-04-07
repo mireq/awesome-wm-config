@@ -36,12 +36,31 @@ local active_theme = themes .. "/simple-dark"
 
 --terminal = "alacrittyc"
 local terminal = "urxvtc"
+--local terminal = "urxvt"
 local editor = os.getenv("EDITOR")
 local gui_editor = "kwrite"
 local browser = "firefox-bin"
 local tasks = terminal .. " -e htop"
 local wireless_settings = "wpa_gui"
 local filemanager = "konqueror"
+
+local function launch_terminal(cmd)
+	local command = {terminal}
+	local s = awful.screen.focused()
+	local font_scale = (s.dpi*8*100/75)/96
+	local font = 'xft:DejaVu Sans Mono for Powerline:style=normal:pixelsize={urxvt_font_size},xft:Noto Color Emoji:stye=normal:pixelsize={urxvt_font_size},xft:DejaVuSansMono Nerd Font:pixelsize={urxvt_font_size}'
+	font = font:gsub('{urxvt_font_size}', tostring(font_scale))
+	table.insert(command, '-font')
+	table.insert(command, font)
+	gdebug.dump(command)
+	if cmd == nil then
+		awful.spawn(command)
+	else
+		table.insert(command, '-e')
+		table.insert(command, cmd)
+		awful.spawn(command .. ' -e ' .. cmd)
+	end
+end
 
 local modkey = "Mod4"
 local altkey = "Mod1"
@@ -58,7 +77,7 @@ end
 if menu_items == nil then
 	local menu_accessories = {
 		{ "archives", "ark" },
-		{ "terminal emulator", terminal },
+		{ "terminal emulator", launch_terminal },
 		{ "file manager", "konqueror" },
 		{ "editor", gui_editor },
 	}
@@ -75,7 +94,7 @@ if menu_items == nil then
 		{ "impress" , "loimpress" },
 	}
 	local menu_system = {
-		{ "htop" , terminal .. " -e htop " },
+		{ "htop" , function() launch_terminal("htop") end },
 		{ "hotkeys", function() return false, utils.show_hotkeys_help end},
 		{ "quit", function() awesome.quit() end},
 		{ "reboot", "loginctl reboot"},
@@ -330,7 +349,7 @@ awful.keyboard.append_global_keybindings({
 	),
 	awful.key({ modkey }, "Return",
 		function()
-			awful.spawn(terminal)
+			launch_terminal()
 		end,
 		{description = "Run terminal", group = "Launcher"}
 	),
