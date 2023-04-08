@@ -576,6 +576,7 @@ client.connect_signal("request::default_keybindings", function()
 				cyclefocus.cycle({
 					modifier = "Alt_L",
 					cycle_filters = { is_focusable, cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
+					move_mouse_pointer = false,
 					centered = true
 				})
 			end,
@@ -586,6 +587,7 @@ client.connect_signal("request::default_keybindings", function()
 				cyclefocus.cycle({
 					modifier = "Alt_L",
 					cycle_filters = { is_focusable, cyclefocus.filters.same_screen, cyclefocus.filters.common_tag },
+					move_mouse_pointer = false,
 					centered = true
 				})
 			end,
