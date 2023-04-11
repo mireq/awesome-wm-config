@@ -1759,12 +1759,19 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		)
 	})
 
+	s.systray_spacer = wibox.widget { text = ' ', widget = wibox.widget.textbox, visible = false }
 	s.systray_widget = wibox.widget {
 		wibox.widget.systray(),
 		top = dpi(1, s),
 		bottom = dpi(1, s),
 		widget = wibox.container.margin,
 	}
+	local function on_systray_changed()
+		local num_entries = capi.awesome.systray()
+		s.systray_spacer.visible = num_entries > 0
+	end
+	s.systray_widget.children[1]:connect_signal("widget::layout_changed", on_systray_changed)
+	on_systray_changed()
 
 	s.clock_widget = wibox.widget({
 		wibox.widget.textclock('<span font="'..(theme.clock_font or theme.sensor_font)..'">%a  %d.%m  %H:%M</span>'),
@@ -1797,6 +1804,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 			s.battery_widget,
 			s.wifi_widget,
 			s.udisks_mount,
+			s.systray_spacer,
 			s.systray_widget,
 			spacer,
 			s.clock_widget,
