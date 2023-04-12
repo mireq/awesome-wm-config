@@ -1766,12 +1766,13 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		bottom = dpi(1, s),
 		widget = wibox.container.margin,
 	}
-	local function on_systray_changed()
-		local num_entries = capi.awesome.systray()
-		s.systray_spacer.visible = num_entries > 0
-	end
-	s.systray_widget.children[1]:connect_signal("widget::layout_changed", on_systray_changed)
-	on_systray_changed()
+	--local function on_systray_changed()
+	--	local num_entries = capi.awesome.systray()
+	--	if s.systray_spacer ~= nil then
+	--		s.systray_spacer.visible = num_entries > 0
+	--	end
+	--end
+	--s.systray_widget.children[1]:connect_signal("widget::layout_changed", on_systray_changed)
 
 	s.clock_widget = wibox.widget({
 		wibox.widget.textclock('<span font="'..(theme.clock_font or theme.sensor_font)..'">%a  %d.%m  %H:%M</span>'),
@@ -1816,6 +1817,7 @@ screen.connect_signal("request::desktop_decoration", function(s)
 	})
 
 	update_widgets()
+	--on_systray_changed()
 end)
 
 utils.volume.start_monitor()
@@ -1829,6 +1831,16 @@ end, 0.5, false)
 
 screen.connect_signal("list", function()
 	collect_garbage()
+end)
+
+
+capi.awesome.connect_signal("systray::update", function()
+	local num_entries = capi.awesome.systray()
+	for s in screen do
+		if s.systray_spacer ~= nil then
+			s.systray_spacer.visible = num_entries > 0
+		end
+	end
 end)
 
 
