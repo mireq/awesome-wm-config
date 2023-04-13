@@ -1229,6 +1229,9 @@ local battery_tooltip_common = {
 	timer_function = function()
 		vicious.force({ widgets.battery_widget })
 		local tooltip_text = '<span font="'..theme.font..'" color="'..theme.fg_normal..'">Status: <b><span color="'..theme.fg_accent..'">'..battery_current.status..'</span></b></span>'
+		if battery_current.percentage ~= nil then
+			tooltip_text = tooltip_text .. '\n<span font="'..theme.font..'" color="'..theme.fg_normal..'">Percentage: <b><span color="'..theme.fg_accent..'">'..battery_current.percentage..'%</span></b></span>'
+		end
 		if battery_current.time and battery_current.time ~= "N/A" then
 			tooltip_text = tooltip_text .. '\n<span font="'..theme.font..'" color="'..theme.fg_normal..'">Remaining time: <b><span color="'..theme.fg_accent..'">'..battery_current.time..'</span></b></span>'
 		end
