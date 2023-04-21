@@ -89,6 +89,7 @@ function widget.new()
 		local margin = self._cached_wiboxes[s][1]:get_children_by_id('margin')[1]
 		margin:set_left(dpi(8, s))
 		local background = self._cached_wiboxes[s][1]:get_children_by_id('background')[1]
+		background.shape_border_width = dpi(1, s)
 		background.forced_width = input_width
 		background.forced_height = input_height
 		local w = self._cached_wiboxes[s][1]
