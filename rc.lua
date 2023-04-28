@@ -353,7 +353,7 @@ awful.keyboard.append_global_keybindings({
 		end,
 		{description = "Run terminal", group = "Launcher"}
 	),
-	awful.key({ modkey, "Control" }, "F7",
+	awful.key({ modkey, "Shift" }, "F7",
 		function()
 			awful.spawn("/etc/acpi/actions/switchvideo.sh")
 		end,
