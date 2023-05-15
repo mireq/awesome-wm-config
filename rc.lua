@@ -528,10 +528,12 @@ awful.keyboard.append_global_keybindings({
 
 local function unmaximize_before_move(c)
 	if c.fullscreen or c.maximized then
+		local border_width = c.border_width
 		c.fullscreen = false
 		c.maximized = false
 		c.width = c.screen.geometry.width
 		c.height = c.screen.geometry.height
+		c.border_width = border_width
 	end
 end
 
