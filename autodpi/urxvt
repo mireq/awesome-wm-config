@@ -1,0 +1,13 @@
+#!/bin/bash
+dpi=`xrdb -get Xft.dpi`
+if [[ ! -z "$dpi" ]]; then
+	urxvt_font_size=$(echo "scale = 5; ($dpi*8*100/75)/96"|bc)
+	#font="xft:DejaVu Sans Mono for Powerline:style=normal:pixelsize=${urxvt_font_size},xft:Noto Color Emoji:stye=normal:pixelsize=${urxvt_font_size},xft:DejaVuSansMono Nerd Font:pixelsize=${urxvt_font_size}"
+	#font="xft:DejaVu Sans Mono for Powerline:style=normal:pixelsize=40,xft:Symbols Nerd Font Mono:style=normal:pixelsize=40,xft:Noto Color Emoji:stye=normal:pixelsize=20"
+	#font="xft:DejaVu Sans Mono for Powerline:style=normal:pixelsize=${urxvt_font_size},xft:Symbols Nerd Font Mono:style=normal:pixelsize=15:slant=0:weight=100:minspace=True"
+	font="xft:DejaVu Sans Mono for Powerline:style=normal:pixelsize=${urxvt_font_size},xft:DejaVuSansM Nerd Font Mono:style=normal:pixelsize=${urxvt_font_size}"
+	#slant=0:weight=100:pixelsize=19:minspace=True
+	urxvt -font "$font" "$@"
+else
+	urxvt "$@"
+fi
