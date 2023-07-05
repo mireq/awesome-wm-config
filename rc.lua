@@ -48,7 +48,7 @@ local function launch_terminal(cmd)
 	local command = {terminal}
 	local s = awful.screen.focused()
 	local font_scale = (s.dpi*8*100/75)/96
-	local font = 'xft:DejaVu Sans Mono for Powerline:style=normal:pixelsize={urxvt_font_size},xft:Noto Color Emoji:stye=normal:pixelsize={urxvt_font_size},xft:DejaVuSansMono Nerd Font:pixelsize={urxvt_font_size}'
+	local font = 'xft:DejaVu Sans Mono for Powerline:style=normal:pixelsize={urxvt_font_size},xft:DejaVuSansMono Nerd Font:pixelsize={urxvt_font_size}:slant=0:weight=100:minspace=True'
 	font = font:gsub('{urxvt_font_size}', tostring(font_scale))
 	table.insert(command, '-font')
 	table.insert(command, font)
