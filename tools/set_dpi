@@ -18,7 +18,8 @@ $AWESOME_DIR/tools/set_cursor_theme Simple-Black $cursor_size
 #xsetroot -xcf /usr/share/cursors/xorg-x11/Simple-Black/cursors/left_ptr $cursor_size
 killall -q xdg-desktop-portal
 killall -q xdg-document-portal
-find /dev/pts -user mirec -exec bash -c "echo -ne \"\e]710;xft:DejaVu\ Sans\ Mono\ for\ Powerline:style=normal:pixelsize=${urxvt_font_size},xft:Noto\ Color\ Emoji:stye=normal:pixelsize=${urxvt_font_size},xft:DejaVuSansMono\ Nerd\ Font:pixelsize=${urxvt_font_size}\a\" > {}" \;
+#find /dev/pts -user mirec -exec bash -c "echo -ne \"\e]710;xft:DejaVu\ Sans\ Mono\ for\ Powerline:style=normal:pixelsize=${urxvt_font_size},xft:Noto\ Color\ Emoji:stye=normal:pixelsize=${urxvt_font_size},xft:DejaVuSansMono\ Nerd\ Font:pixelsize=${urxvt_font_size}\a\" > {}" \;
+find /dev/pts -user mirec -exec bash -c "echo -ne \"\e]710;xft:DejaVu Sans Mono for Powerline:style=normal:pixelsize=${urxvt_font_size},xft:Noto\ Color\ Emoji:stye=normal:pixelsize=${urxvt_font_size}::slant=0:weight=100:minspace=True,xft:DejaVuSansMono Nerd Font:style=normal:pixelsize=${urxvt_font_size}:slant=0:weight=100:minspace=True\a\" > {}" \;
 #echo 'awesome.restart()' | awesome-client
 echo "require('api').change_dpi($dpi)"|awesome-client
 if [ -f $RUNTIME_DIR/alacritty.dpi ]; then
