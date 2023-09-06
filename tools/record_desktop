@@ -17,14 +17,15 @@ softwarecursor-x11 -s 96 -r 48 &
 #	-preset veryfast \
 #	-y \
 #	/dev/shm/video.mkv &
-ffmpeg \
-	-framerate 60 \
-	-f kmsgrab \
-	-i - \
-	-vf 'hwmap=derive_device=vaapi,scale_vaapi=format=nv12' \
-	-c:v hevc_vaapi \
-	-qp 18 \
-	-y \
-	/dev/shm/video.mkv &
+#ffmpeg \
+#	-framerate 60 \
+#	-f kmsgrab \
+#	-i - \
+#	-vf 'hwmap=derive_device=vaapi,scale_vaapi=format=nv12' \
+#	-c:v hevc_vaapi \
+#	-qp 18 \
+#	-y \
+#	/dev/shm/video.mkv &
+ffmpeg -y -framerate 30 -device /dev/dri/card1 -f kmsgrab -i - -vf 'hwmap=derive_device=vaapi,scale_vaapi=format=nv12' -c:v h264_vaapi /dev/shm/video.mp4 &
 echo $! > /tmp/record_desktop.pid
 #fg
