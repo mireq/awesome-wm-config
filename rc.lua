@@ -288,6 +288,10 @@ awful.keyboard.append_global_keybindings({
 		awful.tag.history.restore,
 		{description = "Tag history", group = "Tag"}
 	),
+	awful.key({ modkey }, "o",
+		awful.tag.history.restore,
+		{description = "Tag history", group = "Tag"}
+	),
 	awful.key({ modkey }, "j",
 		function()
 			awful.client.focus.byidx(1)
