@@ -52,6 +52,8 @@ local function launch_terminal(cmd)
 	font = font:gsub('{urxvt_font_size}', tostring(font_scale))
 	table.insert(command, '-font')
 	table.insert(command, font)
+	--table.insert(command, '-geometry')
+	--table.insert(command, '120x36')
 	gdebug.dump(command)
 	if cmd == nil then
 		awful.spawn(command)
@@ -829,7 +831,7 @@ client.connect_signal("request::titlebars", function(c)
 		floating = awful.titlebar.widget.floatingbutton(c),
 	}
 	for _, btn in pairs(window_buttons) do
-		btn.stylesheet = 'svg { color: '..theme.fg_normal..'; }'
+		btn.stylesheet = 'svg { color: '..theme.fg_normal..';  } * { color: '..theme.fg_normal..'; }'
 	end
 	window_buttons.close.stylesheet = 'svg { color: #f2b0b0; }'
 
@@ -1061,7 +1063,7 @@ local function update_widgets()
 			local color = utils.calculate_gradient_color(temp, temperature_gradient)
 			for s in screen do
 				for _, w in ipairs(s.temperature_widget:get_children_by_id('icon')) do
-					w.stylesheet = 'svg { fill: '..color..'; }'
+					w.stylesheet = 'svg { fill: '..color..'; } * { fill: '..color..'; }'
 				end
 				for _, w in ipairs(s.temperature_widget:get_children_by_id('value')) do
 					w:set_markup('<span font="'..(theme.temp_font or theme.sensor_font)..'">' .. temp .. ' °C</span>')
@@ -1080,7 +1082,7 @@ local function update_widgets()
 			local color = utils.calculate_gradient_color(percentage, memory_gradient)
 			for s in screen do
 				for _, w in ipairs(s.memory_widget:get_children_by_id('icon')) do
-					w.stylesheet = 'svg { fill: '..color..'; }'
+					w.stylesheet = 'svg { fill: '..color..'; } * { fill: '..color..'; }'
 				end
 				for _, w in ipairs(s.memory_widget:get_children_by_id('value')) do
 					w:set_markup('<span font="'..(theme.mem_font or theme.sensor_font)..'">' .. utils.format_number(used) .. ' MB</span>')
@@ -1096,7 +1098,7 @@ local function update_widgets()
 			local color = utils.calculate_gradient_color(value, cpu_gradient)
 			for s in screen do
 				for _, w in ipairs(s.cpu_widget:get_children_by_id('icon')) do
-					w.stylesheet = 'svg { fill: '..color..'; }'
+					w.stylesheet = 'svg { fill: '..color..'; } * { fill: '..color..'; }'
 				end
 				for _, w in ipairs(s.cpu_widget:get_children_by_id('value')) do
 					w:set_markup('<span font="'..(theme.cpu_font or theme.sensor_font)..'">' .. value .. ' %</span>')
