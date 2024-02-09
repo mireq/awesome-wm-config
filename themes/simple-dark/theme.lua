@@ -57,7 +57,7 @@ theme.wibar_border_top                      = "#565c64c0"
 
 
 -- {{{ Layout
-theme.layout_stylesheet                     = 'svg { color: ' .. theme.fg_normal .. '; }'
+theme.layout_stylesheet                     = 'svg { color: ' .. theme.fg_normal .. '; } * { color: ' .. theme.fg_normal .. '; }'
 theme.layout_tile                           = themes_dir .. "/icons/tile.svg"
 theme.layout_tileleft                       = themes_dir .. "/icons/tileleft.svg"
 theme.layout_tilebottom                     = themes_dir .. "/icons/tilebottom.svg"
