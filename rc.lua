@@ -377,6 +377,12 @@ awful.keyboard.append_global_keybindings({
 		system_suspend,
 		{description = "Sleep mode", group = "Awesome"}
 	),
+	awful.key({ modkey, "Shift" }, "l",
+		function ()
+			awful.spawn(utils.get_config_dir() .. "tools/lock_screen")
+		end,
+		{description = "Lock screen", group = "Awesome"}
+	),
 	awful.key({ modkey }, "l",
 		function()
 			awful.tag.incmwfact( 0.05)
@@ -442,10 +448,7 @@ awful.keyboard.append_global_keybindings({
 	),
 	awful.key({ modkey, altkey, "Shift" }, "r",
 		function ()
-			local result = awful.spawn("lol")
-			if type(result) == 'string' then
-				awful.spawn(utils.get_config_dir() .. "tools/record_desktop_toggle")
-			end
+			awful.spawn(utils.get_config_dir() .. "tools/record_desktop_toggle")
 		end,
 		{description = "Record desktop", group = "Launcher"}
 	),

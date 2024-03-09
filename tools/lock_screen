@@ -1,0 +1,7 @@
+#!/bin/bash
+resolution=`xdpyinfo | awk '/dimensions/{print $2}'`
+lock_image_filename=$HOME/.config/awesome/themes/simple-dark/wall_${resolution}_blur.png
+if [ ! -f $lock_image_filename ]; then
+	convert $HOME/.config/awesome/themes/simple-dark/wall_1.jpg -resize "${resolution}^" -gravity center -crop $resolution+0+0 +repage -blur 0x10 $lock_image_filename
+fi
+exec i3lock -i $lock_image_filename
