@@ -1831,7 +1831,15 @@ screen.connect_signal("request::desktop_decoration", function(s)
 		layout = wibox.layout.align.horizontal
 	})
 
-	update_widgets()
+	-- call update widgets when all screens are initialized
+	gears.timer {
+		timeout   = 0,
+		call_now  = false,
+		autostart = true,
+		single_shot = true,
+		callback  = function() update_widgets(); end
+	}
+	--update_widgets()
 	--on_systray_changed()
 end)
 
