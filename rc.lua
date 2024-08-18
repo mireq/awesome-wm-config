@@ -79,6 +79,11 @@ if not loaded then
 	menu_items = nil
 end
 
+local system_suspend = utils.debounce(function()
+	--screen_lock()
+	awful.spawn("loginctl suspend")
+end, 0.1, false)
+
 if menu_items == nil then
 	local menu_accessories = {
 		{ "archives", "ark" },
@@ -104,7 +109,7 @@ if menu_items == nil then
 		{ "quit", function() awesome.quit() end},
 		{ "reboot", "loginctl reboot"},
 		{ "poweroff", "loginctl poweroff"},
-		{ "suspend", "loginctl suspend"}
+		{ "suspend", system_suspend}
 	}
 	menu_items = {
 		{ "accessories" , menu_accessories },
