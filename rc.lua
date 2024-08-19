@@ -79,6 +79,10 @@ if not loaded then
 	menu_items = nil
 end
 
+local screen_lock = function()
+	awful.spawn(utils.get_config_dir() .. "tools/lock_screen")
+end
+
 local system_suspend = utils.debounce(function()
 	--screen_lock()
 	awful.spawn("loginctl suspend")
