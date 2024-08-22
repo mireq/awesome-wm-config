@@ -263,10 +263,6 @@ end
 screen.connect_signal("request::wallpaper", set_wallpaper)
 
 
-local system_suspend = utils.debounce(function()
-	awful.spawn("loginctl suspend")
-end, 0.1, false)
-
 -- {{{ Mouse bindings
 root.buttons(gears.table.join(
 	awful.button({ }, 3, function()
