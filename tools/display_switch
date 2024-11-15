@@ -1,0 +1,11 @@
+#!/usr/bin/env python3
+from subprocess import check_output
+
+
+def main():
+	xrandr_output = check_output(["xrandr", '--properties']).decode("utf-8")
+	print(xrandr_output)
+
+
+if __name__ == "__main__":
+	main()
