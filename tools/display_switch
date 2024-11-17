@@ -1,10 +1,39 @@
 #!/usr/bin/env python3
 from subprocess import check_output
+import re
+
+
+SCREEN_RE = re.compile(r'^Screen (?P<screen>\d+):.*$')
+OUTPUT_RE = re.compile(r'^(?P<output>[a-zA-Z0-9\-]+) connected (?P<width>\d+)x(?P<height>\d+)\+(?P<x>\d+)\+(?P<y>\d+) (?P<rotation>[a-z]+) (?P<primary>primary)?$')
+
+
+def parse_screen(output):
+	print(len(output))
+
+
+def parse_screens(output):
+	current_screen = None
+	current_screen_lines = []
+	for line in output:
+		match = SCREEN_RE.match(line)
+		if match is not None:
+			if current_screen is not None:
+				parse_screen(current_screen_lines)
+			current_screen = match.groupdict()['screen']
+			current_screen_lines = []
+		else:
+			current_screen_lines.append(line)
+	if current_screen is not None:
+		parse_screen(current_screen_lines)
+
+
+def parse_xrandr(output):
+	parse_screens(output)
 
 
 def main():
 	xrandr_output = check_output(["xrandr", '--properties']).decode("utf-8")
-	print(xrandr_output)
+	parse_xrandr(xrandr_output.splitlines())
 
 
 if __name__ == "__main__":
