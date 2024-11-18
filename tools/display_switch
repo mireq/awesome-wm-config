@@ -4,11 +4,28 @@ import re
 
 
 SCREEN_RE = re.compile(r'^Screen (?P<screen>\d+):.*$')
-OUTPUT_RE = re.compile(r'^(?P<output>[a-zA-Z0-9\-]+) connected (?P<width>\d+)x(?P<height>\d+)\+(?P<x>\d+)\+(?P<y>\d+) (?P<rotation>[a-z]+) (?P<primary>primary)?$')
+OUTPUT_RE = re.compile(r'^(?P<output>[a-zA-Z0-9\-]+) (?P<connected>connected|disconnected).*$')
 
 
-def parse_screen(output):
+def parse_output(output):
 	print(len(output))
+
+
+def parse_outputs(output):
+	current_output = None
+	current_output_lines = []
+
+	for line in output:
+		match = OUTPUT_RE.match(line)
+		if match is not None:
+			if current_output is not None:
+				parse_output(current_output_lines)
+			current_output = match.groupdict()
+			current_output_lines = []
+		else:
+			current_output_lines.append(line)
+	if current_output is not None:
+		parse_output(current_output_lines)
 
 
 def parse_screens(output):
@@ -18,13 +35,13 @@ def parse_screens(output):
 		match = SCREEN_RE.match(line)
 		if match is not None:
 			if current_screen is not None:
-				parse_screen(current_screen_lines)
+				parse_outputs(current_screen_lines)
 			current_screen = match.groupdict()['screen']
 			current_screen_lines = []
 		else:
 			current_screen_lines.append(line)
 	if current_screen is not None:
-		parse_screen(current_screen_lines)
+		parse_outputs(current_screen_lines)
 
 
 def parse_xrandr(output):
