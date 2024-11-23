@@ -40,7 +40,7 @@ def parse_output(output):
 					framerate = framerate[:-1]
 				is_enabled = framerate.endswith('*')
 				if is_enabled:
-					framerate = framerate[1:]
+					framerate = framerate[:-1]
 				modes.append({
 					'mode': mode,
 					'is_default': is_default,
