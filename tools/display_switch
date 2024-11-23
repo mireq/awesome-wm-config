@@ -4,7 +4,7 @@ import re
 
 
 SCREEN_RE = re.compile(r'^Screen (?P<screen>\d+):.*$')
-OUTPUT_RE = re.compile(r'^(?P<name>[a-zA-Z0-9\-]+) (?P<connected>connected|disconnected).*$')
+OUTPUT_RE = re.compile(r'^(?P<name>[a-zA-Z0-9\-]+) (?P<connected>connected|disconnected) ?(?P<primary>primary)? ?(?P<position>\d+x\d+\+\d+\+\d+)? ?(?P<orientation>normal|left|inverted|right)?.*$')
 
 
 def parse_output(output):
@@ -72,6 +72,8 @@ def parse_outputs(output):
 			if current_output is not None:
 				output = parse_output(current_output_lines)
 				output['connected'] = current_output['connected'] == 'connected'
+				output['primary'] = bool(current_output['primary'])
+				output['orientation'] = current_output['orientation'] or 'normal'
 				outputs[current_output['name']] = output
 			current_output = match.groupdict()
 			current_output_lines = []
@@ -80,6 +82,8 @@ def parse_outputs(output):
 	if current_output is not None:
 		output = parse_output(current_output_lines)
 		output['connected'] = current_output['connected'] == 'connected'
+		output['primary'] = bool(current_output['primary'])
+		output['orientation'] = current_output['orientation'] or 'normal'
 		outputs[current_output['name']] = output
 	return outputs
 
@@ -105,7 +109,7 @@ def parse_screens(output):
 
 
 def parse_xrandr(output):
-	parse_screens(output)
+	__import__('pprint').pprint(parse_screens(output))
 
 
 def main():
