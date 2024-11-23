@@ -117,14 +117,21 @@ def parse_xrandr():
 	return parse_screens(xrandr_output)
 
 
+def activate_next_layout(screen_info):
+	screen_info = [(output, info) for output, info in screen_info.items() if info['connected']]
+	for enabled_output_index, info in enumerate(screen_info):
+		if info[1]['is_enabled']:
+			break
+	next_enabled_output_index = (enabled_output_index + 1) % len(screen_info)
+
+
 def main():
 	parser = argparse.ArgumentParser(description='Display switcher')
 	parser.add_argument('--screen', default='0')
 	args = parser.parse_args()
 
 	screen_info = parse_xrandr()[args.screen]
-
-	__import__('pprint').pprint(screen_info)
+	activate_next_layout(screen_info)
 
 
 if __name__ == "__main__":
