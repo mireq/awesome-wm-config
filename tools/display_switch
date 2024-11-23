@@ -4,7 +4,7 @@ import re
 
 
 SCREEN_RE = re.compile(r'^Screen (?P<screen>\d+):.*$')
-OUTPUT_RE = re.compile(r'^(?P<output>[a-zA-Z0-9\-]+) (?P<connected>connected|disconnected).*$')
+OUTPUT_RE = re.compile(r'^(?P<name>[a-zA-Z0-9\-]+) (?P<connected>connected|disconnected).*$')
 
 
 def parse_output(output):
@@ -46,6 +46,7 @@ def parse_output(output):
 	}
 
 def parse_outputs(output):
+	outputs = {}
 	current_output = None
 	current_output_lines = []
 
@@ -53,33 +54,42 @@ def parse_outputs(output):
 		match = OUTPUT_RE.match(line)
 		if match is not None:
 			if current_output is not None:
-				parse_output(current_output_lines)
+				output = parse_output(current_output_lines)
+				output['connected'] = current_output['connected'] == 'connected'
+				outputs[current_output['name']] = output
 			current_output = match.groupdict()
 			current_output_lines = []
 		else:
 			current_output_lines.append(line)
 	if current_output is not None:
-		parse_output(current_output_lines)
+		output = parse_output(current_output_lines)
+		output['connected'] = current_output['connected'] == 'connected'
+		outputs[current_output['name']] = output
+	return outputs
 
 
 def parse_screens(output):
+	screens = {}
 	current_screen = None
 	current_screen_lines = []
 	for line in output:
 		match = SCREEN_RE.match(line)
 		if match is not None:
 			if current_screen is not None:
-				parse_outputs(current_screen_lines)
+				outputs = parse_outputs(current_screen_lines)
+				screens[current_screen] = outputs
 			current_screen = match.groupdict()['screen']
 			current_screen_lines = []
 		else:
 			current_screen_lines.append(line)
 	if current_screen is not None:
-		parse_outputs(current_screen_lines)
+		outputs = parse_outputs(current_screen_lines)
+		screens[current_screen] = outputs
+	return screens
 
 
 def parse_xrandr(output):
-	parse_screens(output)
+	__import__('pprint').pprint(parse_screens(output))
 
 
 def main():
