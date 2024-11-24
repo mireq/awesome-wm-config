@@ -15,6 +15,7 @@ def parse_output(output):
 	properties = {}
 	modes = []
 	output_is_enabled = False
+	default_mode = None
 
 	for line in output:
 		if line.startswith('\t\t'):
@@ -44,12 +45,15 @@ def parse_output(output):
 				if is_enabled:
 					framerate = framerate[:-1]
 				output_is_enabled = output_is_enabled or is_enabled
-				modes.append({
+				mode = {
 					'mode': mode,
 					'is_default': is_default,
 					'is_enabled': is_enabled,
 					'framerate': framerate,
-				})
+				}
+				if is_default:
+					default_mode = mode
+				modes.append(mode)
 	
 	if property_name is not None:
 		properties[property_name] = {
@@ -62,6 +66,7 @@ def parse_output(output):
 	return {
 		'properties': properties,
 		'modes': modes,
+		'default_mode': default_mode,
 		'is_enabled': output_is_enabled,
 	}
 
@@ -118,11 +123,20 @@ def parse_xrandr():
 
 
 def activate_next_layout(screen_info):
-	screen_info = [(output, info) for output, info in screen_info.items() if info['connected']]
+	screen_info = [(output, info) for output, info in screen_info.items() if info['connected'] and info['default_mode']]
+	enabled_output_index = 0
 	for enabled_output_index, info in enumerate(screen_info):
 		if info[1]['is_enabled']:
 			break
 	next_enabled_output_index = (enabled_output_index + 1) % len(screen_info)
+
+	new_output, new_info = screen_info[next_enabled_output_index]
+	new_deafult_mode = new_info['default_mode']
+
+	check_output(['xrandr', '--output', new_output, '--mode', new_deafult_mode['mode'], '-r', new_deafult_mode['framerate'], '--primary'])
+	for output, __ in screen_info:
+		if output != new_output:
+			check_output(['xrandr', '--output', output, '--off'])
 
 
 def main():
