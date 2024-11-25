@@ -5,7 +5,7 @@ import re
 
 
 SCREEN_RE = re.compile(r'^Screen (?P<screen>\d+):.*$')
-OUTPUT_RE = re.compile(r'^(?P<name>[a-zA-Z0-9\-]+) (?P<connected>connected|disconnected) ?(?P<primary>primary)? ?(?P<position>\d+x\d+\+\d+\+\d+)? ?(?P<orientation>normal|left|inverted|right)?.*$')
+OUTPUT_RE = re.compile(r'^(?P<name>[a-zA-Z0-9\-]+) (?P<connected>connected|disconnected) ?(?P<primary>primary)? ?(?P<position>\d+x\d+\+\d+\+\d+)? ?(?P<rotate>normal|left|inverted|right)?.*$')
 
 
 def parse_output(output):
@@ -14,7 +14,7 @@ def parse_output(output):
 	property_info = []
 	properties = {}
 	modes = []
-	output_is_enabled = False
+	output_enabled = False
 	default_mode = None
 
 	for line in output:
@@ -41,14 +41,14 @@ def parse_output(output):
 				is_default = framerate.endswith('+')
 				if is_default:
 					framerate = framerate[:-1]
-				is_enabled = framerate.endswith('*')
-				if is_enabled:
+				enabled = framerate.endswith('*')
+				if enabled:
 					framerate = framerate[:-1]
-				output_is_enabled = output_is_enabled or is_enabled
+				output_enabled = output_enabled or enabled
 				mode = {
 					'mode': mode,
 					'is_default': is_default,
-					'is_enabled': is_enabled,
+					'enabled': enabled,
 					'framerate': framerate,
 				}
 				if is_default:
@@ -67,7 +67,7 @@ def parse_output(output):
 		'properties': properties,
 		'modes': modes,
 		'default_mode': default_mode,
-		'is_enabled': output_is_enabled,
+		'enabled': output_enabled,
 	}
 
 def parse_outputs(output):
@@ -82,7 +82,7 @@ def parse_outputs(output):
 				output = parse_output(current_output_lines)
 				output['connected'] = current_output['connected'] == 'connected'
 				output['primary'] = bool(current_output['primary'])
-				output['orientation'] = current_output['orientation'] or 'normal'
+				output['rotate'] = current_output['rotate'] or 'normal'
 				outputs[current_output['name']] = output
 			current_output = match.groupdict()
 			current_output_lines = []
@@ -92,7 +92,7 @@ def parse_outputs(output):
 		output = parse_output(current_output_lines)
 		output['connected'] = current_output['connected'] == 'connected'
 		output['primary'] = bool(current_output['primary'])
-		output['orientation'] = current_output['orientation'] or 'normal'
+		output['rotate'] = current_output['rotate'] or 'normal'
 		outputs[current_output['name']] = output
 	return outputs
 
@@ -126,7 +126,7 @@ def activate_next_layout(screen_info):
 	screen_info = [(output, info) for output, info in screen_info.items() if info['connected'] and info['default_mode']]
 	enabled_output_index = 0
 	for enabled_output_index, info in enumerate(screen_info):
-		if info[1]['is_enabled']:
+		if info[1]['enabled']:
 			break
 	next_enabled_output_index = (enabled_output_index + 1) % len(screen_info)
 
@@ -145,7 +145,8 @@ def main():
 	args = parser.parse_args()
 
 	screen_info = parse_xrandr()[args.screen]
-	activate_next_layout(screen_info)
+	__import__('pprint').pprint(screen_info)
+	#activate_next_layout(screen_info)
 
 
 if __name__ == "__main__":
