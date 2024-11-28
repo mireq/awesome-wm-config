@@ -123,8 +123,35 @@ def parse_xrandr():
 	return parse_screens(xrandr_output)
 
 
+class QueryInterpreter:
+	def __init__(self, ctx):
+		self.ctx = ctx
+
+	def interpret(self, query):
+		action = query[0]
+		args = query[1:]
+		return self.INTERPRETER[action](self, args)
+
+	def op_and(self, args):
+		return all(self.interpret(arg) for arg in args)
+
+	INTERPRETER = {
+		'AND': op_and
+	}
+
+
+def match_rules(screen_info, rules):
+	for rule in rules:
+		query = rule['query']
+		ctx = {'screen': screen_info}
+		interpreter = QueryInterpreter(ctx)
+		result = interpreter.interpret(query)
+		print(result)
+
+
 def activate_next_layout(screen_info, rules=None):
-	print(rules)
+	if rules is not None:
+		matched_rule = match_rules(screen_info, rules)
 	return
 	screen_info = [(output, info) for output, info in screen_info.items() if info['connected'] and info['default_mode']]
 	enabled_output_index = 0
