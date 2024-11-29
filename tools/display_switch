@@ -135,8 +135,15 @@ class QueryInterpreter:
 	def op_and(self, args):
 		return all(self.interpret(arg) for arg in args)
 
+	def op_eq(self, args):
+		# check if all args are equal
+		first_arg_value = self.interpret(args[0])
+		return all(self.interpret(arg) == first_arg_value for arg in args[1:])
+
+
 	INTERPRETER = {
-		'AND': op_and
+		'AND': op_and,
+		'EQ': op_eq,
 	}
 
 
