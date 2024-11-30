@@ -139,11 +139,23 @@ class QueryInterpreter:
 		# check if all args are equal
 		first_arg_value = self.interpret(args[0])
 		return all(self.interpret(arg) == first_arg_value for arg in args[1:])
+	
+	def op_q(self, args):
+		# query for screen info
+		obj = self.ctx['screen']
+		for path in args:
+			if not path in obj:
+				return None
+			if not isinstance(obj, dict):
+				return None
+			obj = obj[path]
+		return obj
 
 
 	INTERPRETER = {
 		'AND': op_and,
 		'EQ': op_eq,
+		'Q': op_q,
 	}
 
 
