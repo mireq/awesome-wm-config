@@ -463,7 +463,19 @@ awful.keyboard.append_global_keybindings({
 	awful.key({ }, "XF86AudioRaiseVolume", function () volume_command("up") end),
 	awful.key({ }, "XF86AudioLowerVolume", function () volume_command("down") end),
 	awful.key({ }, "XF86AudioMute", function () volume_command("mute") end),
-	awful.key({ }, "XF86AudioMicMute", function () volume_command("micmute") end)
+	awful.key({ }, "XF86AudioMicMute", function () volume_command("micmute") end),
+	awful.key({ modkey }, "F5",
+		function()
+			awful.spawn("light -T 0.95")
+		end,
+		{description = "Lower brightness"}
+	),
+	awful.key({ modkey }, "F6",
+		function()
+			awful.spawn("light -T 1.05")
+		end,
+		{description = "Higher brightness"}
+	)
 })
 
 
