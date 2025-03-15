@@ -791,7 +791,8 @@ ruled.client.connect_signal("request::rules", function()
 	ruled.client.append_rule {
 		id = "no-titlebars",
 		rule_any = {
-			class = { "URxvt", "Firefox", "firefox", "Google-chrome", "Wine", "kruler", "Alacritty" }
+			class = { "URxvt", "Firefox", "firefox", "Google-chrome", "Wine", "kruler", "Alacritty" },
+			border_width = {0},
 		},
 		properties = { titlebars_enabled = false }
 	}
