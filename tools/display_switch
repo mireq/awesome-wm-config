@@ -151,11 +151,15 @@ class QueryInterpreter:
 			obj = obj[path]
 		return obj
 
+	def op_v(self, args):
+		return args[0]
+
 
 	INTERPRETER = {
 		'AND': op_and,
 		'EQ': op_eq,
 		'Q': op_q,
+		'V': op_v,
 	}
 
 
