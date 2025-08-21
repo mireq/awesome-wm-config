@@ -169,13 +169,36 @@ def match_rules(screen_info, rules):
 		ctx = {'screen': screen_info}
 		interpreter = QueryInterpreter(ctx)
 		result = interpreter.interpret(query)
-		print(result)
+		if result:
+			return rule
+
+
+def execute_actions(actions):
+	for action in actions:
+		if 'output' in action:
+			command = ['xrandr']
+			command.extend(['--output', action['output']])
+			if 'mode' in action:
+				command.extend(['--mode', action['mode']])
+			if action.get('primary'):
+				command.append('--primary')
+			if not action.get('enabled', True):
+				command.append('--off')
+			if 'rotate' in action:
+				command.extend(['--rotate', action['rotate']])
+			check_output(command)
+		if 'dpi' in action:
+			command = ['set_dpi', action['dpi']]
+			check_output(command)
 
 
 def activate_next_layout(screen_info, rules=None):
 	if rules is not None:
 		matched_rule = match_rules(screen_info, rules)
-	return
+		if matched_rule is not None:
+			actions = matched_rule['actions']
+			execute_actions(actions)
+			return
 	screen_info = [(output, info) for output, info in screen_info.items() if info['connected'] and info['default_mode']]
 	enabled_output_index = 0
 	for enabled_output_index, info in enumerate(screen_info):
