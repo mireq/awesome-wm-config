@@ -29,6 +29,15 @@ return helpers.setcall(function (format)
 		end
 	end
 
-	status.text = cache.value
+	if cache.value then
+		local added, removed, files = string.match(cache.value, "%+(%d+)%s+%-(%d+)%s+F(%d+)")
+		if added == nil then
+			status.text = ''
+		else
+			status.text = '<span color="#40f030">+</span>' .. added .. ' <span color="#f08080">-</span>' .. removed .. ' <span color="#f0f080">•</span>' .. files
+		end
+	else
+		status.text = ''
+	end
 	return status
 end)
