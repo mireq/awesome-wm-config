@@ -1,0 +1,186 @@
+#!/usr/bin/env python3
+"""
+Git Repository Statistics Helper
+Calculates total added lines, removed lines, and changed files across multiple repositories
+from the beginning of the current day, including uncommitted changes (but not untracked files).
+"""
+
+import os
+import subprocess
+import sys
+from pathlib import Path
+from datetime import datetime
+
+
+def run_git_command(repo_path, command):
+	"""Run a git command in the specified repository."""
+	try:
+		result = subprocess.run(
+			command,
+			cwd=repo_path,
+			capture_output=True,
+			text=True,
+			check=True
+		)
+		return result.stdout.strip()
+	except subprocess.CalledProcessError:
+		return ""
+	except FileNotFoundError:
+		return ""
+
+
+def get_today_date():
+	"""Get today's date in YYYY-MM-DD format."""
+	return datetime.now().strftime("%Y-%m-%d")
+
+
+def parse_numstat(numstat_output):
+	"""Parse git numstat output and return added lines, removed lines, and changed files."""
+	added_lines = 0
+	removed_lines = 0
+	changed_files = set()
+	
+	for line in numstat_output.split('\n'):
+		if line.strip():
+			parts = line.split('\t')
+			if len(parts) >= 3:
+				add_str, del_str, filename = parts[0], parts[1], parts[2]
+				
+				# Handle binary files (marked with -)
+				if add_str != '-' and add_str.isdigit():
+					added_lines += int(add_str)
+				if del_str != '-' and del_str.isdigit():
+					removed_lines += int(del_str)
+				
+				changed_files.add(filename)
+	
+	return added_lines, removed_lines, len(changed_files)
+
+
+def get_committed_changes(repo_path):
+	"""Get committed changes since beginning of today."""
+	today = get_today_date()
+	
+	# Get numstat for all commits since beginning of today
+	cmd = ["git", "log", f"--since={today} 00:00", "--pretty=format:", "--numstat"]
+	numstat_output = run_git_command(repo_path, cmd)
+	
+	return parse_numstat(numstat_output)
+
+
+def get_uncommitted_changes(repo_path):
+	"""Get uncommitted changes (staged and unstaged, including untracked files)."""
+	# Get staged changes
+	diff_cached = run_git_command(repo_path, ["git", "diff", "--numstat", "--cached"])
+	staged_added, staged_removed, __ = parse_numstat(diff_cached)
+	
+	# Get unstaged changes
+	diff_working = run_git_command(repo_path, ["git", "diff", "--numstat"])
+	unstaged_added, unstaged_removed, __ = parse_numstat(diff_working)
+	
+	# Get all files with changes including untracked files
+	changed_files = set()
+	untracked_added_lines = 0
+	status_output = run_git_command(repo_path, ["git", "status", "--porcelain"])
+	
+	for line in status_output.split('\n'):
+		if line.strip():
+			status_code = line[:2]
+			filename = line[3:] if len(line) > 3 else ""
+			
+			if filename:
+				changed_files.add(filename)
+				
+				# For untracked files, count their lines as added lines
+				if status_code.startswith('??'):
+					try:
+						file_path = os.path.join(repo_path, filename)
+						if os.path.isfile(file_path):
+							with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+								lines = len(f.readlines())
+								untracked_added_lines += lines
+					except:
+						# Skip files that can't be read
+						pass
+	
+	return (staged_added + unstaged_added + untracked_added_lines, 
+			staged_removed + unstaged_removed, 
+			len(changed_files))
+
+
+def get_repo_stats(repo_path):
+	"""Get total stats for a repository."""
+	if not os.path.exists(repo_path) or not os.path.exists(os.path.join(repo_path, '.git')):
+		return 0, 0, 0
+	
+	# Get committed changes since beginning of today
+	comm_added, comm_removed, comm_files = get_committed_changes(repo_path)
+	
+	# Get uncommitted changes (excluding untracked files)
+	uncomm_added, uncomm_removed, uncomm_files = get_uncommitted_changes(repo_path)
+	
+	return (comm_added + uncomm_added, 
+			comm_removed + uncomm_removed, 
+			comm_files + uncomm_files)
+
+
+def read_repositories():
+	"""Read repository paths from config file."""
+	config_file = Path.home() / '.config' / 'awesome' / 'watch_repositories'
+	
+	if not config_file.exists():
+		return []
+	
+	repositories = []
+	try:
+		with open(config_file, 'r') as f:
+			for line in f:
+				path = line.strip()
+				if path and not path.startswith('#'):
+					# Expand user path if needed
+					expanded_path = os.path.expanduser(path)
+					repositories.append(expanded_path)
+	except IOError:
+		return []
+	
+	return repositories
+
+
+def main():
+	"""Main function to calculate and display repository statistics."""
+	repositories = read_repositories()
+	
+	if not repositories:
+		return
+	
+	total_added = 0
+	total_removed = 0
+	total_changed_files = 0
+	
+	for repo_path in repositories:
+		added, removed, files = get_repo_stats(repo_path)
+		total_added += added
+		total_removed += removed
+		total_changed_files += files
+	
+	# Return empty string if nothing changed
+	if total_added == 0 and total_removed == 0 and total_changed_files == 0:
+		return
+	
+	# Format output as +{added} -{removed} F{files}
+	result_parts = []
+	
+	if total_added > 0:
+		result_parts.append(f"+{total_added}")
+	
+	if total_removed > 0:
+		result_parts.append(f"-{total_removed}")
+	
+	if total_changed_files > 0:
+		result_parts.append(f"F{total_changed_files}")
+	
+	sys.stdout.write(" ".join(result_parts))
+
+
+if __name__ == "__main__":
+	main()
