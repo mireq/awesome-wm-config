@@ -144,9 +144,9 @@ class QueryInterpreter:
 		# query for screen info
 		obj = self.ctx['screen']
 		for path in args:
-			if not path in obj:
-				return None
 			if not isinstance(obj, dict):
+				return None
+			if not path in obj:
 				return None
 			obj = obj[path]
 		return obj
