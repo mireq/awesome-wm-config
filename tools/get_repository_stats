@@ -10,6 +10,7 @@ import subprocess
 import sys
 from pathlib import Path
 from datetime import datetime
+import argparse
 
 
 def run_git_command(repo_path, command):
@@ -71,11 +72,11 @@ def get_committed_changes(repo_path):
 def get_uncommitted_changes(repo_path):
 	"""Get uncommitted changes (staged and unstaged, including untracked files)."""
 	# Get staged changes
-	diff_cached = run_git_command(repo_path, ["git", "diff", "--numstat", "--cached"])
+	diff_cached = run_git_command(repo_path, ["git", "diff", "-w", "--numstat", "--cached"])
 	staged_added, staged_removed, __ = parse_numstat(diff_cached)
 	
 	# Get unstaged changes
-	diff_working = run_git_command(repo_path, ["git", "diff", "--numstat"])
+	diff_working = run_git_command(repo_path, ["git", "diff", "-w", "--numstat"])
 	unstaged_added, unstaged_removed, __ = parse_numstat(diff_working)
 	
 	# Get all files with changes including untracked files
@@ -146,8 +147,7 @@ def read_repositories():
 	return repositories
 
 
-def main():
-	"""Main function to calculate and display repository statistics."""
+def show_total_stats():
 	repositories = read_repositories()
 	
 	if not repositories:
@@ -180,6 +180,29 @@ def main():
 		result_parts.append(f"F{total_changed_files}")
 	
 	sys.stdout.write(" ".join(result_parts))
+
+
+def show_verbose_stats():
+	repositories = read_repositories()
+
+	for repo_path in repositories:
+		added, removed, files = get_repo_stats(repo_path)
+		if added or removed or files:
+			sys.stdout.write(f"{repo_path} +{added} -{removed} F{files}\n")
+
+
+def main():
+	"""Main function to calculate and display repository statistics."""
+
+	parser = argparse.ArgumentParser(description="Calculate git repository statistics.")
+	parser.add_argument('--verbose', action='store_true', help="Show verbose statistics for each repo.")
+
+	args = parser.parse_args()
+
+	if args.verbose:
+		show_verbose_stats()
+	else:
+		show_total_stats()
 
 
 if __name__ == "__main__":
